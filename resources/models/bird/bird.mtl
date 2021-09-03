@@ -1,0 +1,7 @@
+newmtl material_0
+map_bump normal.jpg
+norm normal.jpg
+map_Kd diffuse.jpg
+occlusion occlusion.jpg
+Pm 0
+Pr 0.793152

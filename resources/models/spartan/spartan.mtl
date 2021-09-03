@@ -1,0 +1,104 @@
+# Blender MTL File: 'None'
+# Material Count: 8
+
+newmtl Spartan_Arms_Mat
+Ns 179.999996
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Spartan_Arms_Mat_BaseColor.png
+map_Bump Spartan_Arms_Mat_Normal.png
+refl Spartan_Arms_Mat_Specular.png
+
+
+newmtl Spartan_Chest_Mat
+Ns 179.999996
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Spartan_Chest_Mat_BaseColor.png
+map_Bump Spartan_Chest_Mat_Normal.png
+refl Spartan_Chest_Mat_Specular.png
+
+newmtl Spartan_Ear_Mat
+Ns 179.999996
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Spartan_Ears_Mat_BaseColor.png
+map_Bump Spartan_Ears_Mat_Normal.png
+refl Spartan_Ears_Mat_Specular.png
+
+newmtl Spartan_Helmet_Mat
+Ns 179.999996
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Spartan_Helmet_Mat_BaseColor.png
+map_Bump Spartan_Helmet_Mat_Normal.png
+refl Spartan_Helmet_Mat_Specular.png
+
+newmtl Spartan_Legs_Mat
+Ns 179.999996
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Spartan_Legs_Mat_BaseColor.png
+map_Bump Spartan_Legs_Mat_Normal.png
+refl Spartan_Legs_Mat_Specular.png
+
+newmtl Spartan_Shoulders_Mat
+Ns 179.999996
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Spartan_Shoulder_Mat_BaseColor.png
+map_Bump Spartan_Shoulder_Mat_Normal.png
+refl Spartan_Shoulder_Mat_Specular.png
+
+newmtl Spartan_Undersuit_Mat
+Ns 179.999996
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Spartan_Undersuit_Mat_BaseColor.png
+map_Bump Spartan_Undersuit_Mat_Normal.png
+refl Spartan_Undersuit_Mat_Specular.png
+
+newmtl lambert1
+Ns 179.999996
+Ka 1.000000 1.000000 1.000000
+Kd 0.500000 0.500000 0.500000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
