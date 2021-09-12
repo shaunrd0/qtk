@@ -11,8 +11,6 @@
 
 #include <QOpenGLTexture>
 
-#include <mainwidget.h>
-
 
 class Texture {
 public:

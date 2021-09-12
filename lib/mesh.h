@@ -12,9 +12,10 @@
 #include <QVector2D>
 #include <QVector3D>
 
-#include <mainwidget.h>
 #include <transform3D.h>
 
+class MeshRenderer;
+class Object;
 
 // Define vertices for drawing a cube using two faces (8 vertex points)
 // Front Vertices

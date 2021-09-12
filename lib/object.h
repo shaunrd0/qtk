@@ -13,7 +13,6 @@
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
 
-#include <mainwidget.h>
 #include <mesh.h>
 
 

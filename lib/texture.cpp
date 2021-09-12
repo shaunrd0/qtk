@@ -6,6 +6,7 @@
 ## Contact: shaunrd0@gmail.com  | URL: www.shaunreed.com | GitHub: shaunrd0   ##
 ##############################################################################*/
 
+#include <QDebug>
 #include <QImageReader>
 
 #include <texture.h>

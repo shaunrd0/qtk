@@ -8,6 +8,7 @@
 
 #include <QImageReader>
 
+#include <mainwidget.h>
 #include <texture.h>
 
 #include <meshrenderer.h>
