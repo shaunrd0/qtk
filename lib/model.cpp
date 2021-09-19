@@ -9,7 +9,7 @@
 
 #include <QFileInfo>
 
-#include <mainwidget.h>
+#include <scene.h>
 #include <texture.h>
 
 #include <model.h>
@@ -105,8 +105,8 @@ void ModelMesh::draw(QOpenGLShaderProgram & shader)
 
   // Set Model View Projection values
   shader.setUniformValue("uModel", mTransform.toMatrix());
-  shader.setUniformValue("uView", MainWidget::Camera().toMatrix());
-  shader.setUniformValue("uProjection", MainWidget::Projection());
+  shader.setUniformValue("uView", Scene::View());
+  shader.setUniformValue("uProjection", Scene::Projection());
 
   GLuint diffuseCount = 1;
   GLuint specularCount = 1;
@@ -389,7 +389,7 @@ ModelMesh::Textures Model::loadMaterialTextures(
 
 void Model::sortModels()
 {
-  auto cameraPos = MainWidget::Camera().transform();
+  auto cameraPos = Scene::Camera().transform();
   auto cameraDistance = [&cameraPos](const ModelMesh &a, const ModelMesh &b)
   {
     // Sort by the first vertex position, since all transforms will be the same

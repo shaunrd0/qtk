@@ -8,7 +8,7 @@
 
 #include <QImageReader>
 
-#include <mainwidget.h>
+#include <scene.h>
 #include <texture.h>
 
 #include <meshrenderer.h>
@@ -129,8 +129,8 @@ void MeshRenderer::setShaders(const std::string & vert, const std::string & frag
 void MeshRenderer::setUniformMVP(const char * model, const char * view,
                                  const char * projection)
 {
-  mProgram.setUniformValue(projection, MainWidget::Projection());
-  mProgram.setUniformValue(view, MainWidget::Camera().toMatrix());
+  mProgram.setUniformValue(projection, Scene::Projection());
+  mProgram.setUniformValue(view, Scene::View());
   mProgram.setUniformValue(model, mTransform.toMatrix());
 }
 

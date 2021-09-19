@@ -6,6 +6,7 @@
 ## Contact: shaunrd0@gmail.com  | URL: www.shaunreed.com | GitHub: shaunrd0   ##
 ##############################################################################*/
 
+#include <scene.h>
 #include <texture.h>
 
 #include <skybox.h>
@@ -46,8 +47,8 @@ void Skybox::draw()
   mProgram.bind();
   mCubeMap->bind();
 
-  mProgram.setUniformValue("uProjectionMatrix", MainWidget::Projection());
-  mProgram.setUniformValue("uViewMatrix", MainWidget::Camera().toMatrix());
+  mProgram.setUniformValue("uProjectionMatrix", Scene::Projection());
+  mProgram.setUniformValue("uViewMatrix", Scene::Camera().toMatrix());
   mProgram.setUniformValue("uTexture", 0);
   glDrawElements(GL_TRIANGLES, mIndices.size(),
                  GL_UNSIGNED_INT, mIndices.data());

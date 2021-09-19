@@ -15,7 +15,6 @@
 #include <QOpenGLVertexArrayObject>
 
 #include <camera3d.h>
-#include <mainwidget.h>
 #include <mesh.h>
 
 

@@ -8,14 +8,14 @@ You can import your own models within `mainwdget.cpp`, inside the
 to explain which model or example I'm modifying. Rotations and translations
 happen in `MainWidget::update()`, to get textures loading on models look into 
 [material files](http://www.paulbourke.net/dataformats/mtl/) and see some 
-examples in the `resources/models/` directory.
+examples in the `resources/models/` directory. For more in-depth examples, see
+`scene.h` and `scene.cpp`
 
 Can be built with cmake manually or using 
 [Qt Creator](https://github.com/qt-creator/qt-creator).
 
 To build and run `qtk` on Ubuntu -
 ```bash
-# Qt Creator
 sudo apt update -y && sudo apt install qttools5-dev freeglut3-dev libassimp-dev cmake build-essential
 git clone https://gitlab.com/shaunrd0/qtk && cd qtk
 mkdir build && cd build
@@ -45,7 +45,7 @@ Spartan with normals -
 
 "Scythe World Of Warcraft" (https://skfb.ly/6UooG) by Warcraft-3D-Models is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 
-"Spartan Armour MKV - Halo Reach" () by McCarthy3D is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+"Spartan Armour MKV - Halo Reach" (https://skfb.ly/6QVvM) by McCarthy3D is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 
 "Survival Guitar Backpack (Low Poly)" (https://skfb.ly/6RnCB) by Berk Gedik is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 Model by Berk Gedik, from: https://sketchfab.com/3d-models/survival-guitar-backpack-low-poly-799f8c4511f84fab8c3f12887f7e6b36

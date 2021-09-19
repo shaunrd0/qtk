@@ -15,13 +15,12 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
 
-#include <camera3d.h>
-
 #define QTK_DEBUG
 
 class MeshRenderer;
 class Model;
 class Object;
+class Scene;
 class Skybox;
 class Texture;
 
@@ -34,10 +33,6 @@ public:
   MainWidget();
   explicit MainWidget(const QSurfaceFormat &format);
   ~MainWidget() override;
-
-  // Static Members
-  static inline QMatrix4x4 &Projection() { return mProjection;}
-  static inline Camera3D &Camera() { return mCamera;}
 
 private:
   void teardownGL();
@@ -65,18 +60,8 @@ private:
   void printContextInformation();
   void updateCameraInput();
 
-  // Private Members
-  static Camera3D mCamera;
-  static QMatrix4x4 mProjection;
-
-  Skybox * mSkybox;
+  Scene * mScene;
   Object * mObject;
-  MeshRenderer * mTestPhong;
-  MeshRenderer * mTestSpecular;
-  MeshRenderer * mTestDiffuse;
-  MeshRenderer * mTestAmbient;
-  std::vector<MeshRenderer *> mMeshes;
-  std::vector<Model *> mModels;
 
   QOpenGLDebugLogger * mDebugLogger;
 };

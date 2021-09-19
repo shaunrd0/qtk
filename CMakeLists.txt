@@ -73,21 +73,23 @@ target_link_libraries(texture PUBLIC Qt5::Widgets)
 add_library(object lib/object.cpp)
 target_include_directories(object PUBLIC lib/)
 target_link_libraries(object PUBLIC Qt5::Widgets)
+target_link_libraries(object INTERFACE mesh)
 
 # MeshRenderer
 add_library(meshrenderer lib/meshrenderer.cpp)
 target_include_directories(meshrenderer PUBLIC lib/)
-target_link_libraries(meshrenderer PUBLIC Qt5::Widgets)
+target_link_libraries(meshrenderer PUBLIC object)
 
 # Camera3D
 add_library(camera3d lib/camera3d.cpp)
 target_include_directories(camera3d PUBLIC lib/)
+target_link_libraries(camera3d INTERFACE input)
 target_link_libraries(camera3d PUBLIC Qt5::Widgets)
 
 # Skybox
 add_library(skybox lib/skybox.cpp)
+# Skybox needs Mesh, Camera3D, and Qt5::Widgets
 target_link_libraries(skybox PRIVATE mesh)
-# Skybox needs Mesh and Camera3D and Qt5::Widgets
 target_link_libraries(skybox PRIVATE camera3d)
 
 # Transform3D
@@ -102,19 +104,22 @@ target_link_libraries(model PRIVATE assimp)
 # Model library requires transform3d and Qt5::Widgets
 target_link_libraries(model PUBLIC transform3d)
 
+# Scene
+add_library(scene lib/scene.cpp)
+target_include_directories(scene PUBLIC lib/)
+target_link_libraries(scene PUBLIC model)
+target_link_libraries(scene PUBLIC meshrenderer)
+target_link_libraries(scene PUBLIC skybox)
+target_link_libraries(scene PUBLIC texture)
+
 
 ################################################################################
 # Final Application
 ################################################################################
 
-target_link_libraries(main-widget PUBLIC model)
-target_link_libraries(main-widget PRIVATE input)
-target_link_libraries(main-widget PRIVATE transform3d)
-target_link_libraries(main-widget PRIVATE object)
-target_link_libraries(main-widget PRIVATE meshrenderer)
-target_link_libraries(main-widget PRIVATE texture)
-target_link_libraries(main-widget PRIVATE skybox)
+#target_link_libraries(main-widget PRIVATE input)
 target_link_libraries(main-widget PRIVATE mesh)
+target_link_libraries(main-widget PUBLIC scene)
 
 # Link qtk executable to main main-widget library
 target_link_libraries(qtk PUBLIC main-widget)
