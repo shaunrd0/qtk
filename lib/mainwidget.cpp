@@ -1,7 +1,7 @@
 /*##############################################################################
 ## Author: Shaun Reed                                                         ##
-## Legal: All Content (c) 2021 Shaun Reed, all rights reserved                ##
-## About: Main window for Qt5 OpenGL widget application                       ##
+## Legal: All Content (c) 2022 Shaun Reed, all rights reserved                ##
+## About: Main window for Qt6 OpenGL widget application                       ##
 ##                                                                            ##
 ## Contact: shaunrd0@gmail.com  | URL: www.shaunreed.com | GitHub: shaunrd0   ##
 ##############################################################################*/

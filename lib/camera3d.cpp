@@ -1,6 +1,6 @@
 /*##############################################################################
 ## Author: Shaun Reed                                                         ##
-## Legal: All Content (c) 2021 Shaun Reed, all rights reserved                ##
+## Legal: All Content (c) 2022 Shaun Reed, all rights reserved                ##
 ## About: Fly camera class from tutorials followed at trentreed.net           ##
 ##                                                                            ##
 ## Contact: shaunrd0@gmail.com	| URL: www.shaunreed.com | GitHub: shaunrd0   ##
@@ -22,7 +22,8 @@ const QVector3D Camera3D::LocalRight(1.0f, 0.0f, 0.0f);
 const QMatrix4x4 & Camera3D::toMatrix()
 {
   mWorld.setToIdentity();
-  mWorld.rotate(mTransform.rotation().conjugate());
+  // Qt6 renamed QMatrix4x4::conjugate() to conjugated()
+  mWorld.rotate(mTransform.rotation().conjugated());
   mWorld.translate(-mTransform.translation());
   return mWorld;
 }

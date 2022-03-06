@@ -1,6 +1,6 @@
 /*##############################################################################
 ## Author: Shaun Reed                                                         ##
-## Legal: All Content (c) 2021 Shaun Reed, all rights reserved                ##
+## Legal: All Content (c) 2022 Shaun Reed, all rights reserved                ##
 ## About: Transform3D class to represent object position in 3D space          ##
 ##        From following tutorials at trentreed.net                           ##
 ##                                                                            ##

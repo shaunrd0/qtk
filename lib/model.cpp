@@ -1,6 +1,6 @@
 /*##############################################################################
 ## Author: Shaun Reed                                                         ##
-## Legal: All Content (c) 2021 Shaun Reed, all rights reserved                ##
+## Legal: All Content (c) 2022 Shaun Reed, all rights reserved                ##
 ## About: Model classes for importing with Assimp                             ##
 ##        From following tutorials on learnopengl.com                         ##
 ##                                                                            ##

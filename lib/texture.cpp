@@ -1,6 +1,6 @@
 /*##############################################################################
 ## Author: Shaun Reed                                                         ##
-## Legal: All Content (c) 2021 Shaun Reed, all rights reserved                ##
+## Legal: All Content (c) 2022 Shaun Reed, all rights reserved                ##
 ## About: Texture class to help with texture and image initializations        ##
 ##                                                                            ##
 ## Contact: shaunrd0@gmail.com  | URL: www.shaunreed.com | GitHub: shaunrd0   ##
@@ -14,6 +14,8 @@
 
 QImage * Texture::initImage(const char * image, bool flipX, bool flipY)
 {
+  // Qt6 limits loaded images to 256MB by default
+  QImageReader::setAllocationLimit(512);
   auto loadedImage = new QImage(QImage(image).mirrored(flipX, flipY));
   if (loadedImage->isNull()) {
     qDebug() << "Error loading image: " << image << "\n";
