@@ -1,7 +1,7 @@
 # Qtk
 
-Practice project for learning about using OpenGL in Qt5 widget applications. 
-Model loader using [Assimp](https://assimp.org/) within a Qt5 widget application.
+Practice project for learning about using OpenGL in Qt widget applications.
+Model loader using [Assimp](https://assimp.org/) within a Qt widget application.
 
 You can import your own models within `mainwdget.cpp`, inside the
 `MainWidget::initObjects()` function. I've commented throughout the code there
@@ -13,13 +13,19 @@ examples in the `resources/models/` directory. For more in-depth examples, see
 
 Can be built with cmake manually or using 
 [Qt Creator](https://github.com/qt-creator/qt-creator).
+For the build to be successful, I've found through testing on VMs that the system requires around 6GB of RAM.
+This is mostly due to the large .obj files that are built into the project using [Qt Resource System](https://doc.qt.io/qt-6/resources.html)
 
-To build and run `qtk` on Ubuntu -
+This project has been ported to Qt6, which is not yet available in Ubuntu apt repositories.
+To run this project, you will *need* to install [Qt6 Open Source Binaries](https://www.qt.io/download-qt-installer) for your system.
+Be sure to take note of the Qt6 installation directory, as we will need it to correctly set our `CMAKE_PREFIX_PATH` in the next steps.
+
+Once Qt6 is installed, to build and run `qtk` on Ubuntu -
 ```bash
-sudo apt update -y && sudo apt install qttools5-dev freeglut3-dev libassimp-dev cmake build-essential
+sudo apt update -y && sudo apt install freeglut3-dev libassimp-dev cmake build-essential git
 git clone https://gitlab.com/shaunrd0/qtk && cd qtk
 mkdir build && cd build
-cmake .. && cmake --build .
+cmake .. -DCMAKE_PREFIX_PATH=$HOME/Qt6/6.2.3/gcc_64 && cmake --build .
 ./qtk
 ```
 
