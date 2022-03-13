@@ -24,7 +24,10 @@ QMatrix4x4 Scene::mProjection;
 
 Scene::Scene()
 {
- init();
+  mCamera.transform().setTranslation(0.0f, 0.0f, 20.0f);
+  mCamera.transform().setRotation(-5.0f, 0.0f, 1.0f, 0.0f);
+
+  init();
 }
 
 Scene::~Scene()
@@ -44,10 +47,6 @@ Scene::~Scene()
 
 void Scene::init()
 {
-  mCamera.transform().setTranslation(0.0f, 0.0f, 5.0f);
-  mCamera.transform().setRotation(180.0f, 0.0f, 1.0f, 0.0f);
-
-
   // Initialize Phong example cube
   mTestPhong = new MeshRenderer("phong", Cube());
   mTestPhong->mTransform.setTranslation(3.0f, 0.0f, -2.0f);

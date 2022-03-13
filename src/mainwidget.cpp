@@ -22,23 +22,20 @@
 
 MainWidget::MainWidget() : mDebugLogger(Q_NULLPTR)
 {
-  QSurfaceFormat format;
-  format.setRenderableType(QSurfaceFormat::OpenGL);
-  format.setProfile(QSurfaceFormat::CoreProfile);
-  format.setVersion(4, 5);
-  format.setDepthBufferSize(16);
-  // If QTK_DEBUG is set, enable debug context
-#ifdef QTK_DEBUG
-  format.setOption(QSurfaceFormat::DebugContext);
-#endif
+  initializeWidget();
+}
+
+// Constructor for using this widget in QtDesigner
+MainWidget::MainWidget(QWidget *parent) : QOpenGLWidget(parent), mDebugLogger(Q_NULLPTR)
+{
+  initializeWidget();
 }
 
 MainWidget::MainWidget(const QSurfaceFormat &format)
     : mDebugLogger(Q_NULLPTR)
 {
   setFormat(format);
-  resize(QSize(800, 600));
-  show();
+  setFocusPolicy(Qt::ClickFocus);
 }
 
 MainWidget::~MainWidget()
@@ -89,9 +86,9 @@ void MainWidget::initObjects()
   mObject->mProgram.enableAttributeArray(0);
   mObject->mProgram.setAttributeBuffer(0, GL_FLOAT, 0,
                                        3, sizeof(mObject->vertices()[0]));
-  mObject->mProgram.setUniformValue("uColor", QVector3D(0.0f, 0.25f, 0.0f));
+  mObject->mProgram.setUniformValue("uColor", QVector3D(1.0f, 0.0f, 0.0f));
   mObject->mProgram.setUniformValue("uLightColor", WHITE);
-  mObject->mProgram.setUniformValue("uAmbientStrength", 0.2f);
+  mObject->mProgram.setUniformValue("uAmbientStrength", 0.75f);
 
   mObject->mVBO.release();
   mObject->mVAO.release();
@@ -248,6 +245,7 @@ void MainWidget::messageLogged(const QOpenGLDebugMessage &msg)
 void MainWidget::keyPressEvent(QKeyEvent *event)
 {
   if (event->isAutoRepeat()) {
+    // Do not repeat input while a key is held down
     event->ignore();
   } else {
     Input::registerKeyPress(event->key());
@@ -277,6 +275,24 @@ void MainWidget::mouseReleaseEvent(QMouseEvent *event)
 /*******************************************************************************
  * Private Helpers
  ******************************************************************************/
+
+void MainWidget::initializeWidget()
+{
+  QSurfaceFormat format;
+  format.setRenderableType(QSurfaceFormat::OpenGL);
+  format.setProfile(QSurfaceFormat::CoreProfile);
+  format.setVersion(4, 6);
+  // Set the number of samples used for glEnable(GL_MULTISAMPLING)
+  format.setSamples(4);
+  // Set the size of the depth bufer for glEnable(GL_DEPTH_TEST)
+  format.setDepthBufferSize(16);
+  // If QTK_DEBUG is set, enable debug context
+#ifdef QTK_DEBUG
+  format.setOption(QSurfaceFormat::DebugContext);
+#endif
+  setFormat(format);
+  setFocusPolicy(Qt::ClickFocus);
+}
 
 void MainWidget::printContextInformation()
 {

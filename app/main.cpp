@@ -10,6 +10,7 @@
 #include <QLabel>
 
 #include <mainwidget.h>
+#include <mainwindow.h>
 
 
 int main(int argc, char *argv[])
@@ -24,14 +25,15 @@ int main(int argc, char *argv[])
   format.setVersion(4,5);
   // Set the number of samples used for glEnable(GL_MULTISAMPLING)
   format.setSamples(4);
-  // Set the size of teh depth bufer for glEnable(GL_DEPTH_TEST)
+  // Set the size of the depth bufer for glEnable(GL_DEPTH_TEST)
   format.setDepthBufferSize(16);
 #ifdef QTK_DEBUG
   format.setOption(QSurfaceFormat::DebugContext);
 #endif // QTK_DEBUG
 
-  // Set the widget up using a custom format
-  MainWidget widget(format);
+  // Create window for Qt application using custom mainwindow.h
+  MainWindow w;
+  w.show();
 
   return a.exec();
 }

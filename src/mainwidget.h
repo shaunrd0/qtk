@@ -31,6 +31,7 @@ Q_OBJECT;
 public:
   // Constructors
   MainWidget();
+  explicit MainWidget(QWidget *parent);
   explicit MainWidget(const QSurfaceFormat &format);
   ~MainWidget() override;
 
@@ -57,6 +58,7 @@ protected:
 
 private:
   // Private helpers
+  void initializeWidget();
   void printContextInformation();
   void updateCameraInput();
 

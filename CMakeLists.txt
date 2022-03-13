@@ -48,81 +48,32 @@ find_package(assimp REQUIRED)
 ################################################################################
 
 # Mainwidget
-add_library(main-widget src/mainwidget.cpp src/mainwidget.h)
+include(GenerateExportHeader)
+add_library(main-widget SHARED
+    src/mainwidget.cpp src/mainwidget.h
+    src/mainwindow.cpp src/mainwindow.h src/mainwindow.ui
+    src/input.cpp src/input.h
+    src/mesh.cpp src/mesh.h
+    src/texture.cpp src/texture.h
+    src/object.cpp src/object.h
+    src/meshrenderer.cpp src/meshrenderer.h
+    src/camera3d.cpp src/camera3d.h
+    src/skybox.cpp src/skybox.h
+    src/transform3D.cpp src/transform3D.h
+    src/model.cpp src/model.h
+    src/scene.cpp src/scene.h
+)
+
 target_include_directories(main-widget PUBLIC src/)
 target_include_directories(main-widget PRIVATE ${OPENGL_INCLUDE_DIR})
 target_link_libraries(main-widget PRIVATE ${OPENGL_LIBRARIES})
-
-# Input
-add_library(input src/input.cpp src/input.h)
-target_include_directories(input PUBLIC src/)
-target_link_libraries(input PUBLIC Qt${QT_VERSION_MAJOR}::Widgets)
-
-# Mesh
-add_library(mesh src/mesh.cpp src/mesh.h)
-target_include_directories(mesh PUBLIC src/)
-target_link_libraries(mesh PUBLIC Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
-
-# Texture
-add_library(texture src/texture.cpp src/texture.h)
-target_include_directories(texture PUBLIC src/)
-target_link_libraries(texture PUBLIC Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
-
-# Object
-add_library(object src/object.cpp src/object.h)
-target_include_directories(object PUBLIC src/)
-target_link_libraries(object INTERFACE mesh)
-target_link_libraries(object PUBLIC Qt${QT_VERSION_MAJOR}::OpenGL)
-target_link_libraries(object PUBLIC Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
-
-# MeshRenderer
-add_library(meshrenderer src/meshrenderer.cpp src/meshrenderer.h)
-target_include_directories(meshrenderer PUBLIC src/)
-target_link_libraries(meshrenderer PUBLIC object)
-
-# Camera3D
-add_library(camera3d src/camera3d.cpp src/camera3d.h)
-target_include_directories(camera3d PUBLIC src/)
-target_link_libraries(camera3d INTERFACE input)
-target_link_libraries(camera3d PUBLIC Qt${QT_VERSION_MAJOR}::Widgets)
-
-# Skybox
-add_library(skybox src/skybox.cpp src/skybox.h)
-# Skybox needs Mesh, Camera3D, and Qt6::Widgets
-target_link_libraries(skybox PRIVATE mesh)
-target_link_libraries(skybox PRIVATE camera3d)
-target_link_libraries(skybox PUBLIC Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
-
-# Transform3D
-add_library(transform3d src/transform3D.cpp src/transform3D.h)
-target_include_directories(transform3d PUBLIC src/)
-target_link_libraries(transform3d PUBLIC Qt${QT_VERSION_MAJOR}::Widgets)
-
-# Model
-add_library(model src/model.cpp src/model.h)
-target_include_directories(model PUBLIC src/)
-target_link_libraries(model PRIVATE assimp)
-target_link_libraries(model PUBLIC Qt${QT_VERSION_MAJOR}::OpenGL)
-# Model library requires transform3d and Qt6::Widgets
-target_link_libraries(model PUBLIC transform3d)
-target_link_libraries(model PUBLIC Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
-
-# Scene
-add_library(scene src/scene.cpp src/scene.h)
-target_include_directories(scene PUBLIC src/)
-target_link_libraries(scene PUBLIC model)
-target_link_libraries(scene PUBLIC meshrenderer)
-target_link_libraries(scene PUBLIC skybox)
-target_link_libraries(scene PUBLIC texture)
-target_link_libraries(scene PUBLIC Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
-
+target_link_libraries(main-widget PRIVATE assimp)
+target_link_libraries(main-widget PUBLIC Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(main-widget PUBLIC Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 
 ################################################################################
 # Final Application
 ################################################################################
-
-target_link_libraries(main-widget PRIVATE mesh)
-target_link_libraries(main-widget PUBLIC scene)
 
 # Link qtk executable to main main-widget library
 target_link_libraries(qtk PUBLIC main-widget)
@@ -131,3 +82,5 @@ set_target_properties(qtk PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
+
+generate_export_header(main-widget)
