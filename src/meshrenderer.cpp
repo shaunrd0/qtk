@@ -29,9 +29,6 @@ MeshRenderer::MeshRenderer(const char * name, const ShapeBase & shape)
 
 MeshRenderer::~MeshRenderer()
 {
-  if (mHasTexture) {
-    mTexture->destroy();
-  }
   sInstances.remove(mName);
 }
 
@@ -96,8 +93,8 @@ void MeshRenderer::draw()
   mProgram.bind();
   mVAO.bind();
 
-  if(mHasTexture) {
-    mTexture->bind();
+  if(mTexture.hasTexture()) {
+    mTexture.getOpenGLTexture().bind();
   }
 
   // TODO: Automate uniforms some other way
@@ -112,8 +109,8 @@ void MeshRenderer::draw()
                    GL_UNSIGNED_INT, mShape.mIndices.data());
   }
 
-  if(mHasTexture) {
-    mTexture->release();
+  if(mTexture.hasTexture()) {
+    mTexture.getOpenGLTexture().release();
   }
 
   mVAO.release();
@@ -146,18 +143,6 @@ void MeshRenderer::setColor(const QVector3D & color)
       mShape.mColors[i] = color;
     }
   }
-}
-
-void MeshRenderer::setTexture(const char * path)
-{
-  mTexture = new QOpenGLTexture(*OpenGLTextureFactory::initImage(path));
-  mHasTexture = true;
-}
-
-void MeshRenderer::setTexture(QOpenGLTexture * texture)
-{
-  mTexture = texture;
-  mHasTexture = true;
 }
 
 

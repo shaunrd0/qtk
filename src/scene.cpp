@@ -196,8 +196,7 @@ void Scene::init()
   mMeshes.back()->init();
 
   mModels.push_back(
-      new Model("alienTest",
-                "../resources/models/alien-hominid/alien.obj",
+      new Model("alienTest", "../resources/models/alien-hominid/alien.obj",
                 ":/model-specular.vert", ":/model-specular.frag"));
   mModels.back()->mTransform.setTranslation(3.0f, -1.0f, 10.0f);
   mModels.back()->mTransform.scale(0.15f);
@@ -224,8 +223,7 @@ void Scene::init()
   mMeshes.back()->init();
 
   mModels.push_back(
-      new Model("spartanTest",
-                "../resources/models/spartan/spartan.obj",
+      new Model("spartanTest", "../resources/models/spartan/spartan.obj",
                 ":/model-normals.vert", ":/model-normals.frag"));
   mModels.back()->mTransform.setTranslation(0.0f, -1.0f, 10.0f);
   mModels.back()->mTransform.scale(2.0f);
@@ -516,7 +514,7 @@ void Scene::init()
   mMeshes.back()->init();
   mMeshes.back()->mProgram.bind();
 
-  mMeshes.back()->setTexture(OpenGLTextureFactory::initTexture2D(":/crate.png"));
+  mMeshes.back()->setTexture(":/crate.png");
   mMeshes.back()->setUniform("uTexture", 0);
 
   mMeshes.back()->mVAO.bind();
@@ -542,7 +540,8 @@ void Scene::init()
   mMeshes.back()->init();
   mMeshes.back()->mProgram.bind();
 
-  mMeshes.back()->setTexture(OpenGLTextureFactory::initTexture2D(":/crate.png"));
+//  mMeshes.back()->setTexture(OpenGLTextureFactory::initTexture2D(":/crate.png"));
+  mMeshes.back()->mTexture.setTexture(":/crate.png");
   mMeshes.back()->setUniform("uTexture", 0);
 
   mMeshes.back()->mVAO.bind();

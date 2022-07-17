@@ -390,12 +390,13 @@ ModelMesh::Textures Model::loadMaterialTextures(
 void Model::sortModels()
 {
   auto cameraPos = Scene::Camera().transform();
-  auto cameraDistance = [&cameraPos](const ModelMesh &a, const ModelMesh &b)
-  {
-    // Sort by the first vertex position, since all transforms will be the same
-    return (cameraPos.getTranslation().distanceToPoint(a.mVertices[0].mPosition))
-           < (cameraPos.getTranslation().distanceToPoint(b.mVertices[0].mPosition));
-  };
+  auto cameraDistance =
+      [&cameraPos](const ModelMesh &a, const ModelMesh &b)
+      {
+        // Sort by the first vertex position in the model
+        return (cameraPos.getTranslation().distanceToPoint(a.mVertices[0].mPosition))
+               < (cameraPos.getTranslation().distanceToPoint(b.mVertices[0].mPosition));
+      };
   std::sort(mMeshes.begin(), mMeshes.end(), cameraDistance);
 }
 

@@ -55,11 +55,6 @@ public:
   void setUniformMVP(const char * model="uModel", const char * view="uView",
                      const char * projection="uProjection");
 
-  // Sets the texture to the image at the given path
-  // + Sets mHasTexture to enable texture binding in draw()
-  void setTexture(const char * path);
-  void setTexture(QOpenGLTexture * texture);
-
   // These functions modify data stored in a VBO
   // + After calling them, the VBO will need to be reallocated
   void setShape(const Shape & value) override;

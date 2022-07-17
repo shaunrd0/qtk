@@ -14,6 +14,7 @@
 #include <QOpenGLVertexArrayObject>
 
 #include <mesh.h>
+#include <texture.h>
 
 
 class Object : public QObject {
@@ -32,15 +33,12 @@ public:
 
   ~Object() {}
 
-  // Look to MeshRenderer for wrapped texture functionality
-  // + Object only exposes a QOpenGLTexture object with no wrapped features
-  inline QOpenGLTexture & texture() const { return *mTexture;}
-  // These custom types are wrapped for Qtk
   inline const Colors & getColors() { return mShape.mColors;}
   inline const Indices & getIndexData() { return mShape.mIndices;}
   inline const Normals & getNormals() { return mShape.mNormals;}
   inline const Shape & getShape() { return mShape;}
   inline const TexCoords & getTexCoords() { return mShape.mTexCoords;}
+  inline Texture & getTexture() { return mTexture;}
   inline const Vertices & getVertices() { return mShape.mVertices;}
 
   virtual inline void setColors(const Colors & value) { mShape.mColors = value;}
@@ -48,8 +46,10 @@ public:
   virtual inline void setNormals(const Normals & value) { mShape.mNormals = value;}
   virtual inline void setShape(const Shape & value) { mShape = value;}
   virtual inline void setTexCoords(const TexCoords & value) { mShape.mTexCoords = value;}
+  virtual inline void setTexture(const char * path, bool flipX=false, bool flipY=false)
+  { mTexture.setTexture(OpenGLTextureFactory::initTexture2D(path, flipX, flipY));}
+  virtual inline void setTexture(QOpenGLTexture * value) { mTexture.setTexture(value);}
   virtual inline void setVertices(const Vertices & value) { mShape.mVertices = value;}
-  // To set mTexture use the accessor and QOpenGLTexture API
 
   QOpenGLBuffer mVBO, mNBO;
   QOpenGLVertexArrayObject mVAO;
@@ -57,10 +57,9 @@ public:
 
   Transform3D mTransform;
   Shape mShape;
+  Texture mTexture;
 
   const char * mName;
-private:
-  QOpenGLTexture * mTexture;
 };
 
 #endif // QTK_OBJECT_H
