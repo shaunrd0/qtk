@@ -1,0 +1,26 @@
+name: Build Test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  Ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '6.2.3'
+
+      - name: Install Assimp
+        run: |
+          sudo apt install libassimp-dev -y
+
+      - name: Build Qtk
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/6.2.3/gcc_64/ && cmake --build .

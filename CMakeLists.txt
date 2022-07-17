@@ -19,8 +19,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#find_package(QT NAMES Qt6 COMPONENTS Widgets REQUIRED)
-find_package(Qt6 COMPONENTS Widgets OpenGLWidgets OpenGL REQUIRED)
+# For CLion builds, point CMAKE_PREFIX_PATH to Qt6 install directory
+list(APPEND CMAKE_PREFIX_PATH $ENV{HOME}/Code/Clones/Qt6.2/6.2.3/gcc_64/)
+find_package(Qt6 COMPONENTS OpenGLWidgets REQUIRED)
 
 # Add our Qt resources.qrc file to our application
 set(SOURCES app/main.cpp)
@@ -34,10 +35,6 @@ add_executable(
 ################################################################################
 # External Libraries
 ################################################################################
-
-# Find and link OpenGL package; Otherwise show an error
-set(OpenGL_GL_PREFERENCE LEGACY)
-find_package(OpenGL REQUIRED)
 
 # https://github.com/assimp/assimp/commit/6ac8279977c3a54118551e549d77329497116f66
 find_package(assimp REQUIRED)
@@ -65,10 +62,7 @@ add_library(main-widget SHARED
 )
 
 target_include_directories(main-widget PUBLIC src/)
-target_include_directories(main-widget PRIVATE ${OPENGL_INCLUDE_DIR})
-target_link_libraries(main-widget PRIVATE ${OPENGL_LIBRARIES})
 target_link_libraries(main-widget PRIVATE assimp)
-target_link_libraries(main-widget PUBLIC Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(main-widget PUBLIC Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 
 ################################################################################

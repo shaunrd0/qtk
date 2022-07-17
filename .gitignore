@@ -3,6 +3,7 @@
 
 # CMake build files
 **/cmake-build-debug/**
+**/build/**
 
 # C++ objects and libs
 *.slo
@@ -35,7 +36,7 @@ ui_*.h
 *.qmlc
 *.jsc
 Makefile*
-*build-*
+/*build-*
 *.qm
 *.prl
 
