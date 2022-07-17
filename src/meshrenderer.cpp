@@ -68,9 +68,9 @@ void MeshRenderer::init()
 
   // Combine position and color data into one vector, allowing us to use one VBO
   Vertices combined;
-  combined.reserve(vertices().size() + colors().size());
-  combined.insert(combined.end(), vertices().begin(), vertices().end());
-  combined.insert(combined.end(), colors().begin(), colors().end());
+  combined.reserve(getVertices().size() + getColors().size());
+  combined.insert(combined.end(), getVertices().begin(), getVertices().end());
+  combined.insert(combined.end(), getColors().begin(), getColors().end());
 
   mVBO.allocate(combined.data(),
                 combined.size() * sizeof(combined[0]));
@@ -82,7 +82,7 @@ void MeshRenderer::init()
   // Enable color attribute, setting offset to total size of vertices()
   mProgram.enableAttributeArray(1);
   mProgram.setAttributeBuffer(1, GL_FLOAT,
-                              vertices().size() * sizeof(vertices()[0]),
+                              getVertices().size() * sizeof(getVertices()[0]),
                               3, sizeof(QVector3D));
 
   mVBO.release();
@@ -104,7 +104,7 @@ void MeshRenderer::draw()
   setUniformMVP();
 
   if (mShape.mDrawMode == QTK_DRAW_ARRAYS) {
-    glDrawArrays(mDrawType, 0, vertices().size());
+    glDrawArrays(mDrawType, 0, getVertices().size());
   }
   else if (mShape.mDrawMode == QTK_DRAW_ELEMENTS
            || mShape.mDrawMode == QTK_DRAW_ELEMENTS_NORMALS) {
@@ -137,12 +137,12 @@ void MeshRenderer::setUniformMVP(const char * model, const char * view,
 void MeshRenderer::setColor(const QVector3D & color)
 {
   if (mShape.mColors.empty()) {
-    for (const auto & vertex : mShape.vertices()) {
+    for (const auto & vertex : mShape.getVertices()) {
       mShape.mColors.push_back(color);
     }
   }
   else {
-    for (int i = 0; i < mShape.colors().size(); i++) {
+    for (int i = 0; i < mShape.getColors().size(); i++) {
       mShape.mColors[i] = color;
     }
   }
@@ -150,7 +150,7 @@ void MeshRenderer::setColor(const QVector3D & color)
 
 void MeshRenderer::setTexture(const char * path)
 {
-  mTexture = new QOpenGLTexture(*Texture::initImage(path));
+  mTexture = new QOpenGLTexture(*OpenGLTextureFactory::initImage(path));
   mHasTexture = true;
 }
 

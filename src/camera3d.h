@@ -24,18 +24,18 @@ public:
   // Accessors
   inline Transform3D & transform() { return mTransform;}
   inline const QVector3D & translation() const
-  { return mTransform.translation();}
+  { return mTransform.getTranslation();}
   inline const QQuaternion & rotation() const
-  { return mTransform.rotation();}
+  { return mTransform.getRotation();}
   const QMatrix4x4 & toMatrix();
 
   // Queries
   inline QVector3D forward() const
-  { return mTransform.rotation().rotatedVector(LocalForward);}
+  { return mTransform.getRotation().rotatedVector(LocalForward);}
   inline QVector3D right() const
-  { return mTransform.rotation().rotatedVector(LocalRight);}
+  { return mTransform.getRotation().rotatedVector(LocalRight);}
   inline QVector3D up() const
-  { return mTransform.rotation().rotatedVector(LocalUp);}
+  { return mTransform.getRotation().rotatedVector(LocalUp);}
 
 private:
   Transform3D mTransform;

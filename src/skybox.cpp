@@ -15,13 +15,13 @@
 Skybox::Skybox(std::string right, std::string top, std::string front,
                std::string left, std::string bottom, std::string back,
                const std::string & name)
-    : mCubeMap(Texture::initCubeMap(
+    : mCubeMap(OpenGLTextureFactory::initCubeMap(
     QImage(right.c_str()).mirrored(), QImage(top.c_str()),
     QImage(front.c_str()), QImage(left.c_str()),
     QImage(bottom.c_str()), QImage(back.c_str()))),
       mVBO(QOpenGLBuffer::VertexBuffer),
-      mVertices(Cube(QTK_DRAW_ELEMENTS).vertices()),
-      mIndices(Cube(QTK_DRAW_ELEMENTS).indices())
+      mVertices(Cube(QTK_DRAW_ELEMENTS).getVertices()),
+      mIndices(Cube(QTK_DRAW_ELEMENTS).getIndexData())
 { init();}
 
 Skybox::Skybox(std::string name)

@@ -90,17 +90,17 @@ const QMatrix4x4 & Transform3D::toMatrix()
  * Queries
  ******************************************************************************/
 
-QVector3D Transform3D::forward() const
+QVector3D Transform3D::getForward() const
 {
   return mRotation.rotatedVector(LocalForward);
 }
 
-QVector3D Transform3D::up() const
+QVector3D Transform3D::getUp() const
 {
   return mRotation.rotatedVector(LocalUp);
 }
 
-QVector3D Transform3D::right() const
+QVector3D Transform3D::getRight() const
 {
   return mRotation.rotatedVector(LocalRight);
 }
@@ -113,16 +113,16 @@ QVector3D Transform3D::right() const
 QDebug operator<<(QDebug dbg, const Transform3D & transform)
 {
   dbg << "Transform3D\n{\n";
-  dbg << "Position: <" << transform.translation().x() << ", "
-      << transform.translation().y() << ", "
-      << transform.translation().z() << ">\n";
-  dbg << "Scale: <" << transform.scale().x() << ", "
-      << transform.scale().y() << ", "
-      << transform.scale().z() << ">\n";
-  dbg << "Rotation: <" << transform.rotation().x() << ", "
-      << transform.rotation().y() << ", "
-      << transform.rotation().z() << " | " <<
-      transform.rotation().scalar() << ">\n}";
+  dbg << "Position: <" << transform.getTranslation().x() << ", "
+      << transform.getTranslation().y() << ", "
+      << transform.getTranslation().z() << ">\n";
+  dbg << "Scale: <" << transform.getScale().x() << ", "
+      << transform.getScale().y() << ", "
+      << transform.getScale().z() << ">\n";
+  dbg << "Rotation: <" << transform.getRotation().x() << ", "
+      << transform.getRotation().y() << ", "
+      << transform.getRotation().z() << " | " <<
+      transform.getRotation().scalar() << ">\n}";
   return dbg;
 }
 

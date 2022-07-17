@@ -86,11 +86,11 @@ struct ShapeBase {
       : mVertices(v), mColors(c), mIndices(i), mTexCoords(t), mNormals(n)
   {}
 
-  inline const Vertices & vertices() const { return mVertices;}
-  inline const Indices & indices() const { return mIndices;}
-  inline const Colors & colors() const { return mColors;}
-  inline const TexCoords & texCoords() const { return mTexCoords;}
-  inline const Normals & normals() const { return mNormals;}
+  inline const Vertices & getVertices() const { return mVertices;}
+  inline const Indices & getIndexData() const { return mIndices;}
+  inline const Colors & getColors() const { return mColors;}
+  inline const TexCoords & getTexCoords() const { return mTexCoords;}
+  inline const Normals & getNormals() const { return mNormals;}
 
 protected:
   DrawMode mDrawMode;

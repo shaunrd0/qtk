@@ -172,7 +172,7 @@ void Model::flipTexture(const std::string & fileName, bool flipX, bool flipY)
       texture.mTexture->destroy();
       texture.mTexture->create();
       texture.mTexture->setData(
-          *Texture::initImage(fullPath.c_str(), flipX, flipY));
+          *OpenGLTextureFactory::initImage(fullPath.c_str(), flipX, flipY));
       modified = true;
     }
   }
@@ -369,7 +369,7 @@ ModelMesh::Textures Model::loadMaterialTextures(
     // If the texture has not yet been loaded
     if (!skip) {
       ModelTexture texture;
-      texture.mTexture = Texture::initTexture2D(
+      texture.mTexture = OpenGLTextureFactory::initTexture2D(
           std::string(mDirectory + '/' + fileName.C_Str()).c_str(),
           false, false);
       texture.mID = texture.mTexture->textureId();
@@ -393,8 +393,8 @@ void Model::sortModels()
   auto cameraDistance = [&cameraPos](const ModelMesh &a, const ModelMesh &b)
   {
     // Sort by the first vertex position, since all transforms will be the same
-    return (cameraPos.translation().distanceToPoint(a.mVertices[0].mPosition))
-           < (cameraPos.translation().distanceToPoint(b.mVertices[0].mPosition));
+    return (cameraPos.getTranslation().distanceToPoint(a.mVertices[0].mPosition))
+           < (cameraPos.getTranslation().distanceToPoint(b.mVertices[0].mPosition));
   };
   std::sort(mMeshes.begin(), mMeshes.end(), cameraDistance);
 }

@@ -24,6 +24,7 @@
 
 // QTK
 #include <transform3D.h>
+#include <object.h>
 
 
 struct ModelVertex {

@@ -32,19 +32,24 @@ public:
 
   ~Object() {}
 
-  inline const Vertices & vertices() { return mShape.mVertices;}
-  inline const Indices & indices() { return mShape.mIndices;}
-  inline const Colors & colors() { return mShape.mColors;}
-  inline const TexCoords & texCoords() { return mShape.mTexCoords;}
-  inline const Normals & normals() { return mShape.mNormals;}
+  // Look to MeshRenderer for wrapped texture functionality
+  // + Object only exposes a QOpenGLTexture object with no wrapped features
   inline QOpenGLTexture & texture() const { return *mTexture;}
+  // These custom types are wrapped for Qtk
+  inline const Colors & getColors() { return mShape.mColors;}
+  inline const Indices & getIndexData() { return mShape.mIndices;}
+  inline const Normals & getNormals() { return mShape.mNormals;}
+  inline const Shape & getShape() { return mShape;}
+  inline const TexCoords & getTexCoords() { return mShape.mTexCoords;}
+  inline const Vertices & getVertices() { return mShape.mVertices;}
 
-  virtual inline void setVertices(const Vertices & value) { mShape.mVertices = value;}
-  virtual inline void setIndices(const Indices & value) { mShape.mIndices = value;}
   virtual inline void setColors(const Colors & value) { mShape.mColors = value;}
-  virtual inline void setTexCoords(const TexCoords & value) { mShape.mTexCoords = value;}
+  virtual inline void setIndices(const Indices & value) { mShape.mIndices = value;}
   virtual inline void setNormals(const Normals & value) { mShape.mNormals = value;}
   virtual inline void setShape(const Shape & value) { mShape = value;}
+  virtual inline void setTexCoords(const TexCoords & value) { mShape.mTexCoords = value;}
+  virtual inline void setVertices(const Vertices & value) { mShape.mVertices = value;}
+  // To set mTexture use the accessor and QOpenGLTexture API
 
   QOpenGLBuffer mVBO, mNBO;
   QOpenGLVertexArrayObject mVAO;

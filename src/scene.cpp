@@ -63,12 +63,11 @@ void Scene::init()
   mTestPhong->mNBO.create();
   mTestPhong->mNBO.setUsagePattern(QOpenGLBuffer::StaticDraw);
   mTestPhong->mNBO.bind();
-  mTestPhong->mNBO.allocate(mTestPhong->normals().data(),
-                            mTestPhong->normals().size()
-                            * sizeof(mTestPhong->normals()[0]));
+  mTestPhong->mNBO.allocate(mTestPhong->getNormals().data(),
+                            mTestPhong->getNormals().size()
+                            * sizeof(mTestPhong->getNormals()[0]));
   mTestPhong->mProgram.enableAttributeArray(1);
-  mTestPhong->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
-                                          3, sizeof(QVector3D));
+  mTestPhong->mProgram.setAttributeBuffer(1, GL_FLOAT, 0, 3, sizeof(QVector3D));
   mTestPhong->mNBO.release();
   mTestPhong->mVAO.release();
   mTestPhong->mProgram.release();
@@ -88,9 +87,9 @@ void Scene::init()
   mTestAmbient->mNBO.create();
   mTestAmbient->mNBO.setUsagePattern(QOpenGLBuffer::StaticDraw);
   mTestAmbient->mNBO.bind();
-  mTestAmbient->mNBO.allocate(mTestAmbient->normals().data(),
-                              mTestAmbient->normals().size()
-                              * sizeof(mTestAmbient->normals()[0]));
+  mTestAmbient->mNBO.allocate(mTestAmbient->getNormals().data(),
+                              mTestAmbient->getNormals().size()
+                              * sizeof(mTestAmbient->getNormals()[0]));
   mTestAmbient->mProgram.enableAttributeArray(1);
   mTestAmbient->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                             3, sizeof(QVector3D));
@@ -112,9 +111,9 @@ void Scene::init()
   mTestDiffuse->mNBO.create();
   mTestDiffuse->mNBO.setUsagePattern(QOpenGLBuffer::StaticDraw);
   mTestDiffuse->mNBO.bind();
-  mTestDiffuse->mNBO.allocate(mTestDiffuse->normals().data(),
-                              mTestDiffuse->normals().size()
-                              * sizeof(mTestDiffuse->normals()[0]));
+  mTestDiffuse->mNBO.allocate(mTestDiffuse->getNormals().data(),
+                              mTestDiffuse->getNormals().size()
+                              * sizeof(mTestDiffuse->getNormals()[0]));
   mTestDiffuse->mProgram.enableAttributeArray(1);
   mTestDiffuse->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                             3, sizeof(QVector3D));
@@ -138,9 +137,9 @@ void Scene::init()
   mTestSpecular->mNBO.create();
   mTestSpecular->mNBO.setUsagePattern(QOpenGLBuffer::StaticDraw);
   mTestSpecular->mNBO.bind();
-  mTestSpecular->mNBO.allocate(mTestSpecular->normals().data(),
-                               mTestSpecular->normals().size()
-                               * sizeof(mTestSpecular->normals()[0]));
+  mTestSpecular->mNBO.allocate(mTestSpecular->getNormals().data(),
+                               mTestSpecular->getNormals().size()
+                               * sizeof(mTestSpecular->getNormals()[0]));
   mTestSpecular->mProgram.enableAttributeArray(1);
   mTestSpecular->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                              3, sizeof(QVector3D));
@@ -157,36 +156,29 @@ void Scene::init()
   mModels.back()->flipTexture("diffuse.jpg", false, true);
   mModels.back()->mTransform.setTranslation(0.0f, 0.0f, -10.0f);
 
-  mModels.push_back(
-      new Model("bird",
-                "../resources/models/bird/bird.obj"));
+  mModels.push_back(new Model("bird", "../resources/models/bird/bird.obj"));
   mModels.back()->mTransform.setTranslation(2.0f, 2.0f, -10.0f);
   // Sometimes the models are very large
   mModels.back()->mTransform.scale(0.0025f);
   mModels.back()->mTransform.rotate(-110.0f, 0.0f, 1.0f, 0.0f);
 
-  mModels.push_back(new Model("lion",
-                              "../resources/models/lion/lion.obj"));
+  mModels.push_back(new Model("lion", "../resources/models/lion/lion.obj"));
   mModels.back()->mTransform.setTranslation(-3.0f, -1.0f, -10.0f);
   mModels.back()->mTransform.scale(0.15f);
 
   mModels.push_back(
-      new Model("alien",
-                "../resources/models/alien-hominid/alien.obj"));
+      new Model("alien", "../resources/models/alien-hominid/alien.obj"));
   mModels.back()->mTransform.setTranslation(2.0f, -1.0f, -5.0f);
   mModels.back()->mTransform.scale(0.15f);
 
-  mModels.push_back(
-      new Model("scythe",
-                "../resources/models/scythe/scythe.obj")
-  );
+  mModels.push_back( new Model("scythe",
+                "../resources/models/scythe/scythe.obj"));
   mModels.back()->mTransform.setTranslation(-6.0f, 0.0f, -10.0f);
   mModels.back()->mTransform.rotate(-90.0f, 1.0f, 0.0f, 0.0f);
   mModels.back()->mTransform.rotate(90.0f, 0.0f, 1.0f, 0.0f);
 
   mModels.push_back(
-      new Model("masterChief",
-                "../resources/models/spartan/spartan.obj"));
+      new Model("masterChief", "../resources/models/spartan/spartan.obj"));
   mModels.back()->mTransform.setTranslation(-1.5f, 0.5f, -2.0f);
 
 
@@ -250,8 +242,7 @@ void Scene::init()
 
 
   // Test basic cube with phong.vert and phong.frag shaders
-  mMeshes.push_back(
-      new MeshRenderer("testLight", Triangle(QTK_DRAW_ELEMENTS)));
+  mMeshes.push_back(new MeshRenderer("testLight", Triangle(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(5.0f, 1.25f, 10.0f);
   mMeshes.back()->mTransform.scale(0.25f);
   mMeshes.back()->setDrawType(GL_LINE_LOOP);
@@ -259,8 +250,7 @@ void Scene::init()
   mMeshes.back()->setColor(GREEN);
   mMeshes.back()->init();
 
-  mMeshes.push_back(
-      new MeshRenderer("testPhong", Cube(QTK_DRAW_ARRAYS)));
+  mMeshes.push_back(new MeshRenderer("testPhong", Cube(QTK_DRAW_ARRAYS)));
   mMeshes.back()->mTransform.setTranslation(5.0f, 0.0f, 10.0f);
   mMeshes.back()->setShaders(":/phong.vert", ":/phong.frag");
   mMeshes.back()->setColor(QVector3D(0.0f, 0.25f, 0.0f));
@@ -271,9 +261,9 @@ void Scene::init()
   mMeshes.back()->mNBO.create();
   mMeshes.back()->mNBO.bind();
 
-  mMeshes.back()->mNBO.allocate(mMeshes.back()->normals().data(),
-                                mMeshes.back()->normals().size()
-                                * sizeof(mMeshes.back()->normals()[0]));
+  mMeshes.back()->mNBO.allocate(mMeshes.back()->getNormals().data(),
+                                mMeshes.back()->getNormals().size()
+                                * sizeof(mMeshes.back()->getNormals()[0]));
   mMeshes.back()->mProgram.enableAttributeArray(1);
   mMeshes.back()->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                               3, sizeof(QVector3D));
@@ -303,8 +293,7 @@ void Scene::init()
       new MeshRenderer("rightTriangle", Triangle(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(-5.0f, 0.0f, -2.0f);
 
-  mMeshes.push_back(
-      new MeshRenderer("centerCube", Cube(QTK_DRAW_ELEMENTS)));
+  mMeshes.push_back(new MeshRenderer("centerCube", Cube(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(-7.0f, 0.0f, -2.0f);
 
   mMeshes.push_back(
@@ -340,9 +329,9 @@ void Scene::init()
   mMeshes.back()->mNBO.bind();
   mMeshes.back()->mProgram.bind();
 
-  mMeshes.back()->mNBO.allocate(mMeshes.back()->normals().data(),
-                                mMeshes.back()->normals().size()
-                                * sizeof(mMeshes.back()->normals()[0]));
+  mMeshes.back()->mNBO.allocate(mMeshes.back()->getNormals().data(),
+                                mMeshes.back()->getNormals().size()
+                                * sizeof(mMeshes.back()->getNormals()[0]));
   mMeshes.back()->mProgram.enableAttributeArray(1);
   mMeshes.back()->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                               3, sizeof(QVector3D));
@@ -353,7 +342,8 @@ void Scene::init()
 
   // RGB Normals cube to show normals are correct with QTK_DRAW_ELEMENTS_NORMALS
   mMeshes.push_back(
-      new MeshRenderer("rgbNormalsCubeElementsTest", Cube(QTK_DRAW_ELEMENTS_NORMALS)));
+      new MeshRenderer("rgbNormalsCubeElementsTest",
+                       Cube(QTK_DRAW_ELEMENTS_NORMALS)));
   mMeshes.back()->mTransform.setTranslation(5.0f, 0.0f, 2.0f);
   mMeshes.back()->setShaders(":/rgb-normals.vert", ":/rgb-normals.frag");
   mMeshes.back()->init();
@@ -362,9 +352,9 @@ void Scene::init()
   mMeshes.back()->mNBO.bind();
   mMeshes.back()->mProgram.bind();
 
-  mMeshes.back()->mNBO.allocate(mMeshes.back()->normals().data(),
-                                mMeshes.back()->normals().size()
-                                * sizeof(mMeshes.back()->normals()[0]));
+  mMeshes.back()->mNBO.allocate(mMeshes.back()->getNormals().data(),
+                                mMeshes.back()->getNormals().size()
+                                * sizeof(mMeshes.back()->getNormals()[0]));
   mMeshes.back()->mProgram.enableAttributeArray(1);
   mMeshes.back()->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                               3, sizeof(QVector3D));
@@ -384,19 +374,16 @@ void Scene::init()
   mMeshes.back()->init();
   mMeshes.back()->mProgram.bind();
 
-  mMeshes.back()->setTexture(Texture::initTexture2D(":/crate.png"));
+  mMeshes.back()->setTexture(OpenGLTextureFactory::initTexture2D(":/crate.png"));
   mMeshes.back()->setUniform("uTexture", 0);
-  mMeshes.back()->texture().bind();
-
-  mMeshes.back()->texture().release();
 
   mMeshes.back()->mVAO.bind();
   mMeshes.back()->mNBO.destroy();
   mMeshes.back()->mNBO.create();
   mMeshes.back()->mNBO.bind();
-  mMeshes.back()->mNBO.allocate(mMeshes.back()->mShape.texCoords().data(),
-                                mMeshes.back()->mShape.texCoords().size()
-                                * sizeof(mMeshes.back()->mShape.texCoords()[0]));
+  mMeshes.back()->mNBO.allocate(mMeshes.back()->mShape.getTexCoords().data(),
+                                mMeshes.back()->mShape.getTexCoords().size()
+                                * sizeof(mMeshes.back()->mShape.getTexCoords()[0]));
   mMeshes.back()->mProgram.enableAttributeArray(1);
   mMeshes.back()->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                               2, sizeof(QVector2D));
@@ -415,13 +402,13 @@ void Scene::init()
   mMeshes.back()->mNBO.bind();
   mMeshes.back()->mProgram.bind();
 
-  mMeshes.back()->mNBO.allocate(mMeshes.back()->texCoords().data(),
-                                mMeshes.back()->texCoords().size()
-                                * sizeof(mMeshes.back()->texCoords()[0]));
+  mMeshes.back()->mNBO.allocate(mMeshes.back()->getTexCoords().data(),
+                                mMeshes.back()->getTexCoords().size()
+                                * sizeof(mMeshes.back()->getTexCoords()[0]));
   mMeshes.back()->mProgram.enableAttributeArray(1);
   mMeshes.back()->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                               3, sizeof(QVector3D));
-  mMeshes.back()->setTexture(Texture::initTexture2D(":/crate.png"));
+  mMeshes.back()->setTexture(OpenGLTextureFactory::initTexture2D(":/crate.png"));
 
   mMeshes.back()->mProgram.setUniformValue("uTexture", 0);
   mMeshes.back()->mProgram.release();
@@ -439,16 +426,16 @@ void Scene::init()
   mMeshes.back()->init();
   mMeshes.back()->mProgram.bind();
 
-  mMeshes.back()->setTexture(Texture::initCubeMap(":/crate.png"));
+  mMeshes.back()->setTexture(OpenGLTextureFactory::initCubeMap(":/crate.png"));
   mMeshes.back()->setUniform("uTexture", 0);
 
   mMeshes.back()->mVAO.bind();
   mMeshes.back()->mNBO.destroy();
   mMeshes.back()->mNBO.create();
   mMeshes.back()->mNBO.bind();
-  mMeshes.back()->mNBO.allocate(mMeshes.back()->mShape.texCoords().data(),
-                                mMeshes.back()->mShape.texCoords().size()
-                                * sizeof(mMeshes.back()->mShape.texCoords()[0]));
+  mMeshes.back()->mNBO.allocate(mMeshes.back()->mShape.getTexCoords().data(),
+                                mMeshes.back()->mShape.getTexCoords().size()
+                                * sizeof(mMeshes.back()->mShape.getTexCoords()[0]));
   mMeshes.back()->mProgram.enableAttributeArray(1);
   mMeshes.back()->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                               2, sizeof(QVector2D));
@@ -458,8 +445,7 @@ void Scene::init()
 
   // Create a cube with custom shaders
   // + Apply RGB normals shader and spin the cube for a neat effect
-  mMeshes.push_back(
-      new MeshRenderer("rgbNormalsCube", Cube(QTK_DRAW_ARRAYS)));
+  mMeshes.push_back(new MeshRenderer("rgbNormalsCube", Cube(QTK_DRAW_ARRAYS)));
   mMeshes.back()->mTransform.setTranslation(5.0f, 2.0f, -2.0f);
   mMeshes.back()->setShaders(":/rgb-normals.vert", ":/rgb-normals.frag");
   mMeshes.back()->init();
@@ -468,9 +454,9 @@ void Scene::init()
   mMeshes.back()->mNBO.bind();
   mMeshes.back()->mProgram.bind();
 
-  mMeshes.back()->mNBO.allocate(mMeshes.back()->normals().data(),
-                                mMeshes.back()->normals().size()
-                                * sizeof(mMeshes.back()->normals()[0]));
+  mMeshes.back()->mNBO.allocate(mMeshes.back()->getNormals().data(),
+                                mMeshes.back()->getNormals().size()
+                                * sizeof(mMeshes.back()->getNormals()[0]));
   mMeshes.back()->mProgram.enableAttributeArray(1);
   mMeshes.back()->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                               3, sizeof(QVector3D));
@@ -490,9 +476,9 @@ void Scene::init()
   mMeshes.back()->mVAO.bind();
   mMeshes.back()->mNBO.create();
   mMeshes.back()->mNBO.bind();
-  mMeshes.back()->mNBO.allocate(mMeshes.back()->normals().data(),
-                                mMeshes.back()->normals().size()
-                                * sizeof(mMeshes.back()->normals()[0]));
+  mMeshes.back()->mNBO.allocate(mMeshes.back()->getNormals().data(),
+                                mMeshes.back()->getNormals().size()
+                                * sizeof(mMeshes.back()->getNormals()[0]));
   mMeshes.back()->mProgram.enableAttributeArray(1);
   mMeshes.back()->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                               3, sizeof(QVector3D));
@@ -512,9 +498,9 @@ void Scene::init()
   mMeshes.back()->mVAO.bind();
   mMeshes.back()->mNBO.create();
   mMeshes.back()->mNBO.bind();
-  mMeshes.back()->mNBO.allocate(mMeshes.back()->normals().data(),
-                                mMeshes.back()->normals().size()
-                                * sizeof(mMeshes.back()->normals()[0]));
+  mMeshes.back()->mNBO.allocate(mMeshes.back()->getNormals().data(),
+                                mMeshes.back()->getNormals().size()
+                                * sizeof(mMeshes.back()->getNormals()[0]));
   mMeshes.back()->mProgram.enableAttributeArray(1);
   mMeshes.back()->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                               3, sizeof(QVector3D));
@@ -530,19 +516,16 @@ void Scene::init()
   mMeshes.back()->init();
   mMeshes.back()->mProgram.bind();
 
-  mMeshes.back()->setTexture(Texture::initTexture2D(":/crate.png"));
+  mMeshes.back()->setTexture(OpenGLTextureFactory::initTexture2D(":/crate.png"));
   mMeshes.back()->setUniform("uTexture", 0);
-  mMeshes.back()->texture().bind();
-
-  mMeshes.back()->texture().release();
 
   mMeshes.back()->mVAO.bind();
   mMeshes.back()->mNBO.destroy();
   mMeshes.back()->mNBO.create();
   mMeshes.back()->mNBO.bind();
-  mMeshes.back()->mNBO.allocate(mMeshes.back()->mShape.texCoords().data(),
-                                mMeshes.back()->mShape.texCoords().size()
-                                * sizeof(mMeshes.back()->mShape.texCoords()[0]));
+  mMeshes.back()->mNBO.allocate(mMeshes.back()->mShape.getTexCoords().data(),
+                                mMeshes.back()->mShape.getTexCoords().size()
+                                * sizeof(mMeshes.back()->mShape.getTexCoords()[0]));
   mMeshes.back()->mProgram.enableAttributeArray(1);
   mMeshes.back()->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                               2, sizeof(QVector2D));
@@ -559,19 +542,16 @@ void Scene::init()
   mMeshes.back()->init();
   mMeshes.back()->mProgram.bind();
 
-  mMeshes.back()->setTexture(Texture::initTexture2D(":/crate.png"));
+  mMeshes.back()->setTexture(OpenGLTextureFactory::initTexture2D(":/crate.png"));
   mMeshes.back()->setUniform("uTexture", 0);
-  mMeshes.back()->texture().bind();
-
-  mMeshes.back()->texture().release();
 
   mMeshes.back()->mVAO.bind();
   mMeshes.back()->mNBO.destroy();
   mMeshes.back()->mNBO.create();
   mMeshes.back()->mNBO.bind();
-  mMeshes.back()->mNBO.allocate(mMeshes.back()->mShape.texCoords().data(),
-                                mMeshes.back()->mShape.texCoords().size()
-                                * sizeof(mMeshes.back()->mShape.texCoords()[0]));
+  mMeshes.back()->mNBO.allocate(mMeshes.back()->mShape.getTexCoords().data(),
+                                mMeshes.back()->mShape.getTexCoords().size()
+                                * sizeof(mMeshes.back()->mShape.getTexCoords()[0]));
   mMeshes.back()->mProgram.enableAttributeArray(1);
   mMeshes.back()->mProgram.setAttributeBuffer(1, GL_FLOAT, 0,
                                               2, sizeof(QVector2D));
@@ -614,24 +594,24 @@ void Scene::draw()
 {
   mSkybox.draw();
 
-  for (auto & model : mModels) model->draw();
+  for (const auto & model : mModels) model->draw();
 
-  for (const auto &mesh : mMeshes) mesh->draw();
+  for (const auto & mesh : mMeshes) mesh->draw();
 
   mTestPhong->mProgram.bind();
   mTestPhong->setUniform("uModelInverseTransposed",
                          mTestPhong->mTransform.toMatrix().normalMatrix());
   mTestPhong->setUniform(
       "uLightPosition",
-      MeshRenderer::getInstance("phongLight")->mTransform.translation());
+      MeshRenderer::getInstance("phongLight")->mTransform.getTranslation());
   mTestPhong->setUniform("uCameraPosition",
-                         Scene::Camera().transform().translation());
+                         Scene::Camera().transform().getTranslation());
   mTestPhong->mProgram.release();
   mTestPhong->draw();
 
   mTestAmbient->mProgram.bind();
   mTestAmbient->setUniform("uCameraPosition",
-                           Scene::Camera().transform().translation());
+                           Scene::Camera().transform().getTranslation());
   mTestAmbient->mProgram.release();
   mTestAmbient->draw();
 
@@ -640,8 +620,9 @@ void Scene::draw()
                            mTestDiffuse->mTransform.toMatrix().normalMatrix());
   mTestDiffuse->setUniform(
       "uLightPosition",
-      MeshRenderer::getInstance("diffuseLight")->mTransform.translation());
-  mTestDiffuse->setUniform("uCameraPosition", Scene::Camera().transform().translation());
+      MeshRenderer::getInstance("diffuseLight")->mTransform.getTranslation());
+  mTestDiffuse->setUniform("uCameraPosition",
+                           Scene::Camera().transform().getTranslation());
   mTestDiffuse->mProgram.release();
   mTestDiffuse->draw();
 
@@ -651,19 +632,21 @@ void Scene::draw()
       mTestSpecular->mTransform.toMatrix().normalMatrix());
   mTestSpecular->setUniform(
       "uLightPosition",
-      MeshRenderer::getInstance("specularLight")->mTransform.translation());
-  mTestSpecular->setUniform("uCameraPosition", Scene::Camera().transform().translation());
+      MeshRenderer::getInstance("specularLight")->mTransform.getTranslation());
+  mTestSpecular->setUniform("uCameraPosition",
+                            Scene::Camera().transform().getTranslation());
   mTestSpecular->mProgram.release();
   mTestSpecular->draw();
 }
 
 void Scene::update()
 {
-  auto position = MeshRenderer::getInstance("alienTestLight")->mTransform.translation();
+  auto position = MeshRenderer::getInstance(
+      "alienTestLight")->mTransform.getTranslation();
   Model::getInstance("alienTest")->setUniform(
       "uLight.position", position);
   Model::getInstance("alienTest")->setUniform(
-      "uCameraPosition", Scene::Camera().transform().translation());
+      "uCameraPosition", Scene::Camera().transform().getTranslation());
   auto posMatrix = Model::getInstance("alienTest")->mTransform.toMatrix();
   Model::getInstance("alienTest")->setUniform(
       "uMVP.normalMatrix", posMatrix.normalMatrix());
@@ -675,11 +658,12 @@ void Scene::update()
       "uMVP.projection", Scene::Projection());
   Model::getInstance("alienTest")->mTransform.rotate(0.75f, 0.0f, 1.0f, 0.0f);
 
-  position = MeshRenderer::getInstance("spartanTestLight")->mTransform.translation();
+  position = MeshRenderer::getInstance(
+      "spartanTestLight")->mTransform.getTranslation();
   Model::getInstance("spartanTest")->setUniform(
       "uLight.position", position);
   Model::getInstance("spartanTest")->setUniform(
-      "uCameraPosition", Scene::Camera().transform().translation());
+      "uCameraPosition", Scene::Camera().transform().getTranslation());
   posMatrix = Model::getInstance("spartanTest")->mTransform.toMatrix();
   Model::getInstance("spartanTest")->setUniform(
       "uMVP.normalMatrix", posMatrix.normalMatrix());
@@ -696,11 +680,11 @@ void Scene::update()
   MeshRenderer::getInstance("testPhong")->mTransform.rotate(
       0.75f, 1.0f, 0.5f, 0.0f);
   MeshRenderer::getInstance("testPhong")->mProgram.bind();
-  position = MeshRenderer::getInstance("testLight")->mTransform.translation();
+  position = MeshRenderer::getInstance("testLight")->mTransform.getTranslation();
   MeshRenderer::getInstance("testPhong")->setUniform(
       "uLight.position", position);
   MeshRenderer::getInstance("testPhong")->setUniform(
-      "uCameraPosition", Scene::Camera().transform().translation());
+      "uCameraPosition", Scene::Camera().transform().getTranslation());
   posMatrix = MeshRenderer::getInstance("testPhong")->mTransform.toMatrix();
   MeshRenderer::getInstance("testPhong")->setUniform(
       "uMVP.normalMatrix", posMatrix.normalMatrix());
@@ -736,7 +720,7 @@ void Scene::update()
   static float translateX = 0.025f;
   float limit = -9.0f; // Origin position.x - 2.0f
   float posX =
-      MeshRenderer::getInstance("topTriangle")->mTransform.translation().x();
+      MeshRenderer::getInstance("topTriangle")->mTransform.getTranslation().x();
   if (posX < limit || posX > limit + 4.0f) {
     translateX = -translateX;
   }

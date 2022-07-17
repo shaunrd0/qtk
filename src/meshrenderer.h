@@ -11,15 +11,17 @@
 #include <mesh.h>
 #include <object.h>
 
+#include <utility>
+
 
 class MeshRenderer : public Object {
 public:
   // Delegate constructors
   MeshRenderer(const char * name, Vertices vertices, Indices indices,
                DrawMode mode=QTK_DRAW_ARRAYS)
-      : MeshRenderer(name, ShapeBase(mode, vertices, indices))
+      : MeshRenderer(name, ShapeBase(mode, std::move(vertices), std::move(indices)))
   {}
-  MeshRenderer(const char * name)
+  explicit MeshRenderer(const char * name)
       : MeshRenderer(name, Cube(QTK_DRAW_ELEMENTS))
   {}
   // Constructor

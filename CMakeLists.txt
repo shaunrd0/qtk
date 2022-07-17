@@ -27,10 +27,7 @@ find_package(Qt6 COMPONENTS OpenGLWidgets REQUIRED)
 set(SOURCES app/main.cpp)
 qt6_add_resources(SOURCES resources.qrc)
 
-add_executable(
-    qtk             # Executable name
-    ${SOURCES}      # Executable source code
-)
+add_executable(qtk ${SOURCES})
 
 ################################################################################
 # External Libraries

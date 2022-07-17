@@ -9,8 +9,8 @@
 #include <QApplication>
 #include <QLabel>
 
-#include <mainwidget.h>
 #include <mainwindow.h>
+#include <QSurfaceFormat>
 
 
 int main(int argc, char *argv[])

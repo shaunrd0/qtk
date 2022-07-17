@@ -22,7 +22,7 @@ class Model;
 class Object;
 class Scene;
 class Skybox;
-class Texture;
+class OpenGLTextureFactory;
 
 class MainWidget : public QOpenGLWidget,
                    protected QOpenGLFunctions {

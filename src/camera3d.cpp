@@ -23,8 +23,8 @@ const QMatrix4x4 & Camera3D::toMatrix()
 {
   mWorld.setToIdentity();
   // Qt6 renamed QMatrix4x4::conjugate() to conjugated()
-  mWorld.rotate(mTransform.rotation().conjugated());
-  mWorld.translate(-mTransform.translation());
+  mWorld.rotate(mTransform.getRotation().conjugated());
+  mWorld.translate(-mTransform.getTranslation());
   return mWorld;
 }
 

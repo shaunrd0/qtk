@@ -11,8 +11,7 @@
 
 #include <texture.h>
 
-
-QImage * Texture::initImage(const char * image, bool flipX, bool flipY)
+QImage * OpenGLTextureFactory::initImage(const char * image, bool flipX, bool flipY)
 {
   // Qt6 limits loaded images to 256MB by default
   QImageReader::setAllocationLimit(512);
@@ -26,8 +25,8 @@ QImage * Texture::initImage(const char * image, bool flipX, bool flipY)
   return loadedImage;
 }
 
-QOpenGLTexture * Texture::initTexture2D(const char * texture,
-                                        bool flipX, bool flipY)
+QOpenGLTexture * OpenGLTextureFactory::initTexture2D(const char * texture,
+                                                     bool flipX, bool flipY)
 {
   QImage * image = initImage(texture, flipX, flipY);
   auto newTexture = new QOpenGLTexture(QOpenGLTexture::Target2D);
@@ -39,14 +38,14 @@ QOpenGLTexture * Texture::initTexture2D(const char * texture,
   return newTexture;
 }
 
-QOpenGLTexture * Texture::initCubeMap(const char * tile)
+QOpenGLTexture * OpenGLTextureFactory::initCubeMap(const char * tile)
 {
   return initCubeMap(QImage(tile), QImage(tile),
                      QImage(tile), QImage(tile),
                      QImage(tile), QImage(tile));
 }
 
-QOpenGLTexture * Texture::initCubeMap(
+QOpenGLTexture * OpenGLTextureFactory::initCubeMap(
     const char * right, const char * top,
     const char * front, const char * left,
     const char * bottom, const char * back)
@@ -56,7 +55,7 @@ QOpenGLTexture * Texture::initCubeMap(
                      QImage(bottom), QImage(back));
 }
 
-QOpenGLTexture * Texture::initCubeMap(
+QOpenGLTexture * OpenGLTextureFactory::initCubeMap(
     QImage right, QImage top,
     QImage front, QImage left,
     QImage bottom, QImage back)

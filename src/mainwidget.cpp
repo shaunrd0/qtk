@@ -62,8 +62,8 @@ void MainWidget::initObjects()
   // The Object class only stores basic QOpenGL* members and shape data
   // + Within mainwidget, mObject serves as a basic QOpenGL example
   mObject = new Object("testObject");
-  mObject->setVertices(Cube(QTK_DRAW_ELEMENTS).vertices());
-  mObject->setIndices(Cube(QTK_DRAW_ELEMENTS).indices());
+  mObject->setVertices(Cube(QTK_DRAW_ELEMENTS).getVertices());
+  mObject->setIndices(Cube(QTK_DRAW_ELEMENTS).getIndexData());
   mObject->mProgram.create();
   mObject->mProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,
                                             ":/solid-ambient.vert");
@@ -79,13 +79,15 @@ void MainWidget::initObjects()
   mObject->mVBO.setUsagePattern(QOpenGLBuffer::StaticDraw);
   mObject->mVBO.bind();
 
-  mObject->mVBO.allocate(mObject->vertices().data(),
-                         mObject->vertices().size()
-                         * sizeof(mObject->vertices()[0]));
+  mObject->mVBO.allocate(
+      mObject->getVertices().data(),
+      mObject->getVertices().size() * sizeof(mObject->getVertices()[0])
+  );
 
   mObject->mProgram.enableAttributeArray(0);
-  mObject->mProgram.setAttributeBuffer(0, GL_FLOAT, 0,
-                                       3, sizeof(mObject->vertices()[0]));
+  mObject->mProgram.setAttributeBuffer(
+      0, GL_FLOAT, 0, 3, sizeof(mObject->getVertices()[0])
+  );
   mObject->mProgram.setUniformValue("uColor", QVector3D(1.0f, 0.0f, 0.0f));
   mObject->mProgram.setUniformValue("uLightColor", WHITE);
   mObject->mProgram.setUniformValue("uAmbientStrength", 0.75f);
@@ -116,8 +118,8 @@ void MainWidget::paintGL()
   mObject->mProgram.setUniformValue("uModel", mObject->mTransform.toMatrix());
   mObject->mProgram.setUniformValue("uView", Scene::Camera().toMatrix());
   mObject->mProgram.setUniformValue("uProjection", Scene::Projection());
-  glDrawElements(GL_TRIANGLES, mObject->indices().size(),
-                 GL_UNSIGNED_INT, mObject->indices().data());
+  glDrawElements(GL_TRIANGLES, mObject->getIndexData().size(),
+                 GL_UNSIGNED_INT, mObject->getIndexData().data());
   mObject->mVAO.release();
   mObject->mProgram.release();
 }

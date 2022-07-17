@@ -12,9 +12,9 @@
 #include <QOpenGLTexture>
 
 
-class Texture {
+class OpenGLTextureFactory {
 public:
-  ~Texture() {}
+  ~OpenGLTextureFactory() {}
 
   // QImage
   static QImage * initImage(const char * image,
@@ -36,7 +36,7 @@ public:
 
 private:
   // Private ctor to prevent creating instances of this class
-  Texture() {}
+  OpenGLTextureFactory() {}
 };
 
 #endif // QTOPENGL_TEXTURE_H

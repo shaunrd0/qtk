@@ -77,14 +77,14 @@ public:
   //
   // Accessors
 
-  inline const QVector3D & translation() const { return mTranslation;}
-  inline const QVector3D & scale() const { return mScale; }
-  inline const QQuaternion & rotation() const { return mRotation; }
+  inline const QVector3D & getTranslation() const { return mTranslation;}
+  inline const QVector3D & getScale() const { return mScale; }
+  inline const QQuaternion & getRotation() const { return mRotation; }
   const QMatrix4x4 & toMatrix();
 
-  QVector3D forward() const;
-  QVector3D up() const;
-  QVector3D right() const;
+  QVector3D getForward() const;
+  QVector3D getUp() const;
+  QVector3D getRight() const;
 
   static const QVector3D LocalForward, LocalUp, LocalRight;
 
