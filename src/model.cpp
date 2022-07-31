@@ -11,6 +11,7 @@
 
 #include <scene.h>
 #include <texture.h>
+#include <resourcemanager.h>
 
 #include <model.h>
 
@@ -188,6 +189,21 @@ void Model::flipTexture(const std::string & fileName, bool flipX, bool flipY)
  * Model Private Member Functions
  ******************************************************************************/
 
+/**
+ * Loads a model in .obj, .fbx, .gltf, and other formats
+ * For a full list of formats see assimp documentation:
+ *  https://github.com/assimp/assimp/blob/master/doc/Fileformats.md
+ *
+ * Models should not be loaded into Qt resource system
+ * Instead pass an *absolute* path to this function
+ * Relative paths will break if Qtk is executed from different locations
+ *
+ * Models can also be loaded from the `qtk/resource` directory using qrc format
+ *  loadModel(":/models/backpack/backpack.obj")
+ * See resourcemanager.h for more information
+ *
+ * @param path Absolute path to a model .obj or other format accepted by assimp
+ */
 void Model::loadModel(const std::string & path)
 {
   Assimp::Importer import;
@@ -195,13 +211,14 @@ void Model::loadModel(const std::string & path)
   // JIC a relative path was used, get the absolute file path
   QFileInfo info(path.c_str());
   info.makeAbsolute();
-  std::string temp = info.absoluteFilePath().toStdString();
+  mDirectory = path[0] == ':' ? RM::getPath(path)
+      : info.absoluteFilePath().toStdString();
 
   // Import the model, converting non-triangular geometry to triangles
   // + And flipping texture UVs, etc..
   // Assimp options: http://assimp.sourceforge.net/lib_html/postprocess_8h.html
   const aiScene * scene =
-      import.ReadFile(temp, aiProcess_Triangulate
+      import.ReadFile(mDirectory, aiProcess_Triangulate
                             | aiProcess_FlipUVs
                             | aiProcess_GenSmoothNormals
                             | aiProcess_CalcTangentSpace
@@ -216,7 +233,7 @@ void Model::loadModel(const std::string & path)
     return;
   }
   // If there were no errors, find the directory that contains this model
-  mDirectory = path.substr(0, path.find_last_of('/'));
+  mDirectory = mDirectory.substr(0, mDirectory.find_last_of('/'));
 
   // Pass the pointers to the root node and the scene to recursive function
   // + Base case breaks when no nodes left to process on model

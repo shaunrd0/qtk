@@ -10,6 +10,7 @@
 #include <texture.h>
 #include <meshrenderer.h>
 #include <model.h>
+#include <resourcemanager.h>
 
 #include <scene.h>
 
@@ -151,42 +152,31 @@ void Scene::init()
   //
   // Model loading
 
-  mModels.push_back(new Model("backpack",
-                              "../resources/models/backpack/backpack.obj"));
+  mModels.push_back(new Model("backpack", ":/models/backpack/backpack.obj"));
   // Sometimes model textures need flipped in certain directions
   mModels.back()->flipTexture("diffuse.jpg", false, true);
   mModels.back()->mTransform.setTranslation(0.0f, 0.0f, -10.0f);
 
-  mModels.push_back(
-      new Model("bird",
-                "../resources/models/bird/bird.obj"));
+  mModels.push_back(new Model("bird", ":/models/bird/bird.obj"));
   mModels.back()->mTransform.setTranslation(2.0f, 2.0f, -10.0f);
   // Sometimes the models are very large
   mModels.back()->mTransform.scale(0.0025f);
   mModels.back()->mTransform.rotate(-110.0f, 0.0f, 1.0f, 0.0f);
 
-  mModels.push_back(new Model("lion",
-                              "../resources/models/lion/lion.obj"));
+  mModels.push_back(new Model("lion", ":/models/lion/lion.obj"));
   mModels.back()->mTransform.setTranslation(-3.0f, -1.0f, -10.0f);
   mModels.back()->mTransform.scale(0.15f);
 
-  mModels.push_back(
-      new Model("alien",
-                "../resources/models/alien-hominid/alien.obj"));
+  mModels.push_back(new Model("alien", ":/models/alien-hominid/alien.obj"));
   mModels.back()->mTransform.setTranslation(2.0f, -1.0f, -5.0f);
   mModels.back()->mTransform.scale(0.15f);
 
-  mModels.push_back(
-      new Model("scythe",
-                "../resources/models/scythe/scythe.obj")
-  );
+  mModels.push_back(new Model("scythe", ":/models/scythe/scythe.obj"));
   mModels.back()->mTransform.setTranslation(-6.0f, 0.0f, -10.0f);
   mModels.back()->mTransform.rotate(-90.0f, 1.0f, 0.0f, 0.0f);
   mModels.back()->mTransform.rotate(90.0f, 0.0f, 1.0f, 0.0f);
 
-  mModels.push_back(
-      new Model("masterChief",
-                "../resources/models/spartan/spartan.obj"));
+  mModels.push_back(new Model("masterChief", ":/models/spartan/spartan.obj"));
   mModels.back()->mTransform.setTranslation(-1.5f, 0.5f, -2.0f);
 
 
@@ -204,9 +194,9 @@ void Scene::init()
   mMeshes.back()->init();
 
   mModels.push_back(
-      new Model("alienTest",
-                "../resources/models/alien-hominid/alien.obj",
-                ":/model-specular.vert", ":/model-specular.frag"));
+      new Model("alienTest", ":/models/alien-hominid/alien.obj",
+                ":/model-specular.vert", ":/model-specular.frag")
+  );
   mModels.back()->mTransform.setTranslation(3.0f, -1.0f, 10.0f);
   mModels.back()->mTransform.scale(0.15f);
   mModels.back()->setUniform("uMaterial.ambient", QVector3D(1.0f, 1.0f, 1.0f));
@@ -224,7 +214,8 @@ void Scene::init()
 
   // Test spartan Model with phong lighting, specular and normal mapping
   mMeshes.push_back(
-      new MeshRenderer("spartanTestLight", Triangle(QTK_DRAW_ELEMENTS)));
+      new MeshRenderer("spartanTestLight", Triangle(QTK_DRAW_ELEMENTS))
+  );
   mMeshes.back()->mTransform.setTranslation(1.0f, 1.5f, 10.0f);
   mMeshes.back()->mTransform.scale(0.25f);
   // This function changes values we have allocated in a buffer, so init() after
@@ -232,9 +223,9 @@ void Scene::init()
   mMeshes.back()->init();
 
   mModels.push_back(
-      new Model("spartanTest",
-                "../resources/models/spartan/spartan.obj",
-                ":/model-normals.vert", ":/model-normals.frag"));
+      new Model("spartanTest", ":/models/spartan/spartan.obj",
+                ":/model-normals.vert", ":/model-normals.frag")
+  );
   mModels.back()->mTransform.setTranslation(0.0f, -1.0f, 10.0f);
   mModels.back()->mTransform.scale(2.0f);
   mModels.back()->setUniform("uMaterial.ambient", QVector3D(1.0f, 1.0f, 1.0f));

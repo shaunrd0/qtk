@@ -20,12 +20,16 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # For CLion builds, point CMAKE_PREFIX_PATH to Qt6 install directory
-list(APPEND CMAKE_PREFIX_PATH $ENV{HOME}/Code/Clones/Qt6.2/6.2.3/gcc_64/)
-find_package(Qt6 COMPONENTS OpenGLWidgets REQUIRED)
+list(APPEND CMAKE_PREFIX_PATH $ENV{HOME}/Code/Clones/Qt/6.3.1/gcc_64/)
+find_package(Qt6 COMPONENTS OpenGLWidgets)
+if (NOT Qt6_FOUND)
+  message(SEND_ERROR "Unable to find Qt6 at CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+  message(FATAL_ERROR "Specify path to Qt6 with `cmake -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x.x/gcc_64 -S /path/to/qtk -B /path/to/qtk/build && cmake --build /path/to/qtk/build -j $(nprocs)`")
+endif()
 
 # Add our Qt resources.qrc file to our application
 set(SOURCES app/main.cpp)
-qt6_add_resources(SOURCES resources.qrc)
+qt6_add_big_resources(SOURCES resources.qrc)
 
 add_executable(
     qtk             # Executable name
@@ -59,6 +63,7 @@ add_library(main-widget SHARED
     src/transform3D.cpp src/transform3D.h
     src/model.cpp src/model.h
     src/scene.cpp src/scene.h
+    src/resourcemanager.cpp src/resourcemanager.h
 )
 
 target_include_directories(main-widget PUBLIC src/)

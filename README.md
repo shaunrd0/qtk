@@ -23,10 +23,9 @@ Be sure to take note of the Qt6 installation directory, as we will need it to co
 Once Qt6 is installed, to build and run `qtk` on Ubuntu -
 ```bash
 sudo apt update -y && sudo apt install freeglut3-dev libassimp-dev cmake build-essential git
-git clone https://gitlab.com/shaunrd0/qtk && cd qtk
-mkdir build && cd build
-cmake .. -DCMAKE_PREFIX_PATH=$HOME/Qt6/6.2.3/gcc_64 && cmake --build .
-./qtk
+git clone https://gitlab.com/shaunrd0/qtk
+cmake -DCMAKE_PREFIX_PATH=$HOME/Qt/6.3.1/gcc_64 -S qtk/ -B qtk/build/ && cmake --build qtk/build/ -j $(nprocs)
+./qtk/build/qtk
 ```
 
 You can fly around the scene if you hold the right mouse button and use WASD.

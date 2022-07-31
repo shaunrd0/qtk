@@ -37,7 +37,8 @@ public:
 
   // Shader settings
   inline void setShaderVertex(const std::string & vert) { mVertexShader = vert;}
-  inline void setShaderFragment(const std::string & frag) { mFragmentShader = frag;}
+  inline void setShaderFragment(const std::string & frag)
+  { mFragmentShader = frag;}
   void setShaders(const std::string & vert, const std::string & frag);
 
   template <typename T>
