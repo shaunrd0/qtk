@@ -7,7 +7,18 @@
 ##############################################################################*/
 
 #include "resourcemanager.h"
+#include <algorithm>
+#include <string>
+#include <QtGlobal>
+
+static std::string nixPath(std::string path)
+{
+#ifdef Q_OS_WINDOWS
+    std::replace(path.begin(), path.end(), '\\', '/');
+#endif
+    return path;
+}
 
 std::string RM::resourcesDir =
-    std::string(__FILE__).substr(0, std::string(__FILE__).find("src/"))
+    std::string(__FILE__).substr(0, nixPath(__FILE__).find("src/"))
     + "resources/";

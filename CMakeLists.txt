@@ -50,7 +50,7 @@ find_package(assimp REQUIRED)
 
 # Mainwidget
 include(GenerateExportHeader)
-add_library(main-widget SHARED
+add_library(main-widget STATIC
     src/mainwidget.cpp src/mainwidget.h
     src/mainwindow.cpp src/mainwindow.h src/mainwindow.ui
     src/input.cpp src/input.h
@@ -67,8 +67,16 @@ add_library(main-widget SHARED
 )
 
 target_include_directories(main-widget PUBLIC src/)
+#if(TARGET assimp)
 target_link_libraries(main-widget PRIVATE assimp)
-target_link_libraries(main-widget PUBLIC Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+#else()
+#    target_link_libraries(main-widget PRIVATE assimp::assimp)
+#endif()
+target_link_libraries(main-widget PUBLIC Qt6::OpenGLWidgets)
+if(WIN32)
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(main-widget PUBLIC OpenGL::GL)
+endif()
 
 ################################################################################
 # Final Application

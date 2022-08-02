@@ -69,6 +69,8 @@ void Skybox::draw()
 
 void Skybox::init()
 {
+  initializeOpenGLFunctions();
+
   // Set up shader program
   mProgram.create();
   mProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/skybox.vert");

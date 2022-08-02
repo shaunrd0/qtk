@@ -13,12 +13,13 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
+#include <QOpenGLFunctions>
 
 #include <camera3d.h>
 #include <mesh.h>
 
 
-class Skybox {
+class Skybox : protected QOpenGLFunctions {
 public:
   // Delegate this constructor to use default skybox images
   // + This allows creating a skybox with no arguments ( auto s = new Skybox; )

@@ -16,6 +16,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
+#include <QOpenGLFunctions>
 
 // Assimp
 #include <assimp/Importer.hpp>
@@ -43,7 +44,7 @@ struct ModelTexture {
 
 class Model;
 
-class ModelMesh {
+class ModelMesh : protected QOpenGLFunctions {
 public:
   friend Model;
   typedef std::vector<ModelVertex> Vertices;

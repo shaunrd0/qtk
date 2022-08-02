@@ -31,6 +31,8 @@ Model * Model::getInstance(const char * name)
 
 void ModelMesh::initMesh(const char * vert, const char * frag)
 {
+  initializeOpenGLFunctions();
+
   // Create VAO, VBO, EBO
   mVAO->create();
   mVBO->create();
