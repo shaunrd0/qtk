@@ -10,27 +10,57 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
-            CMAKE_PARAMS: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/6.3.1/gcc_64/
+            cmake: -DCMAKE_PREFIX_PATH="/home/runner/work/qtk/Qt/6.3.1/gcc_64/;../assimp"
+          - os: windows-latest
+            cmake: -DCMAKE_PREFIX_PATH="D:/a/qtk/qtk/Qt/6.3.1/mingw81_64/;../assimp" -DASSIMP_NEW_INTERFACE=on
           - os: macos-latest
-            CMAKE_PARAMS: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/6.3.1/gcc_64/ -DASSIMP_NEW_INTERFACE=on
+            cmake: -DCMAKE_PREFIX_PATH="/home/runner/work/qtk/Qt/6.3.1/gcc_64/;../assimp" -DASSIMP_NEW_INTERFACE=on
 
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
 
+      - name: Clone Assimp
+        uses: actions/checkout@v3
+        with:
+          repository: 'assimp/assimp'
+          path: 'assimp'
+
+      - name: Build Assimp
+        shell: bash
+        run: |
+          pwd
+          ls
+          cmake -S assimp/ -B assimp/build/ -DCMAKE_INSTALL_PREFIX=../assimp && cmake --build assimp/build
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
           version: '6.3.1'
 
-      - name: Install Assimp Linux
-        if: matrix.os == 'ubuntu-latest'
-        shell: bash
-        run: |
-          sudo apt install libassimp-dev -y
+      #      - name: Install Assimp Linux
+      #        if: matrix.os == 'ubuntu-latest'
+      #        shell: bash
+      #        run: |
+      #          sudo apt install libassimp-dev -y
+      #
+      #      - name: Install Assimp MacOS
+      #        if: matrix.os == 'macos-latest'
+      #        shell: bash
+      #        run: |
+      #          brew install assimp
+      #
+      #      - name: Install Assimp Windows
+      #        if: matrix.os == 'windows-latest'
+      #        shell: bash
+      #        run: |
+      #          git clone https://github.com/Microsoft/vcpkg.git
+      #          cd vcpkg
+      #          ./bootstrap-vcpkg.sh
+      #          ./vcpkg integrate install
+      #          vcpkg install assimp
 
       - name: Install Assimp MacOS
         if: matrix.os == 'macos-latest'
@@ -41,5 +71,4 @@ jobs:
       - name: Build Qtk
         shell: bash
         run: |
-          mkdir build && cd build
-          cmake .. ${{ matrix.CMAKE_PARAMS }}  && cmake --build .
+          cmake -S . -B build/ ${{ matrix.cmake }} && cmake --build build/
