@@ -27,30 +27,25 @@ if (NOT Qt6_FOUND)
   message(FATAL_ERROR "Specify path to Qt6 with `cmake -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x.x/gcc_64 -S /path/to/qtk -B /path/to/qtk/build && cmake --build /path/to/qtk/build -j $(nprocs)`")
 endif()
 
-# Add our Qt resources.qrc file to our application
-set(SOURCES app/main.cpp)
-qt6_add_big_resources(SOURCES resources.qrc)
-
-add_executable(
-    qtk             # Executable name
-    ${SOURCES}      # Executable source code
-)
-
 ################################################################################
 # External Libraries
 ################################################################################
 
 # https://github.com/assimp/assimp/commit/6ac8279977c3a54118551e549d77329497116f66
 find_package(assimp REQUIRED)
-
-
-################################################################################
-# Custom Libraries
-################################################################################
-
-# Mainwidget
+option(ASSIMP_NEW_INTERFACE "Use assimp::assimp as target instead of assimp" OFF)
 include(GenerateExportHeader)
-add_library(main-widget STATIC
+
+################################################################################
+# Final Application
+################################################################################
+
+# Add our Qt resources.qrc file to our application
+set(SOURCES app/main.cpp)
+qt6_add_big_resources(SOURCES resources.qrc)
+qt_add_executable(qtk ${SOURCES})
+
+set(SOURCES
     src/mainwidget.cpp src/mainwidget.h
     src/mainwindow.cpp src/mainwindow.h src/mainwindow.ui
     src/input.cpp src/input.h
@@ -65,29 +60,28 @@ add_library(main-widget STATIC
     src/scene.cpp src/scene.h
     src/resourcemanager.cpp src/resourcemanager.h
 )
+qt_add_library(main-widget STATIC ${SOURCES})
 
 target_include_directories(main-widget PUBLIC src/)
-#if(TARGET assimp)
-target_link_libraries(main-widget PRIVATE assimp)
-#else()
-#    target_link_libraries(main-widget PRIVATE assimp::assimp)
-#endif()
+if(ASSIMP_NEW_INTERFACE)
+    target_link_libraries(main-widget PRIVATE assimp::assimp)
+else()
+    target_link_libraries(main-widget PRIVATE assimp)
+endif()
 target_link_libraries(main-widget PUBLIC Qt6::OpenGLWidgets)
 if(WIN32)
     find_package(OpenGL REQUIRED)
     target_link_libraries(main-widget PUBLIC OpenGL::GL)
 endif()
 
-################################################################################
-# Final Application
-################################################################################
-
-# Link qtk executable to main main-widget library
 target_link_libraries(qtk PUBLIC main-widget)
 
+# Link qtk executable to main main-widget library
 set_target_properties(qtk PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
 generate_export_header(main-widget)
