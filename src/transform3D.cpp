@@ -9,6 +9,7 @@
 
 #include <transform3D.h>
 
+using namespace Qtk;
 
 const QVector3D Transform3D::LocalForward(0.0f, 0.0f, 1.0f);
 const QVector3D Transform3D::LocalUp(0.0f, 1.0f, 0.0f);
@@ -110,35 +111,41 @@ QVector3D Transform3D::right() const
  * QT Streams
  ******************************************************************************/
 
-QDebug operator<<(QDebug dbg, const Transform3D & transform)
-{
-  dbg << "Transform3D\n{\n";
-  dbg << "Position: <" << transform.translation().x() << ", "
-      << transform.translation().y() << ", "
-      << transform.translation().z() << ">\n";
-  dbg << "Scale: <" << transform.scale().x() << ", "
-      << transform.scale().y() << ", "
-      << transform.scale().z() << ">\n";
-  dbg << "Rotation: <" << transform.rotation().x() << ", "
-      << transform.rotation().y() << ", "
-      << transform.rotation().z() << " | " <<
-      transform.rotation().scalar() << ">\n}";
-  return dbg;
+namespace Qtk {
+#ifndef QT_NO_DEBUG_STREAM
+  QDebug operator<<(QDebug dbg, const Transform3D & transform)
+  {
+    dbg << "Transform3D\n{\n";
+    dbg << "Position: <" << transform.translation().x() << ", "
+        << transform.translation().y() << ", "
+        << transform.translation().z() << ">\n";
+    dbg << "Scale: <" << transform.scale().x() << ", "
+        << transform.scale().y() << ", "
+        << transform.scale().z() << ">\n";
+    dbg << "Rotation: <" << transform.rotation().x() << ", "
+        << transform.rotation().y() << ", "
+        << transform.rotation().z() << " | " <<
+        transform.rotation().scalar() << ">\n}";
+    return dbg;
 }
+#endif
 
-QDataStream & operator<<(QDataStream & out, const Transform3D & transform)
-{
-  out << transform.mTranslation;
-  out << transform.mScale;
-  out << transform.mRotation;
-  return out;
-}
+#ifndef QT_NO_DATASTREAM
+  QDataStream & operator<<(QDataStream & out, const Transform3D & transform)
+  {
+    out << transform.mTranslation;
+    out << transform.mScale;
+    out << transform.mRotation;
+    return out;
+  }
 
-QDataStream & operator>>(QDataStream & in, Transform3D & transform)
-{
-  in >> transform.mTranslation;
-  in >> transform.mScale;
-  in >> transform.mRotation;
-  transform.m_dirty = true;
-  return in;
+  QDataStream & operator>>(QDataStream & in, Transform3D & transform)
+  {
+    in >> transform.mTranslation;
+    in >> transform.mScale;
+    in >> transform.mRotation;
+    transform.m_dirty = true;
+    return in;
+  }
+#endif
 }

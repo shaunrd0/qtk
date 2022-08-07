@@ -9,12 +9,12 @@
 
 #include <QFileInfo>
 
-#include <scene.h>
-#include <texture.h>
-#include <resourcemanager.h>
-
+#include <abstractscene.h>
 #include <model.h>
+#include <resourcemanager.h>
+#include <texture.h>
 
+using namespace Qtk;
 
 Model::ModelManager Model::mManager;
 

@@ -14,7 +14,7 @@
    <string>Qtk - MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="MainWidget" name="openGLWidget">
+   <widget class="Qtk::MainWidget" name="openGLWidget">
     <property name="geometry">
      <rect>
       <x>10</x>

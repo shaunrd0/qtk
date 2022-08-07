@@ -16,7 +16,6 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
-#include <QOpenGLFunctions>
 
 // Assimp
 #include <assimp/Importer.hpp>
@@ -24,117 +23,119 @@
 #include <assimp/scene.h>
 
 // QTK
+#include <qtkapi.h>
 #include <transform3D.h>
 
+namespace Qtk {
+  struct QTKAPI ModelVertex {
+    QVector3D mPosition;
+    QVector3D mNormal;
+    QVector3D mTangent;
+    QVector3D mBitangent;
+    QVector2D mTextureCoord;
+  };
 
-struct ModelVertex {
-  QVector3D mPosition;
-  QVector3D mNormal;
-  QVector3D mTangent;
-  QVector3D mBitangent;
-  QVector2D mTextureCoord;
-};
+  struct QTKAPI ModelTexture {
+    GLuint mID;
+    QOpenGLTexture * mTexture;
+    std::string mType;
+    std::string mPath;
+  };
 
-struct ModelTexture {
-  GLuint mID;
-  QOpenGLTexture * mTexture;
-  std::string mType;
-  std::string mPath;
-};
+  class Model;
 
-class Model;
+  class QTKAPI ModelMesh : protected QOpenGLFunctions {
+  public:
+    friend Model;
+    typedef std::vector<ModelVertex> Vertices;
+    typedef std::vector<GLuint> Indices;
+    typedef std::vector<ModelTexture> Textures;
 
-class ModelMesh : protected QOpenGLFunctions {
-public:
-  friend Model;
-  typedef std::vector<ModelVertex> Vertices;
-  typedef std::vector<GLuint> Indices;
-  typedef std::vector<ModelTexture> Textures;
-
-  // Constructors, Destructors
-  ModelMesh(Vertices vertices, Indices indices, Textures textures,
-            const char * vertexShader=":/model-basic.vert",
-            const char * fragmentShader=":/model-basic.frag")
-      : mProgram(new QOpenGLShaderProgram),
+    // Constructors, Destructors
+    ModelMesh(Vertices vertices, Indices indices, Textures textures,
+              const char * vertexShader=":/model-basic.vert",
+              const char * fragmentShader=":/model-basic.frag")
+        : mProgram(new QOpenGLShaderProgram),
         mVAO(new QOpenGLVertexArrayObject),
         mVBO(new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer)),
         mEBO(new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer)),
         mVertices(std::move(vertices)),
         mIndices(std::move(indices)),
         mTextures(std::move(textures))
-  { initMesh(vertexShader, fragmentShader);}
-  ~ModelMesh() {}
+    { initMesh(vertexShader, fragmentShader);}
+    ~ModelMesh() {}
 
-private:
-  void initMesh(const char * vert, const char * frag);
+  private:
+    void initMesh(const char * vert, const char * frag);
 
-  // ModelMesh Private Members
-  QOpenGLBuffer * mVBO, * mEBO;
-  QOpenGLVertexArrayObject * mVAO;
-  QOpenGLShaderProgram * mProgram;
+    // ModelMesh Private Members
+    QOpenGLBuffer * mVBO, * mEBO;
+    QOpenGLVertexArrayObject * mVAO;
+    QOpenGLShaderProgram * mProgram;
 
-public:
-  inline void draw() { draw(*mProgram);}
-  void draw(QOpenGLShaderProgram & shader);
+  public:
+    inline void draw() { draw(*mProgram);}
+    void draw(QOpenGLShaderProgram & shader);
 
-  // ModelMesh Public Members
-  Vertices mVertices;
-  Indices mIndices;
-  Textures mTextures;
-  Transform3D mTransform;
-};
+    // ModelMesh Public Members
+    Vertices mVertices;
+    Indices mIndices;
+    Textures mTextures;
+    Transform3D mTransform;
+  };
 
 
-class Model : public QObject {
-Q_OBJECT
+  class QTKAPI Model : public QObject {
+  Q_OBJECT
 
-public:
-  inline Model(const char * name, const char * path,
-               const char * vertexShader=":/model-basic.vert",
-               const char * fragmentShader=":/model-basic.frag")
-      : mName(name), mVertexShader(vertexShader),
+  public:
+    inline Model(const char * name, const char * path,
+                 const char * vertexShader=":/model-basic.vert",
+                 const char * fragmentShader=":/model-basic.frag")
+        : mName(name), mVertexShader(vertexShader),
         mFragmentShader(fragmentShader)
-  { loadModel(path);}
-  inline ~Model() { mManager.remove(mName);}
+    { loadModel(path);}
+    inline ~Model() { mManager.remove(mName);}
 
-  void draw();
-  void draw(QOpenGLShaderProgram & shader);
+    void draw();
+    void draw(QOpenGLShaderProgram & shader);
 
-  void flipTexture(const std::string & fileName,
-                   bool flipX=false, bool flipY=true);
+    void flipTexture(const std::string & fileName,
+                     bool flipX=false, bool flipY=true);
 
-  template <typename T>
-  void setUniform(const char * location, T value)
-  {
-    for (auto & mesh : mMeshes) {
-      mesh.mProgram->bind();
+    template <typename T>
+    void setUniform(const char * location, T value)
+    {
+      for (auto & mesh : mMeshes) {
+        mesh.mProgram->bind();
 
-      mesh.mProgram->setUniformValue(location, value);
+        mesh.mProgram->setUniformValue(location, value);
 
-      mesh.mProgram->release();
+        mesh.mProgram->release();
+      }
     }
-  }
 
-  Transform3D mTransform;
+    Transform3D mTransform;
 
-  static Model * getInstance(const char * name);
+    static Model * getInstance(const char * name);
 
-  typedef QHash<QString, Model *> ModelManager;
-private:
-  static ModelManager mManager;
-  void loadModel(const std::string & path);
-  void processNode(aiNode * node, const aiScene * scene);
-  ModelMesh processMesh(aiMesh * mesh, const aiScene * scene);
-  ModelMesh::Textures loadMaterialTextures(aiMaterial * mat, aiTextureType type,
-                                           const std::string & typeName);
-  void sortModels();
+    typedef QHash<QString, Model *> ModelManager;
+  private:
+    static ModelManager mManager;
+    void loadModel(const std::string & path);
+    void processNode(aiNode * node, const aiScene * scene);
+    ModelMesh processMesh(aiMesh * mesh, const aiScene * scene);
+    ModelMesh::Textures loadMaterialTextures(aiMaterial * mat, aiTextureType type,
+                                             const std::string & typeName);
+    void sortModels();
 
-  // Model Private Members
+    // Model Private Members
 
-  ModelMesh::Textures mTexturesLoaded;
-  std::vector<ModelMesh> mMeshes;
-  std::string mDirectory;
-  const char * mVertexShader, * mFragmentShader, * mName;
-};
+    ModelMesh::Textures mTexturesLoaded;
+    std::vector<ModelMesh> mMeshes;
+    std::string mDirectory;
+    const char * mVertexShader, * mFragmentShader, * mName;
+  };
+}
 
 #endif // QTK_MODEL_H

@@ -10,39 +10,42 @@
 
 #include <QImage>
 #include <QOpenGLBuffer>
+#include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
-#include <QOpenGLFunctions>
 
 #include <camera3d.h>
 #include <mesh.h>
+#include <qtkapi.h>
 
 
-class Skybox : protected QOpenGLFunctions {
-public:
-  // Delegate this constructor to use default skybox images
-  // + This allows creating a skybox with no arguments ( auto s = new Skybox; )
-  explicit Skybox(std::string name="Skybox");
-  explicit Skybox(QOpenGLTexture * cubeMap, const std::string & name="Skybox");
-  // Constructor, Destructor
-  Skybox(std::string right, std::string top, std::string front,
-         std::string left, std::string bottom, std::string back,
-         const std::string & name="Skybox");
-  ~Skybox() {}
+namespace Qtk {
+  class QTKAPI Skybox : protected QOpenGLFunctions {
+  public:
+    // Delegate this constructor to use default skybox images
+    // + This allows creating a skybox with no arguments ( auto s = new Skybox; )
+    explicit Skybox(std::string name="Skybox");
+    explicit Skybox(QOpenGLTexture * cubeMap, const std::string & name="Skybox");
+    // Constructor, Destructor
+    Skybox(std::string right, std::string top, std::string front,
+           std::string left, std::string bottom, std::string back,
+           const std::string & name="Skybox");
+    ~Skybox() {}
 
-  void draw();
+    void draw();
 
-private:
-  void init();
+  private:
+    void init();
 
-  Vertices mVertices;
-  Indices mIndices;
+    Vertices mVertices;
+    Indices mIndices;
 
-  QOpenGLShaderProgram mProgram;
-  QOpenGLVertexArrayObject mVAO;
-  QOpenGLBuffer mVBO;
-  QOpenGLTexture * mCubeMap;
-};
+    QOpenGLShaderProgram mProgram;
+    QOpenGLVertexArrayObject mVAO;
+    QOpenGLBuffer mVBO;
+    QOpenGLTexture * mCubeMap;
+  };
+}
 
 #endif // QTK_SKYBOX_H

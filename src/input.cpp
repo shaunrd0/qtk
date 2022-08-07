@@ -13,6 +13,7 @@
 
 #include <input.h>
 
+using namespace Qtk;
 
 /*******************************************************************************
  * Static Helper Structs

@@ -15,57 +15,61 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
 
-#define QTK_DEBUG
+#include <qtkapi.h>
+#include <abstractscene.h>
 
-class MeshRenderer;
-class Model;
-class Object;
-class Scene;
-class Skybox;
-class Texture;
 
-class MainWidget : public QOpenGLWidget,
-                   protected QOpenGLFunctions {
-Q_OBJECT;
+namespace Qtk {
+  class QTKAPI MainWidget : public QOpenGLWidget,
+                     protected QOpenGLFunctions {
+  Q_OBJECT;
 
-public:
-  // Constructors
-  MainWidget();
-  explicit MainWidget(QWidget *parent);
-  explicit MainWidget(const QSurfaceFormat &format);
-  ~MainWidget() override;
+  public:
+    // Constructors
+    MainWidget();
+    explicit MainWidget(QWidget *parent);
+    explicit MainWidget(const QSurfaceFormat &format);
+    ~MainWidget() override;
 
-private:
-  void teardownGL();
-  void initObjects();
+  private:
+    void teardownGL();
 
-public:
-  // Inherited virtual Members
-  void paintGL() override;
-  void initializeGL() override;
-  void resizeGL(int width, int height) override;
+  public:
+    // Inherited virtual Members
+    void paintGL() override;
+    void initializeGL() override;
+    void resizeGL(int width, int height) override;
 
-protected slots:
-  void update();
-  void messageLogged(const QOpenGLDebugMessage &msg);
+    inline Scene * getScene() {return mScene;}
+    inline void setScene(Scene * scene) {
+      if (mScene != Q_NULLPTR) delete mScene;
+      mScene = scene;
+    }
 
-  // Protected Helpers
-protected:
-  void keyPressEvent(QKeyEvent *event);
-  void keyReleaseEvent(QKeyEvent *event);
-  void mousePressEvent(QMouseEvent *event);
-  void mouseReleaseEvent(QMouseEvent *event);
+  protected slots:
+    void update();
+#ifdef QTK_DEBUG
+    void messageLogged(const QOpenGLDebugMessage &msg);
+#endif
 
-private:
-  // Private helpers
-  void initializeWidget();
-  void printContextInformation();
-  void updateCameraInput();
+    // Protected Helpers
+  protected:
+    void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
 
-  Scene * mScene;
-  Object * mObject;
+  private:
+    // Private helpers
+    void initializeWidget();
+    void updateCameraInput();
 
-  QOpenGLDebugLogger * mDebugLogger;
-};
+    Scene * mScene;
+#ifdef QTK_DEBUG
+    void printContextInformation();
+    QOpenGLDebugLogger * mDebugLogger;
+#endif
+  };
+}
 
 #endif // QTK_MAINWIDGET_H

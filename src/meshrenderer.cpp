@@ -8,14 +8,14 @@
 
 #include <QImageReader>
 
-#include <scene.h>
+#include <abstractscene.h>
+#include <meshrenderer.h>
 #include <texture.h>
 
-#include <meshrenderer.h>
-
+using namespace Qtk;
 
 // Static QHash that holds all MeshRenderer instances using their mName as keys
-MeshRenderer::MeshManager MeshRenderer::sInstances;
+Qtk::MeshRenderer::MeshManager Qtk::MeshRenderer::sInstances;
 
 MeshRenderer::MeshRenderer(const char * name, const ShapeBase & shape)
     : Object(name, shape), mVertexShader(":/multi-color.vert"),

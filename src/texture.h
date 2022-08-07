@@ -11,32 +11,35 @@
 
 #include <QOpenGLTexture>
 
+#include <qtkapi.h>
 
-class Texture {
-public:
-  ~Texture() {}
+namespace Qtk {
+  class QTKAPI Texture {
+  public:
+    ~Texture() {}
 
-  // QImage
-  static QImage * initImage(const char * image,
-                            bool flipX=false, bool flipY=false);
+    // QImage
+    static QImage * initImage(const char * image,
+                              bool flipX=false, bool flipY=false);
 
-  // 2D Texture
-  static QOpenGLTexture * initTexture2D(const char * texture,
-                                        bool flipX=false, bool flipY=false);
+    // 2D Texture
+    static QOpenGLTexture * initTexture2D(const char * texture,
+                                          bool flipX=false, bool flipY=false);
 
-  // Cube maps
-  static QOpenGLTexture * initCubeMap(QImage right, QImage top,
-                                      QImage front, QImage left,
-                                      QImage bottom, QImage back);
-  // Overloads for cube map initialization
-  static QOpenGLTexture * initCubeMap(const char * tile);
-  static QOpenGLTexture * initCubeMap(const char * right, const char * top,
-                                      const char * front, const char * left,
-                                      const char * bottom, const char * back);
+    // Cube maps
+    static QOpenGLTexture * initCubeMap(QImage right, QImage top,
+                                        QImage front, QImage left,
+                                        QImage bottom, QImage back);
+    // Overloads for cube map initialization
+    static QOpenGLTexture * initCubeMap(const char * tile);
+    static QOpenGLTexture * initCubeMap(const char * right, const char * top,
+                                        const char * front, const char * left,
+                                        const char * bottom, const char * back);
 
-private:
-  // Private ctor to prevent creating instances of this class
-  Texture() {}
-};
+  private:
+    // Private ctor to prevent creating instances of this class
+    Texture() {}
+  };
+}
 
 #endif // QTOPENGL_TEXTURE_H

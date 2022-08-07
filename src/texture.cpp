@@ -11,6 +11,7 @@
 
 #include <texture.h>
 
+using namespace Qtk;
 
 QImage * Texture::initImage(const char * image, bool flipX, bool flipY)
 {

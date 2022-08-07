@@ -9,30 +9,30 @@
 #include <QKeyEvent>
 
 #include <input.h>
-#include <mesh.h>
-#include <object.h>
-#include <scene.h>
-
 #include <mainwidget.h>
+#include <mesh.h>
+#include <abstractscene.h>
 
+using namespace Qtk;
 
 /*******************************************************************************
  * Constructors, Destructors
  ******************************************************************************/
 
-MainWidget::MainWidget() : mDebugLogger(Q_NULLPTR)
+MainWidget::MainWidget() : mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR)
 {
   initializeWidget();
 }
 
 // Constructor for using this widget in QtDesigner
-MainWidget::MainWidget(QWidget *parent) : QOpenGLWidget(parent), mDebugLogger(Q_NULLPTR)
+MainWidget::MainWidget(QWidget *parent) : QOpenGLWidget(parent),
+    mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR)
 {
   initializeWidget();
 }
 
 MainWidget::MainWidget(const QSurfaceFormat &format)
-    : mDebugLogger(Q_NULLPTR)
+    : mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR)
 {
   setFormat(format);
   setFocusPolicy(Qt::ClickFocus);
@@ -54,49 +54,6 @@ void MainWidget::teardownGL()
   // Nothing to teardown yet...
 }
 
-void MainWidget::initObjects()
-{
-  mScene = new Scene;
-
-  // Drawing a primitive object using Qt and OpenGL
-  // The Object class only stores basic QOpenGL* members and shape data
-  // + Within mainwidget, mObject serves as a basic QOpenGL example
-  mObject = new Object("testObject");
-  mObject->setVertices(Cube(QTK_DRAW_ELEMENTS).vertices());
-  mObject->setIndices(Cube(QTK_DRAW_ELEMENTS).indices());
-  mObject->mProgram.create();
-  mObject->mProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,
-                                            ":/solid-ambient.vert");
-  mObject->mProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,
-                                            ":/solid-ambient.frag");
-  mObject->mProgram.link();
-  mObject->mProgram.bind();
-
-  mObject->mVAO.create();
-  mObject->mVAO.bind();
-
-  mObject->mVBO.create();
-  mObject->mVBO.setUsagePattern(QOpenGLBuffer::StaticDraw);
-  mObject->mVBO.bind();
-
-  mObject->mVBO.allocate(mObject->vertices().data(),
-                         mObject->vertices().size()
-                         * sizeof(mObject->vertices()[0]));
-
-  mObject->mProgram.enableAttributeArray(0);
-  mObject->mProgram.setAttributeBuffer(0, GL_FLOAT, 0,
-                                       3, sizeof(mObject->vertices()[0]));
-  mObject->mProgram.setUniformValue("uColor", QVector3D(1.0f, 0.0f, 0.0f));
-  mObject->mProgram.setUniformValue("uLightColor", WHITE);
-  mObject->mProgram.setUniformValue("uAmbientStrength", 0.75f);
-
-  mObject->mVBO.release();
-  mObject->mVAO.release();
-  mObject->mProgram.release();
-
-  mObject->mTransform.setTranslation(13.0f, 0.0f, -2.0f);
-}
-
 
 /*******************************************************************************
  * Inherited Virtual Member Functions
@@ -108,18 +65,7 @@ void MainWidget::paintGL()
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
   // Draw the scene first, since it handles drawing our skybox
-  mScene->draw();
-
-  // Draw any additional objects within mainwidget manually
-  mObject->mProgram.bind();
-  mObject->mVAO.bind();
-  mObject->mProgram.setUniformValue("uModel", mObject->mTransform.toMatrix());
-  mObject->mProgram.setUniformValue("uView", Scene::Camera().toMatrix());
-  mObject->mProgram.setUniformValue("uProjection", Scene::Projection());
-  glDrawElements(GL_TRIANGLES, mObject->indices().size(),
-                 GL_UNSIGNED_INT, mObject->indices().data());
-  mObject->mVAO.release();
-  mObject->mProgram.release();
+  if (mScene != Q_NULLPTR) mScene->privDraw();
 }
 
 void MainWidget::initializeGL()
@@ -150,9 +96,6 @@ void MainWidget::initializeGL()
   glClearDepth(1.0f);
   glClearColor(0.0f, 0.25f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-// Initialize default objects within the scene
-  initObjects();
 }
 
 void MainWidget::resizeGL(int width, int height)
@@ -172,7 +115,7 @@ void MainWidget::update()
 {
   updateCameraInput();
 
-  mScene->update();
+  if (mScene != Q_NULLPTR) mScene->update();
 
   QWidget::update();
 }

@@ -8,6 +8,7 @@
 
 #include <mesh.h>
 
+using namespace Qtk;
 
 Cube::Cube(DrawMode mode)
 {

@@ -6,11 +6,11 @@
 ## Contact: shaunrd0@gmail.com  | URL: www.shaunreed.com | GitHub: shaunrd0   ##
 ##############################################################################*/
 
-#include <scene.h>
+#include <abstractscene.h>
+#include <skybox.h>
 #include <texture.h>
 
-#include <skybox.h>
-
+using namespace Qtk;
 
 Skybox::Skybox(std::string right, std::string top, std::string front,
                std::string left, std::string bottom, std::string back,

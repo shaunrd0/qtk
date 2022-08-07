@@ -6,32 +6,27 @@
 ## Contact: shaunrd0@gmail.com  | URL: www.shaunreed.com | GitHub: shaunrd0   ##
 ##############################################################################*/
 
+#include <abstractscene.h>
 #include <camera3d.h>
-#include <texture.h>
 #include <meshrenderer.h>
 #include <model.h>
 #include <resourcemanager.h>
-
 #include <scene.h>
+#include <texture.h>
 
-
-Camera3D Scene::mCamera;
-QMatrix4x4 Scene::mProjection;
-
+using namespace Qtk;
 
 /*******************************************************************************
  * Constructors, Destructors
  ******************************************************************************/
 
-Scene::Scene()
+ExampleScene::ExampleScene()
 {
-  mCamera.transform().setTranslation(0.0f, 0.0f, 20.0f);
-  mCamera.transform().setRotation(-5.0f, 0.0f, 1.0f, 0.0f);
-
-  init();
+  Camera().transform().setTranslation(0.0f, 0.0f, 20.0f);
+  Camera().transform().setRotation(-5.0f, 0.0f, 1.0f, 0.0f);
 }
 
-Scene::~Scene()
+ExampleScene::~ExampleScene()
 {
   delete mTestPhong;
   delete mTestSpecular;
@@ -39,6 +34,7 @@ Scene::~Scene()
   delete mTestAmbient;
   for (auto & mesh : mMeshes) delete mesh;
   for (auto & model : mModels) delete model;
+  delete mSkybox;
 }
 
 
@@ -46,10 +42,13 @@ Scene::~Scene()
  * Public Member Functions
  ******************************************************************************/
 
-void Scene::init()
+void ExampleScene::init()
 {
+  Qtk::Skybox * sb = new Qtk::Skybox("Skybox");
+  setSkybox(sb);
+
   // Initialize Phong example cube
-  mTestPhong = new MeshRenderer("phong", Cube());
+  mTestPhong = new Qtk::MeshRenderer("phong", Qtk::Cube());
   mTestPhong->mTransform.setTranslation(3.0f, 0.0f, -2.0f);
   mTestPhong->setShaders(":/solid-phong.vert", ":/solid-phong.frag");
   mTestPhong->init();
@@ -76,7 +75,7 @@ void Scene::init()
 
 
   // Initialize Ambient example cube
-  mTestAmbient = new MeshRenderer("ambient", Cube());
+  mTestAmbient = new Qtk::MeshRenderer("ambient", Cube());
   mTestAmbient->mTransform.setTranslation(7.0f, 0.0f, -2.0f);
   mTestAmbient->setShaders(":/solid-ambient.vert", ":/solid-ambient.frag");
   mTestAmbient->init();
@@ -100,7 +99,7 @@ void Scene::init()
   mTestAmbient->mProgram.release();
 
   // Initialize Diffuse example cube
-  mTestDiffuse = new MeshRenderer("diffuse", Cube());
+  mTestDiffuse = new Qtk::MeshRenderer("diffuse", Cube());
   mTestDiffuse->mTransform.setTranslation(9.0f, 0.0f, -2.0f);
   mTestDiffuse->setShaders(":/solid-diffuse.vert", ":/solid-diffuse.frag");
   mTestDiffuse->init();
@@ -124,7 +123,7 @@ void Scene::init()
   mTestDiffuse->mProgram.release();
 
   // Initialize Specular example cube
-  mTestSpecular = new MeshRenderer("specular", Cube());
+  mTestSpecular = new Qtk::MeshRenderer("specular", Cube());
   mTestSpecular->mTransform.setTranslation(11.0f, 0.0f, -2.0f);
   mTestSpecular->setShaders(":/solid-specular.vert", ":/solid-specular.frag");
   mTestSpecular->init();
@@ -152,31 +151,31 @@ void Scene::init()
   //
   // Model loading
 
-  mModels.push_back(new Model("backpack", ":/models/backpack/backpack.obj"));
+  mModels.push_back(new Qtk::Model("backpack", ":/models/backpack/backpack.obj"));
   // Sometimes model textures need flipped in certain directions
   mModels.back()->flipTexture("diffuse.jpg", false, true);
   mModels.back()->mTransform.setTranslation(0.0f, 0.0f, -10.0f);
 
-  mModels.push_back(new Model("bird", ":/models/bird/bird.obj"));
+  mModels.push_back(new Qtk::Model("bird", ":/models/bird/bird.obj"));
   mModels.back()->mTransform.setTranslation(2.0f, 2.0f, -10.0f);
   // Sometimes the models are very large
   mModels.back()->mTransform.scale(0.0025f);
   mModels.back()->mTransform.rotate(-110.0f, 0.0f, 1.0f, 0.0f);
 
-  mModels.push_back(new Model("lion", ":/models/lion/lion.obj"));
+  mModels.push_back(new Qtk::Model("lion", ":/models/lion/lion.obj"));
   mModels.back()->mTransform.setTranslation(-3.0f, -1.0f, -10.0f);
   mModels.back()->mTransform.scale(0.15f);
 
-  mModels.push_back(new Model("alien", ":/models/alien-hominid/alien.obj"));
+  mModels.push_back(new Qtk::Model("alien", ":/models/alien-hominid/alien.obj"));
   mModels.back()->mTransform.setTranslation(2.0f, -1.0f, -5.0f);
   mModels.back()->mTransform.scale(0.15f);
 
-  mModels.push_back(new Model("scythe", ":/models/scythe/scythe.obj"));
+  mModels.push_back(new Qtk::Model("scythe", ":/models/scythe/scythe.obj"));
   mModels.back()->mTransform.setTranslation(-6.0f, 0.0f, -10.0f);
   mModels.back()->mTransform.rotate(-90.0f, 1.0f, 0.0f, 0.0f);
   mModels.back()->mTransform.rotate(90.0f, 0.0f, 1.0f, 0.0f);
 
-  mModels.push_back(new Model("masterChief", ":/models/spartan/spartan.obj"));
+  mModels.push_back(new Qtk::Model("masterChief", ":/models/spartan/spartan.obj"));
   mModels.back()->mTransform.setTranslation(-1.5f, 0.5f, -2.0f);
 
 
@@ -186,7 +185,7 @@ void Scene::init()
   // Render an alien with specular
   // Test alien Model with phong lighting and specular mapping
   mMeshes.push_back(
-      new MeshRenderer("alienTestLight", Triangle(QTK_DRAW_ELEMENTS)));
+      new Qtk::MeshRenderer("alienTestLight", Triangle(Qtk::QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(4.0f, 1.5f, 10.0f);
   mMeshes.back()->mTransform.scale(0.25f);
   // This function changes values we have allocated in a buffer, so init() after
@@ -194,7 +193,7 @@ void Scene::init()
   mMeshes.back()->init();
 
   mModels.push_back(
-      new Model("alienTest", ":/models/alien-hominid/alien.obj",
+      new Qtk::Model("alienTest", ":/models/alien-hominid/alien.obj",
                 ":/model-specular.vert", ":/model-specular.frag")
   );
   mModels.back()->mTransform.setTranslation(3.0f, -1.0f, 10.0f);
@@ -214,7 +213,7 @@ void Scene::init()
 
   // Test spartan Model with phong lighting, specular and normal mapping
   mMeshes.push_back(
-      new MeshRenderer("spartanTestLight", Triangle(QTK_DRAW_ELEMENTS))
+      new Qtk::MeshRenderer("spartanTestLight", Triangle(QTK_DRAW_ELEMENTS))
   );
   mMeshes.back()->mTransform.setTranslation(1.0f, 1.5f, 10.0f);
   mMeshes.back()->mTransform.scale(0.25f);
@@ -223,7 +222,7 @@ void Scene::init()
   mMeshes.back()->init();
 
   mModels.push_back(
-      new Model("spartanTest", ":/models/spartan/spartan.obj",
+      new Qtk::Model("spartanTest", ":/models/spartan/spartan.obj",
                 ":/model-normals.vert", ":/model-normals.frag")
   );
   mModels.back()->mTransform.setTranslation(0.0f, -1.0f, 10.0f);
@@ -242,7 +241,7 @@ void Scene::init()
 
   // Test basic cube with phong.vert and phong.frag shaders
   mMeshes.push_back(
-      new MeshRenderer("testLight", Triangle(QTK_DRAW_ELEMENTS)));
+      new Qtk::MeshRenderer("testLight", Triangle(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(5.0f, 1.25f, 10.0f);
   mMeshes.back()->mTransform.scale(0.25f);
   mMeshes.back()->setDrawType(GL_LINE_LOOP);
@@ -251,7 +250,7 @@ void Scene::init()
   mMeshes.back()->init();
 
   mMeshes.push_back(
-      new MeshRenderer("testPhong", Cube(QTK_DRAW_ARRAYS)));
+      new Qtk::MeshRenderer("testPhong", Cube(QTK_DRAW_ARRAYS)));
   mMeshes.back()->mTransform.setTranslation(5.0f, 0.0f, 10.0f);
   mMeshes.back()->setShaders(":/phong.vert", ":/phong.frag");
   mMeshes.back()->setColor(QVector3D(0.0f, 0.25f, 0.0f));
@@ -291,25 +290,25 @@ void Scene::init()
   // Create simple shapes using MeshRenderer class and data in mesh.h
 
   mMeshes.push_back(
-      new MeshRenderer("rightTriangle", Triangle(QTK_DRAW_ELEMENTS)));
+      new Qtk::MeshRenderer("rightTriangle", Triangle(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(-5.0f, 0.0f, -2.0f);
 
   mMeshes.push_back(
-      new MeshRenderer("centerCube", Cube(QTK_DRAW_ELEMENTS)));
+      new Qtk::MeshRenderer("centerCube", Cube(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(-7.0f, 0.0f, -2.0f);
 
   mMeshes.push_back(
-      new MeshRenderer("leftTriangle", Triangle(QTK_DRAW_ELEMENTS)));
+      new Qtk::MeshRenderer("leftTriangle", Triangle(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(-9.0f, 0.0f, -2.0f);
   mMeshes.back()->setDrawType(GL_LINE_LOOP);
 
   mMeshes.push_back(
-      new MeshRenderer("topTriangle", Triangle(QTK_DRAW_ELEMENTS)));
+      new Qtk::MeshRenderer("topTriangle", Triangle(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(-7.0f, 2.0f, -2.0f);
   mMeshes.back()->mTransform.scale(0.25f);
 
   mMeshes.push_back(
-      new MeshRenderer("bottomTriangle", Triangle(QTK_DRAW_ELEMENTS)));
+      new Qtk::MeshRenderer("bottomTriangle", Triangle(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(-7.0f, -2.0f, -2.0f);
   mMeshes.back()->mTransform.scale(0.25f);
   mMeshes.back()->setDrawType(GL_LINE_LOOP);
@@ -322,7 +321,7 @@ void Scene::init()
 
   // RGB Normals cube to show normals are correct with QTK_DRAW_ARRAYS
   mMeshes.push_back(
-      new MeshRenderer("rgbNormalsCubeArraysTest", Cube(QTK_DRAW_ARRAYS)));
+      new Qtk::MeshRenderer("rgbNormalsCubeArraysTest", Cube(QTK_DRAW_ARRAYS)));
   mMeshes.back()->mTransform.setTranslation(5.0f, 0.0f, 4.0f);
   mMeshes.back()->setShaders(":/rgb-normals.vert", ":/rgb-normals.frag");
   mMeshes.back()->init();
@@ -344,7 +343,7 @@ void Scene::init()
 
   // RGB Normals cube to show normals are correct with QTK_DRAW_ELEMENTS_NORMALS
   mMeshes.push_back(
-      new MeshRenderer("rgbNormalsCubeElementsTest", Cube(QTK_DRAW_ELEMENTS_NORMALS)));
+      new Qtk::MeshRenderer("rgbNormalsCubeElementsTest", Cube(QTK_DRAW_ELEMENTS_NORMALS)));
   mMeshes.back()->mTransform.setTranslation(5.0f, 0.0f, 2.0f);
   mMeshes.back()->setShaders(":/rgb-normals.vert", ":/rgb-normals.frag");
   mMeshes.back()->init();
@@ -369,7 +368,7 @@ void Scene::init()
   // + UVs required duplicating element position data from QTK_DRAW_ELEMENTS
   // + This is because the same position must use different UV coordinates
   mMeshes.push_back(
-      new MeshRenderer("uvCubeArraysTest", Cube(QTK_DRAW_ARRAYS)));
+      new Qtk::MeshRenderer("uvCubeArraysTest", Cube(QTK_DRAW_ARRAYS)));
   mMeshes.back()->mTransform.setTranslation(-3.0f, 0.0f, -2.0f);
   mMeshes.back()->setShaders(":/texture2d.vert", ":/texture2d.frag");
   mMeshes.back()->init();
@@ -397,7 +396,7 @@ void Scene::init()
 
   // Test drawing a cube with texture coordinates using glDrawElements
   mMeshes.push_back(
-      new MeshRenderer("uvCubeElementsTest", Cube(QTK_DRAW_ELEMENTS_NORMALS)));
+      new Qtk::MeshRenderer("uvCubeElementsTest", Cube(QTK_DRAW_ELEMENTS_NORMALS)));
   mMeshes.back()->mTransform.setTranslation(-1.7f, 0.0f, -2.0f);
   mMeshes.back()->setShaders(":/texture2d.vert", ":/texture2d.frag");
   mMeshes.back()->init();
@@ -423,7 +422,7 @@ void Scene::init()
   // Texturing a cube using a cube map
   // + Cube map texturing works with both QTK_DRAW_ARRAYS and QTK_DRAW_ELEMENTS
   mMeshes.push_back(
-      new MeshRenderer("testCubeMap", Cube(QTK_DRAW_ELEMENTS)));
+      new Qtk::MeshRenderer("testCubeMap", Cube(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(-3.0f, 1.0f, -2.0f);
   mMeshes.back()->mTransform.setRotation(45.0f, 0.0f, 1.0f, 0.0f);
   mMeshes.back()->setShaders(":/texture-cubemap.vert", ":/texture-cubemap.frag");
@@ -450,7 +449,7 @@ void Scene::init()
   // Create a cube with custom shaders
   // + Apply RGB normals shader and spin the cube for a neat effect
   mMeshes.push_back(
-      new MeshRenderer("rgbNormalsCube", Cube(QTK_DRAW_ARRAYS)));
+      new Qtk::MeshRenderer("rgbNormalsCube", Cube(QTK_DRAW_ARRAYS)));
   mMeshes.back()->mTransform.setTranslation(5.0f, 2.0f, -2.0f);
   mMeshes.back()->setShaders(":/rgb-normals.vert", ":/rgb-normals.frag");
   mMeshes.back()->init();
@@ -472,7 +471,7 @@ void Scene::init()
 
   // RGB Normals triangle to show normals are correct with QTK_DRAW_ARRAYS
   mMeshes.push_back(
-      new MeshRenderer("rgbTriangleArraysTest", Triangle(QTK_DRAW_ARRAYS)));
+      new Qtk::MeshRenderer("rgbTriangleArraysTest", Triangle(QTK_DRAW_ARRAYS)));
   mMeshes.back()->mTransform.setTranslation(7.0f, 0.0f, 2.0f);
   mMeshes.back()->setShaders(":/rgb-normals.vert", ":/rgb-normals.frag");
   mMeshes.back()->init();
@@ -493,7 +492,7 @@ void Scene::init()
 
   // RGB Normals triangle to show normals are correct with QTK_DRAW_ELEMENTS
   mMeshes.push_back(
-      new MeshRenderer("rgbTriangleElementsTest",
+      new Qtk::MeshRenderer("rgbTriangleElementsTest",
                        Triangle(QTK_DRAW_ELEMENTS_NORMALS)));
   mMeshes.back()->mTransform.setTranslation(7.0f, 0.0f, 4.0f);
   mMeshes.back()->setShaders(":/rgb-normals.vert", ":/rgb-normals.frag");
@@ -515,7 +514,7 @@ void Scene::init()
 
   // Test drawing triangle with glDrawArrays with texture coordinates
   mMeshes.push_back(
-      new MeshRenderer("testTriangleArraysUV", Triangle(QTK_DRAW_ARRAYS)));
+      new Qtk::MeshRenderer("testTriangleArraysUV", Triangle(QTK_DRAW_ARRAYS)));
   mMeshes.back()->mTransform.setTranslation(-3.0f, 2.0f, -2.0f);
   mMeshes.back()->setShaders(":/texture2d.vert", ":/texture2d.frag");
   mMeshes.back()->init();
@@ -543,7 +542,7 @@ void Scene::init()
 
   // Test drawing triangle with glDrawElements with texture coordinates
   mMeshes.push_back(
-      new MeshRenderer("testTriangleElementsUV",
+      new Qtk::MeshRenderer("testTriangleElementsUV",
                        Triangle(QTK_DRAW_ELEMENTS_NORMALS)));
   mMeshes.back()->mTransform.setTranslation(-2.5f, 0.0f, -1.0f);
   mMeshes.back()->setShaders(":/texture2d.vert", ":/texture2d.frag");
@@ -575,7 +574,7 @@ void Scene::init()
 
   // Example of a cube with no lighting applied
   mMeshes.push_back(
-      new MeshRenderer("noLight", Cube(QTK_DRAW_ELEMENTS)));
+      new Qtk::MeshRenderer("noLight", Cube(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(5.0f, 0.0f, -2.0f);
   mMeshes.back()->setShaders(":/solid-perspective.vert",
                              ":/solid-perspective.frag");
@@ -586,24 +585,24 @@ void Scene::init()
 
   // Create objects that represent light sources for lighting examples
   mMeshes.push_back(
-      new MeshRenderer("phongLight", Triangle(QTK_DRAW_ELEMENTS)));
+      new Qtk::MeshRenderer("phongLight", Triangle(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(3.0f, 2.0f, -2.0f);
   mMeshes.back()->mTransform.scale(0.25f);
 
   mMeshes.push_back(
-      new MeshRenderer("diffuseLight", Triangle(QTK_DRAW_ELEMENTS)));
+      new Qtk::MeshRenderer("diffuseLight", Triangle(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(9.0f, 2.0f, -2.0f);
   mMeshes.back()->mTransform.scale(0.25f);
 
   mMeshes.push_back(
-      new MeshRenderer("specularLight", Triangle(QTK_DRAW_ELEMENTS)));
+      new Qtk::MeshRenderer("specularLight", Triangle(QTK_DRAW_ELEMENTS)));
   mMeshes.back()->mTransform.setTranslation(11.0f, 2.0f, -2.0f);
   mMeshes.back()->mTransform.scale(0.25f);
 }
 
-void Scene::draw()
+void ExampleScene::draw()
 {
-  mSkybox.draw();
+  mSkybox->draw();
 
   for (auto & model : mModels) model->draw();
 
@@ -616,13 +615,13 @@ void Scene::draw()
       "uLightPosition",
       MeshRenderer::getInstance("phongLight")->mTransform.translation());
   mTestPhong->setUniform("uCameraPosition",
-                         Scene::Camera().transform().translation());
+                         ExampleScene::Camera().transform().translation());
   mTestPhong->mProgram.release();
   mTestPhong->draw();
 
   mTestAmbient->mProgram.bind();
   mTestAmbient->setUniform("uCameraPosition",
-                           Scene::Camera().transform().translation());
+                           ExampleScene::Camera().transform().translation());
   mTestAmbient->mProgram.release();
   mTestAmbient->draw();
 
@@ -632,7 +631,7 @@ void Scene::draw()
   mTestDiffuse->setUniform(
       "uLightPosition",
       MeshRenderer::getInstance("diffuseLight")->mTransform.translation());
-  mTestDiffuse->setUniform("uCameraPosition", Scene::Camera().transform().translation());
+  mTestDiffuse->setUniform("uCameraPosition", ExampleScene::Camera().transform().translation());
   mTestDiffuse->mProgram.release();
   mTestDiffuse->draw();
 
@@ -643,43 +642,43 @@ void Scene::draw()
   mTestSpecular->setUniform(
       "uLightPosition",
       MeshRenderer::getInstance("specularLight")->mTransform.translation());
-  mTestSpecular->setUniform("uCameraPosition", Scene::Camera().transform().translation());
+  mTestSpecular->setUniform("uCameraPosition", ExampleScene::Camera().transform().translation());
   mTestSpecular->mProgram.release();
   mTestSpecular->draw();
 }
 
-void Scene::update()
+void ExampleScene::update()
 {
   auto position = MeshRenderer::getInstance("alienTestLight")->mTransform.translation();
   Model::getInstance("alienTest")->setUniform(
       "uLight.position", position);
   Model::getInstance("alienTest")->setUniform(
-      "uCameraPosition", Scene::Camera().transform().translation());
+      "uCameraPosition", ExampleScene::Camera().transform().translation());
   auto posMatrix = Model::getInstance("alienTest")->mTransform.toMatrix();
   Model::getInstance("alienTest")->setUniform(
       "uMVP.normalMatrix", posMatrix.normalMatrix());
   Model::getInstance("alienTest")->setUniform(
       "uMVP.model", posMatrix);
   Model::getInstance("alienTest")->setUniform(
-      "uMVP.view", Scene::Camera().toMatrix());
+      "uMVP.view", ExampleScene::Camera().toMatrix());
   Model::getInstance("alienTest")->setUniform(
-      "uMVP.projection", Scene::Projection());
+      "uMVP.projection", ExampleScene::Projection());
   Model::getInstance("alienTest")->mTransform.rotate(0.75f, 0.0f, 1.0f, 0.0f);
 
   position = MeshRenderer::getInstance("spartanTestLight")->mTransform.translation();
   Model::getInstance("spartanTest")->setUniform(
       "uLight.position", position);
   Model::getInstance("spartanTest")->setUniform(
-      "uCameraPosition", Scene::Camera().transform().translation());
+      "uCameraPosition", ExampleScene::Camera().transform().translation());
   posMatrix = Model::getInstance("spartanTest")->mTransform.toMatrix();
   Model::getInstance("spartanTest")->setUniform(
       "uMVP.normalMatrix", posMatrix.normalMatrix());
   Model::getInstance("spartanTest")->setUniform(
       "uMVP.model", posMatrix);
   Model::getInstance("spartanTest")->setUniform(
-      "uMVP.view", Scene::Camera().toMatrix());
+      "uMVP.view", ExampleScene::Camera().toMatrix());
   Model::getInstance("spartanTest")->setUniform(
-      "uMVP.projection", Scene::Projection());
+      "uMVP.projection", ExampleScene::Projection());
   Model::getInstance("spartanTest")->mTransform.rotate(0.75f, 0.0f, 1.0f, 0.0f);
 
 
@@ -691,16 +690,16 @@ void Scene::update()
   MeshRenderer::getInstance("testPhong")->setUniform(
       "uLight.position", position);
   MeshRenderer::getInstance("testPhong")->setUniform(
-      "uCameraPosition", Scene::Camera().transform().translation());
+      "uCameraPosition", ExampleScene::Camera().transform().translation());
   posMatrix = MeshRenderer::getInstance("testPhong")->mTransform.toMatrix();
   MeshRenderer::getInstance("testPhong")->setUniform(
       "uMVP.normalMatrix", posMatrix.normalMatrix());
   MeshRenderer::getInstance("testPhong")->setUniform(
       "uMVP.model", posMatrix);
   MeshRenderer::getInstance("testPhong")->setUniform(
-      "uMVP.view", Scene::Camera().toMatrix());
+      "uMVP.view", ExampleScene::Camera().toMatrix());
   MeshRenderer::getInstance("testPhong")->setUniform(
-      "uMVP.projection", Scene::Projection());
+      "uMVP.projection", ExampleScene::Projection());
   MeshRenderer::getInstance("testPhong")->mProgram.release();
 
   // Rotate lighting example cubes

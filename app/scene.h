@@ -6,40 +6,31 @@
 ## Contact: shaunrd0@gmail.com  | URL: www.shaunreed.com | GitHub: shaunrd0   ##
 ##############################################################################*/
 
-#ifndef QTK_SCENE_H
-#define QTK_SCENE_H
+#ifndef QTK_EXAMPLE_SCENE_H
+#define QTK_EXAMPLE_SCENE_H
 
+#include <abstractscene.h>
 #include <camera3d.h>
 #include <skybox.h>
 
 #include <QMatrix4x4>
 
-class MeshRenderer;
-class Model;
 
-class Scene {
+class ExampleScene : public Qtk::Scene {
 public:
-  Scene();
-  ~Scene();
+  ExampleScene();
+  ~ExampleScene();
 
-  void init();
-  void draw();
-  void update();
+  virtual void init();
+  virtual void draw();
+  virtual void update();
 
-  static Camera3D & Camera() { return mCamera;}
-  static QMatrix4x4 View() { return mCamera.toMatrix();}
-  static QMatrix4x4 & Projection() { return mProjection;}
 private:
-  static Camera3D mCamera;
-  static QMatrix4x4 mProjection;
 
-  Skybox mSkybox;
-  MeshRenderer * mTestPhong;
-  MeshRenderer * mTestSpecular;
-  MeshRenderer * mTestDiffuse;
-  MeshRenderer * mTestAmbient;
-  std::vector<MeshRenderer *> mMeshes;
-  std::vector<Model *> mModels;
+  Qtk::MeshRenderer * mTestPhong;
+  Qtk::MeshRenderer * mTestSpecular;
+  Qtk::MeshRenderer * mTestDiffuse;
+  Qtk::MeshRenderer * mTestAmbient;
 };
 
-#endif // QTK_SCENE_H
+#endif // QTK_EXAMPLE_SCENE_H
