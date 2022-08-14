@@ -15,10 +15,9 @@ function(submodule_update _PATH)
   endif()
 
   if (NOT GIT_FOUND)
-    message(FATAL_ERROR "Error: No git executable found")
+    message(FATAL_ERROR "[Qtk] Error: No git executable found")
   endif()
 
-  message(STATUS "${_PATH}")
   execute_process(
       COMMAND ${GIT_EXECUTABLE} submodule update --init "${_PATH}"
       WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
@@ -26,6 +25,6 @@ function(submodule_update _PATH)
   )
 
   if (NOT result EQUAL 0)
-    message(FATAL_ERROR "Error: Unable to update git submodule at ${_PATH}")
+    message(FATAL_ERROR "[Qtk] Error: Unable to update git submodule at ${_PATH}")
   endif()
 endfunction()

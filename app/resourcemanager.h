@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include <resources.h>
+#include <src/qtkresources.h>
 
 #ifndef QTK_RESOURCEMANAGER_H
 #define QTK_RESOURCEMANAGER_H
@@ -28,7 +28,7 @@ public:
    */
   static std::string getPath(const std::string & path) {
     // Only construct qtk resource path if in qrc format; else return it as-is
-    return path[0] == ':' ? QTK_RESOURCES_DIR + path.substr(1) : path;
+    return path[0] == ':' ? QTK_RESOURCES + path.substr(1) : path;
   }
 } RM;
 

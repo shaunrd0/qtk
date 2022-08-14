@@ -19,16 +19,21 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  add_compile_options(/wd4131 /wd4127)
+endif()
+message(STATUS "[Qtk]: Compiling with ${CMAKE_CXX_COMPILER_ID}")
+
 # Qtk build options
 option(QTK_DEBUG "Enable debugger" ON)
 option(BUILD_SHARED_LIBS "Build shared library" ON)
-option(UPDATE_SUBMODULES "Update external project (assimp) git submodule" ON)
 
 # Qt options
 set(QT_DIR "$ENV{HOME}/Code/Clones/Qt/6.3.1/gcc_64/" CACHE PATH "Path to Qt6")
 
 # Options for bringing your own assimp installation; Otherwise not needed
-set(ASSIMP_DIR "" CACHE PATH "Path to local installation of assimp")
+# + If assimp is available system-wide we can just set UPDATE_SUBMODULES OFF
+option(UPDATE_SUBMODULES "Update external project (assimp) git submodule" ON)
 option(ASSIMP_NEW_INTERFACE "Use the assimp::assimp interface (WIN / OSX)" OFF)
 
 ################################################################################
@@ -42,66 +47,56 @@ list(APPEND CMAKE_PREFIX_PATH "${QT_DIR}")
 # Find Qt
 find_package(Qt6 COMPONENTS OpenGLWidgets)
 if (NOT Qt6_FOUND)
-  message(SEND_ERROR "Unable to find Qt6 at CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-  message(FATAL_ERROR "Specify path to Qt6 with `cmake -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x.x/gcc_64 -S /path/to/qtk -B /path/to/qtk/build && cmake --build /path/to/qtk/build -j $(nprocs)`")
+  message(SEND_ERROR "[Qtk] Error: Unable to find Qt6 at CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+  message(FATAL_ERROR "[Qtk] Error: Specify path to Qt6 with `cmake -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x.x/gcc_64 -S /path/to/qtk -B /path/to/qtk/build && cmake --build /path/to/qtk/build -j $(nprocs)`")
 endif()
 
 if (UPDATE_SUBMODULES)
+  message(STATUS "[Qtk]: Updating submodules...")
   include("${CMAKE_SOURCE_DIR}/cmake/include/git_submodule.cmake")
   submodule_update(extern/assimp/assimp/)
   add_subdirectory(extern/assimp/assimp)
-else()
-  if (ASSIMP_DIR)
-    message(STATUS "Using custom ASSIMP_DIR: ${ASSIMP_DIR}")
-    list(APPEND CMAKE_PREFIX_PATH "${ASSIMP_DIR}")
-  endif()
-  find_package(assimp REQUIRED)
-  if (assimp_FOUND)
-    message(STATUS "Found assimp: ${assimp_DIR}")
-  else()
-    message(FATAL_ERROR "Could not find assimp at: ${CMAKE_PREFIX_PATH}")
-  endif()
 endif()
-
 
 
 ################################################################################
 # Qtk
 ################################################################################
 
-set(PUBLIC_HEADERS
-    src/mainwidget.h
-    src/abstractscene.h
-    src/camera3d.h
-    src/mesh.h
-    src/meshrenderer.h
-    src/model.h
-    src/object.h
-    src/skybox.h
-    src/texture.h
-    src/transform3D.h
+set(
+  PUBLIC_HEADERS
+  src/mainwidget.h
+  src/abstractscene.h
+  src/camera3d.h
+  src/mesh.h
+  src/meshrenderer.h
+  src/model.h
+  src/object.h
+  src/skybox.h
+  src/texture.h
+  src/transform3D.h
 )
 
-set(SOURCE_FILES
-    src/mainwidget.cpp
-    src/abstractscene.cpp
-    src/camera3d.cpp
-    src/input.cpp
-    src/input.h
-    src/mesh.cpp
-    src/meshrenderer.cpp
-    src/model.cpp
-    src/object.cpp
-    src/qtkapi.h
-    src/skybox.cpp
-    src/texture.cpp
-    src/transform3D.cpp
+set(
+  SOURCE_FILES
+  src/mainwidget.cpp
+  src/abstractscene.cpp
+  src/camera3d.cpp
+  src/input.cpp
+  src/input.h
+  src/mesh.cpp
+  src/meshrenderer.cpp
+  src/model.cpp
+  src/object.cpp
+  src/qtkapi.h
+  src/skybox.cpp
+  src/texture.cpp
+  src/transform3D.cpp
 )
 
 include(GenerateExportHeader)
 qt_add_library(qtk-widget STATIC ${PUBLIC_HEADERS} ${SOURCE_FILES})
 target_include_directories(qtk-widget PRIVATE src/ app/)
-generate_export_header(qtk-widget)
 
 set_target_properties(qtk-widget PROPERTIES
     PUBLIC_HEADER "${PUBLIC_HEADERS}"
@@ -110,13 +105,14 @@ set_target_properties(qtk-widget PROPERTIES
 
 target_link_libraries(qtk-widget PUBLIC Qt6::OpenGLWidgets)
 
-if ((UPDATE_SUBMODULES AND NOT ASSIMP_DIR) OR NOT ASSIMP_NEW_INTERFACE)
-  target_link_libraries(qtk-widget PRIVATE assimp)
+if (UPDATE_SUBMODULES OR NOT ASSIMP_NEW_INTERFACE)
+  target_link_libraries(qtk-widget PUBLIC assimp)
 elseif(ASSIMP_NEW_INTERFACE)
-  target_link_libraries(qtk-widget PRIVATE assimp::assimp)
+  target_link_libraries(qtk-widget PUBLIC assimp::assimp)
 endif()
 
 if(QTK_DEBUG)
+  message(STATUS "[Qtk]: Building with QTK_DEBUG=${QTK_DEBUG}")
   target_compile_definitions(qtk-widget PUBLIC QTK_DEBUG)
 endif()
 
@@ -126,6 +122,7 @@ if(WIN32)
   target_link_libraries(qtk-widget PUBLIC OpenGL::GL)
 endif()
 
+generate_export_header(qtk-widget)
 # Install files
 install(TARGETS qtk-widget
     # Associate qtk-widget target with qtk-export
@@ -150,14 +147,19 @@ install(EXPORT qtk-export
 # Final Application
 ################################################################################
 
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/resources.h "#ifndef QTK_RESOURCES_H\n#define QTK_RESOURCES_H\n#define QTK_RESOURCES_DIR \"${CMAKE_SOURCE_DIR}/resources\"\n#endif\n")
+set(QTK_RESOURCES "${CMAKE_SOURCE_DIR}/resources")
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/qtkresources.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/src/qtkresources.h"
+    @ONLY
+)
 
 # Add our Qt resources.qrc file to our application
 set(QTK_APP_SOURCES app/main.cpp
     app/mainwindow.cpp app/mainwindow.h app/mainwindow.ui
     app/scene.cpp app/scene.h
-    app/resourcemanager.cpp app/resourcemanager.h
-    ${CMAKE_CURRENT_BINARY_DIR}/resources.h
+    app/resourcemanager.h
+    src/qtkresources.h.in
 )
 qt6_add_big_resources(QTK_APP_SOURCES resources.qrc)
 
@@ -192,7 +194,7 @@ if(WIN32)
   endif()
   if(MSVC AND TARGET Qt6::qmake)
     set(VSUSER_FILE ${CMAKE_CURRENT_BINARY_DIR}/qtk-main.vcxproj.user)
-    file(TO_NATIVE_PATH "${ASSIMP_INSTALL_DIR}/bin" assimp_bin)
+    file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/extern/assimp/assimp/bin" assimp_bin)
     file(WRITE  ${VSUSER_FILE} "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
     file(APPEND ${VSUSER_FILE} "<Project xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n")
     file(APPEND ${VSUSER_FILE} "  <PropertyGroup>\n")
