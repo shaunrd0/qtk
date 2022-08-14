@@ -15,14 +15,16 @@ using namespace Qtk;
 Skybox::Skybox(std::string right, std::string top, std::string front,
                std::string left, std::string bottom, std::string back,
                const std::string & name)
-    : mCubeMap(Texture::initCubeMap(
-    QImage(right.c_str()).mirrored(), QImage(top.c_str()),
-    QImage(front.c_str()), QImage(left.c_str()),
-    QImage(bottom.c_str()), QImage(back.c_str()))),
-      mVBO(QOpenGLBuffer::VertexBuffer),
+    : mVBO(QOpenGLBuffer::VertexBuffer),
       mVertices(Cube(QTK_DRAW_ELEMENTS).vertices()),
       mIndices(Cube(QTK_DRAW_ELEMENTS).indices())
-{ init();}
+{
+  init();
+  mCubeMap = Texture::initCubeMap(
+      QImage(right.c_str()).mirrored(), QImage(top.c_str()),
+      QImage(front.c_str()), QImage(left.c_str()),
+      QImage(bottom.c_str()), QImage(back.c_str()));
+}
 
 Skybox::Skybox(std::string name)
     : Skybox(":/right.png", ":/top.png", ":/front.png",
@@ -87,13 +89,11 @@ void Skybox::init()
   mVBO.setUsagePattern(QOpenGLBuffer::StaticDraw);
   mVBO.bind();
   // Allocate vertex positions into VBO
-  mVBO.allocate(mVertices.data(),
-                mVertices.size() * sizeof(mVertices[0]));
+  mVBO.allocate(mVertices.data(), mVertices.size() * sizeof(mVertices[0]));
 
   // Enable attribute array for vertex positions
   mProgram.enableAttributeArray(0);
-  mProgram.setAttributeBuffer(0, GL_FLOAT, 0,
-                              3, sizeof(QVector3D));
+  mProgram.setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(QVector3D));
   // Set shader texture unit to 0
   mProgram.setUniformValue("uTexture", 0);
 

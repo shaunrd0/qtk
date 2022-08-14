@@ -14,7 +14,7 @@
    <string>Qtk - MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="Qtk::MainWidget" name="openGLWidget">
+   <widget class="Qtk::MainWidget" name="openGLWidget" native="true">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -94,8 +94,8 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MainWidget</class>
-   <extends>QOpenGLWidget</extends>
+   <class>Qtk::MainWidget</class>
+   <extends>QWidget</extends>
    <header>mainwidget.h</header>
   </customwidget>
  </customwidgets>

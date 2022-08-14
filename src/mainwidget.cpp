@@ -65,7 +65,7 @@ void MainWidget::paintGL()
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
   // Draw the scene first, since it handles drawing our skybox
-  if (mScene != Q_NULLPTR) mScene->privDraw();
+  if (mScene != Q_NULLPTR) mScene->draw();
 }
 
 void MainWidget::initializeGL()

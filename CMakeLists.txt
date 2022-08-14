@@ -21,7 +21,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(QTK_DEBUG "Enable debugger" ON)
 option(BUILD_SHARED_LIBS "Build shared library" ON)
-option(ASSIMP_NEW_INTERFACE "Use assimp::assimp as target instead of assimp" OFF)
+option(BUILD_ASSIMP "Add and build assimp as an external project" ON)
 
 ################################################################################
 # External Libraries
@@ -37,11 +37,45 @@ if (NOT Qt6_FOUND)
   message(FATAL_ERROR "Specify path to Qt6 with `cmake -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x.x/gcc_64 -S /path/to/qtk -B /path/to/qtk/build && cmake --build /path/to/qtk/build -j $(nprocs)`")
 endif()
 
-# Find Assimp
-# https://github.com/assimp/assimp/commit/6ac8279977c3a54118551e549d77329497116f66
-find_package(assimp REQUIRED)
+# If no ASSIMP_DIR was provided via -DASSIMP_DIR=...
+# + Add assimp as external project
+# + If assimp is already available system-wide, we can just set -DBUILD_ASSIMP=OFF
+if (BUILD_ASSIMP AND NOT ASSIMP_DIR)
+  # Add Assimp as an external project
+  include(ExternalProject)
 
-include(GenerateExportHeader)
+  set(ASSIMP_PREFIX "${CMAKE_BINARY_DIR}/extern/assimp")
+  set(ASSIMP_INSTALL_DIR "${ASSIMP_PREFIX}/install")
+  set(ASSIMP_INCLUDE_DIR "${ASSIMP_INSTALL_DIR}/include")
+  set(ASSIMP_LIB_DIR "${ASSIMP_INSTALL_DIR}/lib")
+  set(ASSIMP_LIB "${CMAKE_SHARED_LIBRARY_PREFIX}assimp${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  file(MAKE_DIRECTORY "${ASSIMP_INCLUDE_DIR}")
+
+  ExternalProject_Add(
+      assimp-extern
+      PREFIX  "${ASSIMP_PREFIX}"
+      INSTALL_DIR "${ASSIMP_INSTALL}"
+      CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${ASSIMP_INSTALL_DIR}"
+      GIT_REPOSITORY https://github.com/assimp/assimp.git
+      GIT_PROGRESS ON
+      GIT_TAG v5.2.4
+  )
+
+  add_library(assimp STATIC IMPORTED)
+  set_target_properties(
+      assimp
+      PROPERTIES
+      IMPORTED_LOCATION "${ASSIMP_INSTALL_DIR}/lib/${ASSIMP_LIB}"
+  )
+  add_dependencies(assimp assimp-extern)
+  target_include_directories(assimp INTERFACE "${ASSIMP_INCLUDE_DIR}")
+else()
+  if (ASSIMP_DIR)
+    message(STATUS "ASSIMP_DIR: ${ASSIMP_DIR}")
+  endif()
+endif()
+
+
 
 ################################################################################
 # Qtk
@@ -75,6 +109,8 @@ set(SOURCE_FILES
     src/texture.cpp
     src/transform3D.cpp
 )
+
+include(GenerateExportHeader)
 qt_add_library(qtk-widget STATIC ${PUBLIC_HEADERS} ${SOURCE_FILES})
 target_include_directories(qtk-widget PRIVATE src/ app/)
 generate_export_header(qtk-widget)
@@ -84,24 +120,8 @@ set_target_properties(qtk-widget PROPERTIES
     VERSION ${PROJECT_VERSION}
 )
 
-target_include_directories(qtk-widget PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
-if(BUILD_SHARED_LIBS)
-  target_compile_definitions(qtk-widget PRIVATE QTK_EXPORT PUBLIC QTK_SHARED)
-  target_link_libraries(qtk-widget PRIVATE Qt6::OpenGLWidgets)
-  if(ASSIMP_NEW_INTERFACE)
-    target_link_libraries(qtk-widget PUBLIC assimp::assimp)
-  else()
-    target_link_libraries(qtk-widget PUBLIC assimp)
-  endif()
-else()
-  target_compile_definitions(qtk-widget PUBLIC QTK_STATIC)
-  target_link_libraries(qtk-widget PUBLIC Qt6::OpenGLWidgets)
-  if(ASSIMP_NEW_INTERFACE)
-    target_link_libraries(qtk-widget PUBLIC assimp::assimp)
-  else()
-    target_link_libraries(qtk-widget PUBLIC assimp)
-  endif()
-endif()
+target_link_libraries(qtk-widget PUBLIC Qt6::OpenGLWidgets)
+target_link_libraries(qtk-widget PRIVATE assimp)
 
 if(QTK_DEBUG)
   target_compile_definitions(qtk-widget PUBLIC QTK_DEBUG)
@@ -148,19 +168,19 @@ set(QTK_APP_SOURCES app/main.cpp
 )
 qt6_add_big_resources(QTK_APP_SOURCES resources.qrc)
 
-qt_add_executable(qtk-app ${QTK_APP_SOURCES})
-target_include_directories(qtk-app PRIVATE src/ app/)
+qt_add_executable(qtk-main ${QTK_APP_SOURCES})
+target_include_directories(qtk-main PRIVATE src/ app/)
 
-# Link qtk-app executable to main qtk-widget library
-target_link_libraries(qtk-app PRIVATE Qt6::OpenGLWidgets qtk-widget)
+# Link qtk-main executable to main qtk-widget library
+target_link_libraries(qtk-main PRIVATE qtk-widget)
 
-set_target_properties(qtk-app PROPERTIES
+set_target_properties(qtk-main PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
-install(TARGETS qtk-app
+install(TARGETS qtk-main
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
@@ -170,16 +190,16 @@ if(WIN32)
   execute_process(COMMAND "${_qt6_qmake_location}" -query QT_INSTALL_PREFIX RESULT_VARIABLE return_code OUTPUT_VARIABLE qt6_install_prefix OUTPUT_STRIP_TRAILING_WHITESPACE)
   file(TO_NATIVE_PATH "${qt6_install_prefix}/bin" qt6_install_prefix)
   if(TARGET Qt6::windeployqt)
-    add_custom_command(TARGET qtk-app
+    add_custom_command(TARGET qtk-main
         POST_BUILD
         COMMAND set PATH=%PATH%$<SEMICOLON>${qt6_install_prefix}
-        COMMAND Qt6::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:qtk-app>/$<TARGET_FILE_NAME:qtk-app>"
+        COMMAND Qt6::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:qtk-main>/$<TARGET_FILE_NAME:qtk-main>"
         )
     install(DIRECTORY "${CMAKE_BINARY_DIR}/windeployqt/" DESTINATION bin)
   endif()
   if(MSVC AND TARGET Qt6::qmake)
-    set(VSUSER_FILE ${CMAKE_CURRENT_BINARY_DIR}/qtk-app.vcxproj.user)
-    file(TO_NATIVE_PATH "${assimp_DIR}/bin" assimp_bin)
+    set(VSUSER_FILE ${CMAKE_CURRENT_BINARY_DIR}/qtk-main.vcxproj.user)
+    file(TO_NATIVE_PATH "${ASSIMP_INSTALL_DIR}/bin" assimp_bin)
     file(WRITE  ${VSUSER_FILE} "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
     file(APPEND ${VSUSER_FILE} "<Project xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n")
     file(APPEND ${VSUSER_FILE} "  <PropertyGroup>\n")

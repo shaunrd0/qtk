@@ -20,12 +20,13 @@
 namespace Qtk {
   class Scene : protected QOpenGLFunctions {
     friend class MainWidget;
+
   public:
     Scene();
     ~Scene();
 
     virtual void init() = 0;
-    virtual void draw() = 0;
+    virtual void draw() { privDraw(); };
     virtual void update() = 0;
 
     static Camera3D & Camera() { return mCamera;}

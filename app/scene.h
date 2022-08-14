@@ -17,12 +17,13 @@
 
 
 class ExampleScene : public Qtk::Scene {
+
 public:
   ExampleScene();
   ~ExampleScene();
 
   virtual void init();
-  virtual void draw();
+  virtual void draw() override;
   virtual void update();
 
 private:

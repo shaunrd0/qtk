@@ -602,11 +602,7 @@ void ExampleScene::init()
 
 void ExampleScene::draw()
 {
-  mSkybox->draw();
-
-  for (auto & model : mModels) model->draw();
-
-  for (const auto &mesh : mMeshes) mesh->draw();
+  Scene::draw();
 
   mTestPhong->mProgram.bind();
   mTestPhong->setUniform("uModelInverseTransposed",
