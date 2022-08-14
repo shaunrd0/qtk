@@ -19,16 +19,25 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Qtk build options
 option(QTK_DEBUG "Enable debugger" ON)
 option(BUILD_SHARED_LIBS "Build shared library" ON)
-option(BUILD_ASSIMP "Add and build assimp as an external project" ON)
+option(UPDATE_SUBMODULES "Update external project (assimp) git submodule" ON)
+
+# Qt options
+set(QT_DIR "$ENV{HOME}/Code/Clones/Qt/6.3.1/gcc_64/" CACHE PATH "Path to Qt6")
+
+# Options for bringing your own assimp installation; Otherwise not needed
+set(ASSIMP_DIR "" CACHE PATH "Path to local installation of assimp")
+option(ASSIMP_NEW_INTERFACE "Use the assimp::assimp interface (WIN / OSX)" OFF)
 
 ################################################################################
 # External Libraries
 ################################################################################
 
 # For CLion builds, point CMAKE_PREFIX_PATH to Qt6 install directory
-list(APPEND CMAKE_PREFIX_PATH $ENV{HOME}/Code/Clones/Qt/6.3.1/gcc_64/)
+# + QtCreator will handle this for you if that is used instead
+list(APPEND CMAKE_PREFIX_PATH "${QT_DIR}")
 
 # Find Qt
 find_package(Qt6 COMPONENTS OpenGLWidgets)
@@ -37,41 +46,20 @@ if (NOT Qt6_FOUND)
   message(FATAL_ERROR "Specify path to Qt6 with `cmake -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x.x/gcc_64 -S /path/to/qtk -B /path/to/qtk/build && cmake --build /path/to/qtk/build -j $(nprocs)`")
 endif()
 
-# If no ASSIMP_DIR was provided via -DASSIMP_DIR=...
-# + Add assimp as external project
-# + If assimp is already available system-wide, we can just set -DBUILD_ASSIMP=OFF
-if (BUILD_ASSIMP AND NOT ASSIMP_DIR)
-  # Add Assimp as an external project
-  include(ExternalProject)
-
-  set(ASSIMP_PREFIX "${CMAKE_BINARY_DIR}/extern/assimp")
-  set(ASSIMP_INSTALL_DIR "${ASSIMP_PREFIX}/install")
-  set(ASSIMP_INCLUDE_DIR "${ASSIMP_INSTALL_DIR}/include")
-  set(ASSIMP_LIB_DIR "${ASSIMP_INSTALL_DIR}/lib")
-  set(ASSIMP_LIB "${CMAKE_SHARED_LIBRARY_PREFIX}assimp${CMAKE_SHARED_LIBRARY_SUFFIX}")
-  file(MAKE_DIRECTORY "${ASSIMP_INCLUDE_DIR}")
-
-  ExternalProject_Add(
-      assimp-extern
-      PREFIX  "${ASSIMP_PREFIX}"
-      INSTALL_DIR "${ASSIMP_INSTALL}"
-      CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${ASSIMP_INSTALL_DIR}"
-      GIT_REPOSITORY https://github.com/assimp/assimp.git
-      GIT_PROGRESS ON
-      GIT_TAG v5.2.4
-  )
-
-  add_library(assimp STATIC IMPORTED)
-  set_target_properties(
-      assimp
-      PROPERTIES
-      IMPORTED_LOCATION "${ASSIMP_INSTALL_DIR}/lib/${ASSIMP_LIB}"
-  )
-  add_dependencies(assimp assimp-extern)
-  target_include_directories(assimp INTERFACE "${ASSIMP_INCLUDE_DIR}")
+if (UPDATE_SUBMODULES)
+  include("${CMAKE_SOURCE_DIR}/cmake/include/git_submodule.cmake")
+  submodule_update(extern/assimp/assimp/)
+  add_subdirectory(extern/assimp/assimp)
 else()
   if (ASSIMP_DIR)
-    message(STATUS "ASSIMP_DIR: ${ASSIMP_DIR}")
+    message(STATUS "Using custom ASSIMP_DIR: ${ASSIMP_DIR}")
+    list(APPEND CMAKE_PREFIX_PATH "${ASSIMP_DIR}")
+  endif()
+  find_package(assimp REQUIRED)
+  if (assimp_FOUND)
+    message(STATUS "Found assimp: ${assimp_DIR}")
+  else()
+    message(FATAL_ERROR "Could not find assimp at: ${CMAKE_PREFIX_PATH}")
   endif()
 endif()
 
@@ -121,7 +109,12 @@ set_target_properties(qtk-widget PROPERTIES
 )
 
 target_link_libraries(qtk-widget PUBLIC Qt6::OpenGLWidgets)
-target_link_libraries(qtk-widget PRIVATE assimp)
+
+if ((UPDATE_SUBMODULES AND NOT ASSIMP_DIR) OR NOT ASSIMP_NEW_INTERFACE)
+  target_link_libraries(qtk-widget PRIVATE assimp)
+elseif(ASSIMP_NEW_INTERFACE)
+  target_link_libraries(qtk-widget PRIVATE assimp::assimp)
+endif()
 
 if(QTK_DEBUG)
   target_compile_definitions(qtk-widget PUBLIC QTK_DEBUG)
