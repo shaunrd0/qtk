@@ -39,3 +39,41 @@ jobs:
         run: |
           cmake -S . -B build/ ${{ matrix.cmake }} && cmake --build build/ \
             --target qtk-main
+
+  Build-Qtk-Assimp-Targets:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            cmake: -DCMAKE_PREFIX_PATH="/home/runner/work/qtk/Qt/6.3.1/gcc_64/" -DQTK_UPDATE_SUBMODULES=OFF
+          - os: macos-latest
+            cmake: -DCMAKE_PREFIX_PATH="/home/runner/work/qtk/Qt/6.3.1/gcc_64/" -DASSIMP_NEW_INTERFACE=ON -DQTK_UPDATE_SUBMODULES=OFF
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '6.3.1'
+
+      - name: Install Assimp MacOS
+        if: matrix.os == 'macos-latest'
+        shell: bash
+        run: |
+          brew install assimp
+
+      - name: Install Assimp Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          sudo apt install libassimp-dev
+
+      - name: Build Qtk
+        shell: bash
+        run: |
+          cmake -S . -B build/ ${{ matrix.cmake }} && cmake --build build/ \
+            --target qtk-main

@@ -11,7 +11,7 @@ To get textures loading on models look into [material files](http://www.paulbour
 and see some examples in the `resources/models/` directory.
 
 
-### Building
+### Source Builds
 
 Builds are configured for CLion or [Qt Creator](https://github.com/qt-creator/qt-creator).
 Simply open the root `CMakeLists.txt` with either of these editors and configurations will be loaded.
@@ -37,9 +37,18 @@ Using `-DQTK_UPDATE_SUBMODULES=ON` supports providing assimp on cross-platform b
 sudo apt update -y && sudo apt install freeglut3-dev libassimp-dev cmake build-essential git
 git clone https://gitlab.com/shaunrd0/qtk
 cmake -DQTK_UPDATE_SUBMODULES=OFF -DCMAKE_PREFIX_PATH=$HOME/Qt/6.3.1/gcc_64 -S qtk/ -B qtk/build/ && cmake --build qtk/build/ -j $(nproc --ignore=2) --target qtk-main
-#cmake -DQTK_UPDATE_SUBMODULES=OFF -DCMAKE_PREFIX_PATH=$HOME/Qt/6.3.1/gcc_64;/path/to/assimp/dir -S qtk/ -B qtk/build/ && cmake --build qtk/build/ -j $(nproc --ignore=2) --target qtk-main
+# We can also provide a path to assimp -
+#cmake -DQTK_UPDATE_SUBMODULES=OFF -DCMAKE_PREFIX_PATH=$HOME/Qt/6.3.1/gcc_64;/path/to/assimp/ -S qtk/ -B qtk/build/ && cmake --build qtk/build/ -j $(nproc --ignore=2) --target qtk-main
 ./qtk/build/qtk-main
 ```
+
+If you are building on **Windows / Mac** and bringing your own installation of Assimp, consider setting the `-DASSIMP_NEW_INTERFACE` build flag.
+```bash
+cmake -DASSIMP_NEW_INTERFACE=ON -DQTK_UPDATE_SUBMODULES=OFF -DCMAKE_PREFIX_PATH=$HOME/Qt/6.3.1/gcc_64;/path/to/assimp/ -S qtk/ -B qtk/build/ && cmake --build qtk/build/ -j $(nproc --ignore=2) --target qtk-main
+```
+
+
+### Controls
 
 You can fly around the scene if you hold the right mouse button and use WASD.
 If you see a small triangle floating by a model it represents the light source
