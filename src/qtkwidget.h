@@ -5,8 +5,8 @@
 ##                                                                            ##
 ## Contact: shaunrd0@gmail.com  | URL: www.shaunreed.com | GitHub: shaunrd0   ##
 ##############################################################################*/
-#ifndef QTK_MAINWIDGET_H
-#define QTK_MAINWIDGET_H
+#ifndef QTK_QTKWIDGET_H
+#define QTK_QTKWIDGET_H
 
 #include <iostream>
 
@@ -18,18 +18,17 @@
 #include <qtkapi.h>
 #include <abstractscene.h>
 
-
 namespace Qtk {
-  class QTKAPI MainWidget : public QOpenGLWidget,
-                     protected QOpenGLFunctions {
+  class QTKAPI QtkWidget : public QOpenGLWidget,
+                           protected QOpenGLFunctions {
   Q_OBJECT;
 
   public:
     // Constructors
-    MainWidget();
-    explicit MainWidget(QWidget *parent);
-    explicit MainWidget(const QSurfaceFormat &format);
-    ~MainWidget() override;
+    QtkWidget();
+    explicit QtkWidget(QWidget *parent);
+    explicit QtkWidget(const QSurfaceFormat &format);
+    ~QtkWidget() override;
 
   private:
     void teardownGL();
@@ -40,8 +39,8 @@ namespace Qtk {
     void initializeGL() override;
     void resizeGL(int width, int height) override;
 
-    inline Scene * getScene() {return mScene;}
-    inline void setScene(Scene * scene) {
+    inline Qtk::Scene * getScene() {return mScene;}
+    inline void setScene(Qtk::Scene * scene) {
       if (mScene != Q_NULLPTR) delete mScene;
       mScene = scene;
     }
@@ -64,7 +63,7 @@ namespace Qtk {
     void initializeWidget();
     void updateCameraInput();
 
-    Scene * mScene;
+    Qtk::Scene * mScene;
 #ifdef QTK_DEBUG
     void printContextInformation();
     QOpenGLDebugLogger * mDebugLogger;
@@ -72,4 +71,4 @@ namespace Qtk {
   };
 }
 
-#endif // QTK_MAINWIDGET_H
+#endif // QTK_QTKWIDGET_H

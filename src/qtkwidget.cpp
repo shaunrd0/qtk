@@ -9,7 +9,7 @@
 #include <QKeyEvent>
 
 #include <input.h>
-#include <mainwidget.h>
+#include <qtkwidget.h>
 #include <mesh.h>
 #include <abstractscene.h>
 
@@ -19,26 +19,26 @@ using namespace Qtk;
  * Constructors, Destructors
  ******************************************************************************/
 
-MainWidget::MainWidget() : mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR)
+QtkWidget::QtkWidget() : mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR)
 {
   initializeWidget();
 }
 
 // Constructor for using this widget in QtDesigner
-MainWidget::MainWidget(QWidget *parent) : QOpenGLWidget(parent),
+QtkWidget::QtkWidget(QWidget *parent) : QOpenGLWidget(parent),
     mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR)
 {
   initializeWidget();
 }
 
-MainWidget::MainWidget(const QSurfaceFormat &format)
+QtkWidget::QtkWidget(const QSurfaceFormat &format)
     : mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR)
 {
   setFormat(format);
   setFocusPolicy(Qt::ClickFocus);
 }
 
-MainWidget::~MainWidget()
+QtkWidget::~QtkWidget()
 {
   makeCurrent();
   teardownGL();
@@ -49,7 +49,7 @@ MainWidget::~MainWidget()
  * Private Member Functions
  ******************************************************************************/
 
-void MainWidget::teardownGL()
+void QtkWidget::teardownGL()
 {
   // Nothing to teardown yet...
 }
@@ -59,7 +59,7 @@ void MainWidget::teardownGL()
  * Inherited Virtual Member Functions
  ******************************************************************************/
 
-void MainWidget::paintGL()
+void QtkWidget::paintGL()
 {
   // Clear buffers
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -68,7 +68,7 @@ void MainWidget::paintGL()
   if (mScene != Q_NULLPTR) mScene->draw();
 }
 
-void MainWidget::initializeGL()
+void QtkWidget::initializeGL()
 {
   initializeOpenGLFunctions();
   // Connect the frameSwapped signal to call the update() function
@@ -98,7 +98,7 @@ void MainWidget::initializeGL()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void MainWidget::resizeGL(int width, int height)
+void QtkWidget::resizeGL(int width, int height)
 {
   Scene::Projection().setToIdentity();
   Scene::Projection().perspective(45.0f,
@@ -111,7 +111,7 @@ void MainWidget::resizeGL(int width, int height)
  * Protected Slots
  ******************************************************************************/
 
-void MainWidget::update()
+void QtkWidget::update()
 {
   updateCameraInput();
 
@@ -120,7 +120,7 @@ void MainWidget::update()
   QWidget::update();
 }
 
-void MainWidget::messageLogged(const QOpenGLDebugMessage &msg)
+void QtkWidget::messageLogged(const QOpenGLDebugMessage &msg)
 {
   QString error;
 
@@ -185,7 +185,7 @@ void MainWidget::messageLogged(const QOpenGLDebugMessage &msg)
  * Protected Helpers
  ******************************************************************************/
 
-void MainWidget::keyPressEvent(QKeyEvent *event)
+void QtkWidget::keyPressEvent(QKeyEvent *event)
 {
   if (event->isAutoRepeat()) {
     // Do not repeat input while a key is held down
@@ -195,7 +195,7 @@ void MainWidget::keyPressEvent(QKeyEvent *event)
   }
 }
 
-void MainWidget::keyReleaseEvent(QKeyEvent *event)
+void QtkWidget::keyReleaseEvent(QKeyEvent *event)
 {
   if (event->isAutoRepeat()) {
     event->ignore();
@@ -204,12 +204,12 @@ void MainWidget::keyReleaseEvent(QKeyEvent *event)
   }
 }
 
-void MainWidget::mousePressEvent(QMouseEvent *event)
+void QtkWidget::mousePressEvent(QMouseEvent *event)
 {
   Input::registerMousePress(event->button());
 }
 
-void MainWidget::mouseReleaseEvent(QMouseEvent *event)
+void QtkWidget::mouseReleaseEvent(QMouseEvent *event)
 {
   Input::registerMouseRelease(event->button());
 }
@@ -219,7 +219,7 @@ void MainWidget::mouseReleaseEvent(QMouseEvent *event)
  * Private Helpers
  ******************************************************************************/
 
-void MainWidget::initializeWidget()
+void QtkWidget::initializeWidget()
 {
   QSurfaceFormat format;
   format.setRenderableType(QSurfaceFormat::OpenGL);
@@ -237,7 +237,7 @@ void MainWidget::initializeWidget()
   setFocusPolicy(Qt::ClickFocus);
 }
 
-void MainWidget::printContextInformation()
+void QtkWidget::printContextInformation()
 {
   QString glType;
   QString glVersion;
@@ -273,7 +273,7 @@ void MainWidget::printContextInformation()
 
 }
 
-void MainWidget::updateCameraInput()
+void QtkWidget::updateCameraInput()
 {
   Input::update();
   // Camera Transformation

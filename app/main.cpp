@@ -9,7 +9,7 @@
 #include <QApplication>
 #include <QLabel>
 
-#include <mainwidget.h>
+#include <qtkwidget.h>
 #include <mainwindow.h>
 
 

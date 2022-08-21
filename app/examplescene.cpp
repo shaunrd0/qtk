@@ -11,7 +11,7 @@
 #include <meshrenderer.h>
 #include <model.h>
 #include <resourcemanager.h>
-#include <scene.h>
+#include <examplescene.h>
 #include <texture.h>
 
 using namespace Qtk;

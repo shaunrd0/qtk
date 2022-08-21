@@ -14,15 +14,25 @@
    <string>Qtk - MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="Qtk::MainWidget" name="openGLWidget" native="true">
+   <widget class="QWidget" name="qWidget" native="true">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>775</width>
-      <height>550</height>
+      <x>0</x>
+      <y>0</y>
+      <width>801</width>
+      <height>561</height>
      </rect>
     </property>
+    <widget class="Qtk::QtkWidget" name="openGLWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>781</width>
+       <height>541</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -94,9 +104,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>Qtk::MainWidget</class>
-   <extends>QWidget</extends>
-   <header>mainwidget.h</header>
+   <class>Qtk::QtkWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>qtkwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

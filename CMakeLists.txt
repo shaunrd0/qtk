@@ -22,19 +22,27 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   add_compile_options(/wd4131 /wd4127)
 endif()
-message(STATUS "[Qtk]: Compiling with ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "[Qtk] Compiling with ${CMAKE_CXX_COMPILER_ID}")
 
 # Qtk build options
 option(QTK_DEBUG "Enable debugger" ON)
-option(BUILD_SHARED_LIBS "Build shared library" ON)
+message(STATUS "[Qtk] Compiling with QTK_DEBUG=${QTK_DEBUG}")
+option(QTK_UPDATE_SUBMODULES "Update external project (assimp) submodule" ON)
+message(
+  STATUS
+  "[Qtk] Compiling with QTK_UPDATE_SUBMODULES=${QTK_UPDATE_SUBMODULES}"
+)
 
 # Qt options
 set(QT_DIR "$ENV{HOME}/Code/Clones/Qt/6.3.1/gcc_64/" CACHE PATH "Path to Qt6")
 
 # Options for bringing your own assimp installation; Otherwise not needed
-# + If assimp is available system-wide we can just set UPDATE_SUBMODULES OFF
-option(UPDATE_SUBMODULES "Update external project (assimp) git submodule" ON)
+# + If assimp is available system-wide we can just set QTK_UPDATE_SUBMODULES OFF
 option(ASSIMP_NEW_INTERFACE "Use the assimp::assimp interface (WIN / OSX)" OFF)
+message(
+    STATUS
+    "[Qtk] Compiling with ASSIMP_NEW_INTERFACE=${ASSIMP_NEW_INTERFACE}"
+)
 
 ################################################################################
 # External Libraries
@@ -47,15 +55,25 @@ list(APPEND CMAKE_PREFIX_PATH "${QT_DIR}")
 # Find Qt
 find_package(Qt6 COMPONENTS OpenGLWidgets)
 if (NOT Qt6_FOUND)
-  message(SEND_ERROR "[Qtk] Error: Unable to find Qt6 at CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-  message(FATAL_ERROR "[Qtk] Error: Specify path to Qt6 with `cmake -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x.x/gcc_64 -S /path/to/qtk -B /path/to/qtk/build && cmake --build /path/to/qtk/build -j $(nprocs)`")
+  message(
+      SEND_ERROR "[Qtk] Error: Unable to find Qt6 at CMAKE_PREFIX_PATH: "
+      "${CMAKE_PREFIX_PATH}"
+  )
+  message(
+      FATAL_ERROR
+      "[Qtk] Error: Specify path to Qt6 with `cmake "
+      "-DCMAKE_PREFIX_PATH=/path/to/Qt/6.x.x/gcc_64 -S /path/to/qtk -B "
+      "/path/to/qtk/build && cmake --build /path/to/qtk/build -j $(nprocs)`"
+  )
 endif()
 
-if (UPDATE_SUBMODULES)
-  message(STATUS "[Qtk]: Updating submodules...")
+if (QTK_UPDATE_SUBMODULES)
+  message(STATUS "[Qtk] Updating submodules...")
   include("${CMAKE_SOURCE_DIR}/cmake/include/git_submodule.cmake")
-  submodule_update(extern/assimp/assimp/)
-  add_subdirectory(extern/assimp/assimp)
+  submodule_update("${CMAKE_CURRENT_SOURCE_DIR}/extern/assimp/assimp/")
+  add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/extern/assimp/assimp/")
+else()
+  find_package(assimp REQUIRED)
 endif()
 
 
@@ -65,7 +83,7 @@ endif()
 
 set(
   PUBLIC_HEADERS
-  src/mainwidget.h
+  src/qtkwidget.h
   src/abstractscene.h
   src/camera3d.h
   src/mesh.h
@@ -79,7 +97,7 @@ set(
 
 set(
   SOURCE_FILES
-  src/mainwidget.cpp
+  src/qtkwidget.cpp
   src/abstractscene.cpp
   src/camera3d.cpp
   src/input.cpp
@@ -95,7 +113,8 @@ set(
 )
 
 include(GenerateExportHeader)
-qt_add_library(qtk-widget STATIC ${PUBLIC_HEADERS} ${SOURCE_FILES})
+
+add_library(qtk-widget STATIC ${PUBLIC_HEADERS} ${SOURCE_FILES})
 target_include_directories(qtk-widget PRIVATE src/ app/)
 
 set_target_properties(qtk-widget PROPERTIES
@@ -104,15 +123,16 @@ set_target_properties(qtk-widget PROPERTIES
 )
 
 target_link_libraries(qtk-widget PUBLIC Qt6::OpenGLWidgets)
+target_link_libraries(qtk-widget PUBLIC Qt6::Widgets)
 
-if (UPDATE_SUBMODULES OR NOT ASSIMP_NEW_INTERFACE)
+if (QTK_UPDATE_SUBMODULES OR NOT ASSIMP_NEW_INTERFACE)
   target_link_libraries(qtk-widget PUBLIC assimp)
 elseif(ASSIMP_NEW_INTERFACE)
   target_link_libraries(qtk-widget PUBLIC assimp::assimp)
 endif()
 
 if(QTK_DEBUG)
-  message(STATUS "[Qtk]: Building with QTK_DEBUG=${QTK_DEBUG}")
+  message(STATUS "[Qtk] Building with QTK_DEBUG=${QTK_DEBUG}")
   target_compile_definitions(qtk-widget PUBLIC QTK_DEBUG)
 endif()
 
@@ -122,7 +142,6 @@ if(WIN32)
   target_link_libraries(qtk-widget PUBLIC OpenGL::GL)
 endif()
 
-generate_export_header(qtk-widget)
 # Install files
 install(TARGETS qtk-widget
     # Associate qtk-widget target with qtk-export
@@ -156,8 +175,8 @@ configure_file(
 
 # Add our Qt resources.qrc file to our application
 set(QTK_APP_SOURCES app/main.cpp
+    app/examplescene.cpp app/examplescene.h
     app/mainwindow.cpp app/mainwindow.h app/mainwindow.ui
-    app/scene.cpp app/scene.h
     app/resourcemanager.h
     src/qtkresources.h.in
 )
@@ -167,7 +186,7 @@ qt_add_executable(qtk-main ${QTK_APP_SOURCES})
 target_include_directories(qtk-main PRIVATE src/ app/)
 
 # Link qtk-main executable to main qtk-widget library
-target_link_libraries(qtk-main PRIVATE qtk-widget)
+target_link_libraries(qtk-main PUBLIC qtk-widget)
 
 set_target_properties(qtk-main PROPERTIES
     WIN32_EXECUTABLE TRUE
@@ -180,6 +199,7 @@ install(TARGETS qtk-main
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
+generate_export_header(qtk-widget)
 if(WIN32)
   get_target_property(_qt6_qmake_location Qt6::qmake IMPORTED_LOCATION)
   execute_process(COMMAND "${_qt6_qmake_location}" -query QT_INSTALL_PREFIX RESULT_VARIABLE return_code OUTPUT_VARIABLE qt6_install_prefix OUTPUT_STRIP_TRAILING_WHITESPACE)

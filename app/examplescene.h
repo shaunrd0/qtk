@@ -17,7 +17,6 @@
 
 
 class ExampleScene : public Qtk::Scene {
-
 public:
   ExampleScene();
   ~ExampleScene();

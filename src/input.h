@@ -13,10 +13,11 @@
 #include <Qt>
 
 #include <qtkapi.h>
+#include <qtkwidget.h>
 
 namespace Qtk {
   class QTKAPI Input {
-    friend class MainWidget;
+    friend class Qtk::QtkWidget;
   public:
     // Possible key states
     enum InputState

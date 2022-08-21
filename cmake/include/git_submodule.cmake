@@ -10,7 +10,7 @@ find_package(Git)
 # _PATH: Path to git submodule location that we want to update
 # + submodule_update(extern/assimp)
 function(submodule_update _PATH)
-  if (NOT UPDATE_SUBMODULES)
+  if (NOT QTK_UPDATE_SUBMODULES)
     return()
   endif()
 
@@ -19,12 +19,14 @@ function(submodule_update _PATH)
   endif()
 
   execute_process(
-      COMMAND ${GIT_EXECUTABLE} submodule update --init "${_PATH}"
-      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-      RESULT_VARIABLE result
+    COMMAND ${GIT_EXECUTABLE} submodule update --init --force "${_PATH}"
+    RESULT_VARIABLE result
   )
 
   if (NOT result EQUAL 0)
-    message(FATAL_ERROR "[Qtk] Error: Unable to update git submodule at ${_PATH}")
+    message(
+      FATAL_ERROR
+      "[Qtk] Error: Unable to update git submodule at ${_PATH}"
+    )
   endif()
 endfunction()

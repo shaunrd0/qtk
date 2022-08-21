@@ -28,7 +28,14 @@ jobs:
         with:
           version: '6.3.1'
 
+      - name: Chocolatey Action
+        if: matrix.os == 'windows-latest'
+        uses: crazy-max/ghaction-chocolatey@v2.0.0
+        with:
+          args: install pkgconfiglite
+
       - name: Build Qtk
         shell: bash
         run: |
-          cmake -S . -B build/ ${{ matrix.cmake }} && cmake --build build/
+          cmake -S . -B build/ ${{ matrix.cmake }} && cmake --build build/ \
+            --target qtk-main

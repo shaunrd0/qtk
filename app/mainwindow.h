@@ -1,10 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <unordered_map>
+
 #include <QMainWindow>
 
-#include <qtk-widget_export.h>
-#include <scene.h>
+#include "qtk-widget_export.h"
+#include <examplescene.h>
 
 
 namespace Ui {
@@ -21,7 +23,7 @@ public:
 
 private:
   Ui::MainWindow *ui;
-  Qtk::Scene * mScene;
+  std::unordered_map<std::string, Qtk::Scene*> mScenes;
 };
 
 #endif // MAINWINDOW_H
