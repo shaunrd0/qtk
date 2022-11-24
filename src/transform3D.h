@@ -15,99 +15,129 @@
 #include <QVector3D>
 
 #ifndef QT_NO_DEBUG_STREAM
+
 #include <QDebug>
+
 #endif
 
 #include <qtkapi.h>
 
 namespace Qtk {
-  class QTKAPI Transform3D
-  {
-  public:
-    // Constructors
-    inline Transform3D() : m_dirty(true),
-        mScale(1.0f, 1.0f, 1.0f),
-        mTranslation(0.0f, 0.0f, 0.0f) { }
+  class QTKAPI Transform3D {
+    public:
+      // Constructors
+      inline Transform3D() :
+          m_dirty(true), mScale(1.0f, 1.0f, 1.0f),
+          mTranslation(0.0f, 0.0f, 0.0f) {}
 
-    //
-    // Transformations
+      //
+      // Transformations
 
-    void translate(const QVector3D & dt);
-    inline void translate(float dx, float dy, float dz)
-    { translate(QVector3D(dx, dy, dz));}
+      void translate(const QVector3D & dt);
 
-    // Scale object with multiplication
-    void scale(const QVector3D & ds);
-    inline void scale(float dx, float dy, float dz)
-    { scale(QVector3D(dx, dy, dz));}
-    inline void scale(float factor)
-    { scale(QVector3D(factor, factor, factor));}
+      inline void translate(float dx, float dy, float dz) {
+        translate(QVector3D(dx, dy, dz));
+      }
 
-    // Multiplying by a rotation
-    void rotate(const QQuaternion & dr);
-    inline void rotate(float angle, const QVector3D & axis)
-    { rotate(QQuaternion::fromAxisAndAngle(axis, angle));}
-    inline void rotate(float angle, float ax, float ay, float az)
-    { rotate(QQuaternion::fromAxisAndAngle(ax, ay, az, angle));}
+      // Scale object with multiplication
+      void scale(const QVector3D & ds);
 
-    // Scale object by addition
-    void grow(const QVector3D & ds);
-    inline void grow(float dx, float dy, float dz)
-    { grow(QVector3D(dx, dy, dz));}
-    inline void grow(float factor)
-    { grow(QVector3D(factor, factor, factor));}
+      inline void scale(float dx, float dy, float dz) {
+        scale(QVector3D(dx, dy, dz));
+      }
 
-    //
-    // Setters
+      inline void scale(float factor) {
+        scale(QVector3D(factor, factor, factor));
+      }
 
-    // Set object position
-    void setTranslation(const QVector3D & t);
-    inline void setTranslation(float x, float y, float z)
-    { setTranslation(QVector3D(x, y, z));}
+      // Multiplying by a rotation
+      void rotate(const QQuaternion & dr);
 
-    // Set object scale
-    void setScale(const QVector3D & s);
-    inline void setScale(float x, float y, float z)
-    { setScale(QVector3D(x, y, z));}
-    inline void setScale(float k)
-    { setScale(QVector3D(k, k, k));}
+      inline void rotate(float angle, const QVector3D & axis) {
+        rotate(QQuaternion::fromAxisAndAngle(axis, angle));
+      }
 
-    // Set object rotation
-    void setRotation(const QQuaternion & r);
-    inline void setRotation(float angle, const QVector3D & axis)
-    { setRotation(QQuaternion::fromAxisAndAngle(axis, angle));}
-    inline void setRotation(float angle, float ax, float ay, float az)
-    { setRotation(QQuaternion::fromAxisAndAngle(ax, ay, az, angle));}
+      inline void rotate(float angle, float ax, float ay, float az) {
+        rotate(QQuaternion::fromAxisAndAngle(ax, ay, az, angle));
+      }
 
-    //
-    // Accessors
+      // Scale object by addition
+      void grow(const QVector3D & ds);
 
-    inline const QVector3D & translation() const { return mTranslation;}
-    inline const QVector3D & scale() const { return mScale; }
-    inline const QQuaternion & rotation() const { return mRotation; }
-    const QMatrix4x4 & toMatrix();
+      inline void grow(float dx, float dy, float dz) {
+        grow(QVector3D(dx, dy, dz));
+      }
 
-    QVector3D forward() const;
-    QVector3D up() const;
-    QVector3D right() const;
+      inline void grow(float factor) {
+        grow(QVector3D(factor, factor, factor));
+      }
 
-    static const QVector3D LocalForward, LocalUp, LocalRight;
+      //
+      // Setters
 
-  private:
-    QVector3D mTranslation;
-    QQuaternion mRotation;
-    QVector3D mScale;
-    QMatrix4x4 mWorld;
+      // Set object position
+      void setTranslation(const QVector3D & t);
 
-    bool m_dirty;
+      inline void setTranslation(float x, float y, float z) {
+        setTranslation(QVector3D(x, y, z));
+      }
 
+      // Set object scale
+      void setScale(const QVector3D & s);
+
+      inline void setScale(float x, float y, float z) {
+        setScale(QVector3D(x, y, z));
+      }
+
+      inline void setScale(float k) { setScale(QVector3D(k, k, k)); }
+
+      // Set object rotation
+      void setRotation(const QQuaternion & r);
+
+      inline void setRotation(float angle, const QVector3D & axis) {
+        setRotation(QQuaternion::fromAxisAndAngle(axis, angle));
+      }
+
+      inline void setRotation(float angle, float ax, float ay, float az) {
+        setRotation(QQuaternion::fromAxisAndAngle(ax, ay, az, angle));
+      }
+
+      //
+      // Accessors
+
+      [[nodiscard]] inline const QVector3D & getTranslation() const {
+        return mTranslation;
+      }
+
+      [[nodiscard]] inline const QVector3D & getScale() const { return mScale; }
+
+      [[nodiscard]] inline const QQuaternion & getRotation() const {
+        return mRotation;
+      }
+
+      const QMatrix4x4 & toMatrix();
+
+      [[nodiscard]] QVector3D getForward() const;
+      [[nodiscard]] QVector3D getUp() const;
+      [[nodiscard]] QVector3D getRight() const;
+
+      static const QVector3D LocalForward, LocalUp, LocalRight;
+
+    private:
+      QVector3D mTranslation;
+      QQuaternion mRotation;
+      QVector3D mScale;
+      QMatrix4x4 mWorld;
+
+      bool m_dirty;
 
 #ifndef QT_NO_DATASTREAM
-    friend QDataStream &operator<<(QDataStream & out, const Transform3D & transform);
-    friend QDataStream &operator>>(QDataStream & in, Transform3D & transform);
+      friend QDataStream & operator<<(
+          QDataStream & out, const Transform3D & transform);
+      friend QDataStream & operator>>(
+          QDataStream & in, Transform3D & transform);
 #endif
   };
-
 
 // Qt Streams
 #ifndef QT_NO_DEBUG_STREAM
@@ -115,11 +145,11 @@ namespace Qtk {
 #endif
 
 #ifndef QT_NO_DATASTREAM
-  QDataStream &operator<<(QDataStream & out, const Transform3D & transform);
-  QDataStream &operator>>(QDataStream & in, Transform3D & transform);
+  QDataStream & operator<<(QDataStream & out, const Transform3D & transform);
+  QDataStream & operator>>(QDataStream & in, Transform3D & transform);
 #endif
-}
+}  // namespace Qtk
 
 Q_DECLARE_TYPEINFO(Qtk::Transform3D, Q_MOVABLE_TYPE);
 
-#endif // QTK_TRANSFORM3D_H
+#endif  // QTK_TRANSFORM3D_H

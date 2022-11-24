@@ -11,40 +11,50 @@
 
 #include <QDebug>
 
-#include <transform3D.h>
 #include <qtkapi.h>
+#include <transform3D.h>
 
 namespace Qtk {
   class QTKAPI Camera3D {
-  public:
-    // Constants
-    static const QVector3D LocalForward;
-    static const QVector3D LocalUp;
-    static const QVector3D LocalRight;
+    public:
+      // Constants
+      static const QVector3D LocalForward;
+      static const QVector3D LocalUp;
+      static const QVector3D LocalRight;
 
-    // Accessors
-    inline Transform3D & transform() { return mTransform;}
-    inline const QVector3D & translation() const
-    { return mTransform.translation();}
-    inline const QQuaternion & rotation() const
-    { return mTransform.rotation();}
-    const QMatrix4x4 & toMatrix();
+      // Accessors
+      inline Transform3D & transform() { return mTransform; }
 
-    // Queries
-    inline QVector3D forward() const
-    { return mTransform.rotation().rotatedVector(LocalForward);}
-    inline QVector3D right() const
-    { return mTransform.rotation().rotatedVector(LocalRight);}
-    inline QVector3D up() const
-    { return mTransform.rotation().rotatedVector(LocalUp);}
+      [[nodiscard]] inline const QVector3D & translation() const {
+        return mTransform.getTranslation();
+      }
 
-  private:
-    Transform3D mTransform;
-    QMatrix4x4 mWorld;
+      [[nodiscard]] inline const QQuaternion & rotation() const {
+        return mTransform.getRotation();
+      }
+
+      const QMatrix4x4 & toMatrix();
+
+      // Queries
+      [[nodiscard]] inline QVector3D forward() const {
+        return mTransform.getRotation().rotatedVector(LocalForward);
+      }
+
+      [[nodiscard]] inline QVector3D right() const {
+        return mTransform.getRotation().rotatedVector(LocalRight);
+      }
+
+      [[nodiscard]] inline QVector3D up() const {
+        return mTransform.getRotation().rotatedVector(LocalUp);
+      }
+
+    private:
+      Transform3D mTransform;
+      QMatrix4x4 mWorld;
 
 #ifndef QT_NO_DATASTREAM
-    friend QDataStream & operator<<(QDataStream & out, Camera3D & transform);
-    friend QDataStream & operator>>(QDataStream & in, Camera3D & transform);
+      friend QDataStream & operator<<(QDataStream & out, Camera3D & transform);
+      friend QDataStream & operator>>(QDataStream & in, Camera3D & transform);
 #endif
   };
 
@@ -57,8 +67,8 @@ namespace Qtk {
 #ifndef QT_NO_DEBUG_STREAM
   QDebug operator<<(QDebug dbg, const Camera3D & transform);
 #endif
-}
+}  // namespace Qtk
 
 Q_DECLARE_TYPEINFO(Qtk::Camera3D, Q_MOVABLE_TYPE);
 
-#endif // QTK_CAMERA3D_H
+#endif  // QTK_CAMERA3D_H

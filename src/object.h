@@ -15,49 +15,101 @@
 
 #include <mesh.h>
 #include <qtkapi.h>
+#include <texture.h>
 
 namespace Qtk {
   class QTKAPI Object : public QObject {
-  Q_OBJECT
+      Q_OBJECT
 
-  public:
-    friend MeshRenderer;
-    // Initialize an object with no shape data assigned
-    Object(const char * name)
-        : mName(name), mVBO(QOpenGLBuffer::VertexBuffer)
-    { }
-    // Initialize an object with shape data assigned
-    Object(const char * name, const ShapeBase & shape)
-        : mName(name), mVBO(QOpenGLBuffer::VertexBuffer), mShape(shape)
-    { }
+    public:
+      friend MeshRenderer;
 
-    ~Object() {}
+      // Initialize an object with no shape data assigned
+      explicit Object(const char * name) :
+          mName(name), mVBO(QOpenGLBuffer::VertexBuffer), mBound(false) {}
 
-    inline const Vertices & vertices() { return mShape.mVertices;}
-    inline const Indices & indices() { return mShape.mIndices;}
-    inline const Colors & colors() { return mShape.mColors;}
-    inline const TexCoords & texCoords() { return mShape.mTexCoords;}
-    inline const Normals & normals() { return mShape.mNormals;}
-    inline QOpenGLTexture & texture() const { return *mTexture;}
+      // Initialize an object with shape data assigned
+      Object(const char * name, const ShapeBase & shape) :
+          mName(name), mVBO(QOpenGLBuffer::VertexBuffer), mShape(shape),
+          mBound(false) {}
 
-    virtual inline void setVertices(const Vertices & value) { mShape.mVertices = value;}
-    virtual inline void setIndices(const Indices & value) { mShape.mIndices = value;}
-    virtual inline void setColors(const Colors & value) { mShape.mColors = value;}
-    virtual inline void setTexCoords(const TexCoords & value) { mShape.mTexCoords = value;}
-    virtual inline void setNormals(const Normals & value) { mShape.mNormals = value;}
-    virtual inline void setShape(const Shape & value) { mShape = value;}
+      ~Object() override = default;
 
-    QOpenGLBuffer mVBO, mNBO;
-    QOpenGLVertexArrayObject mVAO;
-    QOpenGLShaderProgram mProgram;
+      inline const Colors & getColors() { return mShape.mColors; }
 
-    Transform3D mTransform;
-    Shape mShape;
+      inline const Indices & getIndexData() { return mShape.mIndices; }
 
-    const char * mName;
-  private:
-    QOpenGLTexture * mTexture;
+      inline const Normals & getNormals() { return mShape.mNormals; }
+
+      [[nodiscard]] inline const Shape & getShape() const { return mShape; }
+
+      inline const TexCoords & getTexCoords() { return mShape.mTexCoords; }
+
+      inline Texture & getTexture() { return mTexture; }
+
+      inline const Vertices & getVertices() { return mShape.mVertices; }
+
+      virtual inline void setColors(const Colors & value) {
+        mShape.mColors = value;
+      }
+
+      virtual inline void setIndices(const Indices & value) {
+        mShape.mIndices = value;
+      }
+
+      virtual inline void setNormals(const Normals & value) {
+        mShape.mNormals = value;
+      }
+
+      virtual inline void setShape(const Shape & value) { mShape = value; }
+
+      virtual inline void setTexCoords(const TexCoords & value) {
+        mShape.mTexCoords = value;
+      }
+
+      virtual inline void setTexture(
+          const char * path, bool flipX = false, bool flipY = false) {
+        mTexture.setTexture(path, flipX, flipY);
+      }
+
+      virtual inline void setCubeMap(const char * path) {
+        mTexture.setCubeMap(path);
+      }
+
+      virtual inline void setTexture(const Texture & t) {
+        mTexture.setTexture(t.getPath());
+      }
+
+      virtual inline void setVertices(const Vertices & value) {
+        mShape.mVertices = value;
+      }
+
+      virtual inline void bindShaders() {
+        mBound = true;
+        mProgram.bind();
+      }
+
+      virtual inline void releaseShaders() {
+        mBound = false;
+        mProgram.release();
+      }
+
+      QOpenGLBuffer mVBO, mNBO;
+      QOpenGLVertexArrayObject mVAO;
+
+      Transform3D mTransform;
+      Shape mShape;
+      Texture mTexture;
+      const char * mName;
+      bool mBound;
+
+    private:
+      virtual inline void setTexture(QOpenGLTexture * value) {
+        mTexture.setTexture(value);
+      }
+
+      QOpenGLShaderProgram mProgram;
   };
-}
+}  // namespace Qtk
 
-#endif // QTK_OBJECT_H
+#endif  // QTK_OBJECT_H

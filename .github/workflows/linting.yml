@@ -1,0 +1,67 @@
+name: Linting
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  Tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '6.3.1'
+
+      - name: Install Assimp Ubuntu
+        run: sudo apt install libassimp-dev
+
+      - name: Build Qtk
+        run: |
+          cmake -B build -DQTK_UPDATE_SUBMODULES=OFF && cmake --build build
+
+      - uses: cpp-linter/cpp-linter-action@v2
+        id: linter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Use clang-tools 14
+          version: '14'
+          # Don't use clang-format with this action
+          # + Set to `file` to use .clang-format (Qtk formats with clang 15)
+          style: ''
+          # Use .clang-tidy file
+          tidy-checks: ''
+          # Check the entire repo for source files to tidy
+          files-changed-only: false
+          # Ignore qtk build and external assimp directories
+          ignore: '.github|build|extern/assimp/assimp'
+          # Point to compile_commands.json produced by build
+          database: 'build'
+          # Use thread comments as feedback
+          thread-comments: true
+          # Show file annotations on GH
+          file-annotations: true
+
+      - name: Fail CI if checks don't pass
+        if: steps.linter.outputs.checks-failed != 0
+        run: exit 1
+
+  Format:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path:
+          - 'src'
+          - 'app'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: clang-format Check
+        uses: jidicula/clang-format-action@v4.9.0
+        with:
+          clang-format-version: '15'
+          check-path: ${{ matrix.path }}

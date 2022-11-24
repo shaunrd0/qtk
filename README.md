@@ -1,4 +1,6 @@
 # Qtk
+[![All Builds](https://github.com/shaunrd0/qtk/actions/workflows/all-builds.yml/badge.svg)](https://github.com/shaunrd0/qtk/actions/workflows/all-builds.yml)
+[![Linting](https://github.com/shaunrd0/qtk/actions/workflows/linting.yml/badge.svg)](https://github.com/shaunrd0/qtk/actions/workflows/linting.yml)
 
 Practice project for learning about using OpenGL in Qt widget applications.
 Model loader using [Assimp](https://assimp.org/) within a Qt widget application.
@@ -20,9 +22,11 @@ This project has been ported to Qt6, which is not yet available in Ubuntu apt re
 To run this project, you will *need* to install [Qt6 Open Source Binaries](https://www.qt.io/download-qt-installer) for your system.
 Be sure to take note of the Qt6 installation directory, as we will need it to correctly set our `CMAKE_PREFIX_PATH` in the next steps.
 
+#### Linux
+
 Once Qt6 is installed, to build and run `qtk` on Ubuntu -
 ```bash
-sudo apt update -y && sudo apt install freeglut3-dev libassimp-dev cmake build-essential git
+sudo apt update -y && sudo apt install libassimp-dev cmake build-essential git
 git clone https://gitlab.com/shaunrd0/qtk
 cmake -DCMAKE_PREFIX_PATH=$HOME/Qt/6.3.1/gcc_64 -S qtk/ -B qtk/build/ && cmake --build qtk/build/ -j $(nproc --ignore=2) --target qtk-main
 ./qtk/build/qtk-main
@@ -42,11 +46,71 @@ cmake -DQTK_UPDATE_SUBMODULES=OFF -DCMAKE_PREFIX_PATH=$HOME/Qt/6.3.1/gcc_64 -S q
 ./qtk/build/qtk-main
 ```
 
+#### Windows / MacOS
+
 If you are building on **Windows / Mac** and bringing your own installation of Assimp, consider setting the `-DASSIMP_NEW_INTERFACE` build flag.
 ```bash
 cmake -DASSIMP_NEW_INTERFACE=ON -DQTK_UPDATE_SUBMODULES=OFF -DCMAKE_PREFIX_PATH=$HOME/Qt/6.3.1/gcc_64;/path/to/assimp/ -S qtk/ -B qtk/build/ && cmake --build qtk/build/ -j $(nproc --ignore=2) --target qtk-main
 ```
 
+
+#### Development
+
+This project uses version `15.0.5` of `clang-format`.
+Before merging any branch we should run `clang-tidy` followed by `clang-format`.
+
+```bash
+git clone git@github.com:llvm/llvm-project.git -b llvmorg-15.0.5
+cd llvm-project
+cmake -B build -DLLVM_ENABLE_PROJECTS=clang -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" llvm
+cmake --build build -j $(nproc --ignore=2)
+sudo cmake --build build -j $(nproc --ignore=2) --target install
+```
+
+If this version is any earlier than `15.0.0`, running `clang-format` will fail because this project uses configuration options made available since `15.0.0`.
+
+```bash
+clang-format --version
+clang-format version 15.0.5 (git@github.com:llvm/llvm-project.git 154e88af7ec97d9b9f389e55d45bf07108a9a097)
+```
+
+CLion has integration for IDE code reformatting actions with `clang-format`.
+If you're using CLion, the `.clang-format` configuration will be picked up by CLion automatically.
+
+`clang-tidy` can be run with the following commands.
+
+```bash
+# Move to the root of the repo
+cd qtk
+# Build
+cmake -B build && cmake --build build 
+clang-tidy -p build/ --fix --config-file=.clang-tidy src/*.cpp src/*.h app/*.cpp app/*.h
+```
+
+Last we need to run `clang-format`, this can be done with the command directly.
+This will reformat all the code in the repository.
+
+```bash
+clang-format -i --style=file:.clang-format src/*.cpp src/*.h app/*.cpp app/*.h
+```
+
+`clang-format` can be run with git integration (or CLion if you prefer).
+Git will only reformat the lines you modified, which can be useful.
+
+```bash
+# If we want to format the last N commits
+# git clang-format HEAD~N
+# 3 commits
+git clang-format HEAD~3
+changed files:
+    app/examplescene.h
+    app/mainwindow.h
+    src/abstractscene.cpp
+    src/skybox.h
+    src/texture.cpp
+    src/texture.h
+    src/transform3D.h
+```
 
 ### Controls
 

@@ -16,40 +16,41 @@
 
 #include <QMatrix4x4>
 
-
 namespace Qtk {
   class Scene : protected QOpenGLFunctions {
-    friend class MainWidget;
+      friend class MainWidget;
 
-  public:
-    Scene();
-    ~Scene();
+    public:
+      Scene();
+      ~Scene();
 
-    virtual void init() = 0;
-    virtual void draw() { privDraw(); };
-    virtual void update() = 0;
+      virtual void init() = 0;
 
-    static Camera3D & Camera() { return mCamera;}
-    static QMatrix4x4 View() { return mCamera.toMatrix();}
-    static QMatrix4x4 & Projection() { return mProjection;}
+      virtual void draw() { privDraw(); };
+      virtual void update() = 0;
 
-    inline Skybox * getSkybox() {return mSkybox;}
-    inline void setSkybox(Skybox * skybox) {
-      mSkybox = skybox;
-    }
+      static Camera3D & Camera() { return mCamera; }
 
-  private:
-    static Camera3D mCamera;
-    static QMatrix4x4 mProjection;
-    bool mInit = false;
+      static QMatrix4x4 View() { return mCamera.toMatrix(); }
 
-    void privDraw();
+      static QMatrix4x4 & Projection() { return mProjection; }
 
-  protected:
-    Skybox * mSkybox;
-    std::vector<MeshRenderer *> mMeshes;
-    std::vector<Model *> mModels;
+      inline Skybox * getSkybox() { return mSkybox; }
+
+      inline void setSkybox(Skybox * skybox) { mSkybox = skybox; }
+
+    private:
+      static Camera3D mCamera;
+      static QMatrix4x4 mProjection;
+      bool mInit = false;
+
+      void privDraw();
+
+    protected:
+      Skybox * mSkybox {};
+      std::vector<MeshRenderer *> mMeshes {};
+      std::vector<Model *> mModels {};
   };
-}
+}  // namespace Qtk
 
-#endif // QTK_SCENE_H
+#endif  // QTK_SCENE_H

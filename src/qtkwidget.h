@@ -15,60 +15,61 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
 
-#include <qtkapi.h>
 #include <abstractscene.h>
+#include <qtkapi.h>
 
 namespace Qtk {
-  class QTKAPI QtkWidget : public QOpenGLWidget,
-                           protected QOpenGLFunctions {
-  Q_OBJECT;
+  class QTKAPI QtkWidget : public QOpenGLWidget, protected QOpenGLFunctions {
+      Q_OBJECT;
 
-  public:
-    // Constructors
-    QtkWidget();
-    explicit QtkWidget(QWidget *parent);
-    explicit QtkWidget(const QSurfaceFormat &format);
-    ~QtkWidget() override;
+    public:
+      // Constructors
+      QtkWidget();
+      explicit QtkWidget(QWidget * parent);
+      explicit QtkWidget(const QSurfaceFormat & format);
+      ~QtkWidget() override;
 
-  private:
-    void teardownGL();
+    private:
+      void teardownGL();
 
-  public:
-    // Inherited virtual Members
-    void paintGL() override;
-    void initializeGL() override;
-    void resizeGL(int width, int height) override;
+    public:
+      // Inherited virtual Members
+      void paintGL() override;
+      void initializeGL() override;
+      void resizeGL(int width, int height) override;
 
-    inline Qtk::Scene * getScene() {return mScene;}
-    inline void setScene(Qtk::Scene * scene) {
-      if (mScene != Q_NULLPTR) delete mScene;
-      mScene = scene;
-    }
+      inline Qtk::Scene * getScene() { return mScene; }
 
-  protected slots:
-    void update();
+      inline void setScene(Qtk::Scene * scene) {
+        delete mScene;
+
+        mScene = scene;
+      }
+
+    protected slots:
+      void update();
 #ifdef QTK_DEBUG
-    void messageLogged(const QOpenGLDebugMessage &msg);
+      static void messageLogged(const QOpenGLDebugMessage & msg);
 #endif
 
-    // Protected Helpers
-  protected:
-    void keyPressEvent(QKeyEvent *event);
-    void keyReleaseEvent(QKeyEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
+      // Protected Helpers
+    protected:
+      void keyPressEvent(QKeyEvent * event) override;
+      void keyReleaseEvent(QKeyEvent * event) override;
+      void mousePressEvent(QMouseEvent * event) override;
+      void mouseReleaseEvent(QMouseEvent * event) override;
 
-  private:
-    // Private helpers
-    void initializeWidget();
-    void updateCameraInput();
+    private:
+      // Private helpers
+      void initializeWidget();
+      static void updateCameraInput();
 
-    Qtk::Scene * mScene;
+      Qtk::Scene * mScene;
 #ifdef QTK_DEBUG
-    void printContextInformation();
-    QOpenGLDebugLogger * mDebugLogger;
+      void printContextInformation();
+      QOpenGLDebugLogger * mDebugLogger;
 #endif
   };
-}
+}  // namespace Qtk
 
-#endif // QTK_QTKWIDGET_H
+#endif  // QTK_QTKWIDGET_H

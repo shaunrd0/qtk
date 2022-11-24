@@ -8,10 +8,10 @@
 
 #include <QKeyEvent>
 
-#include <input.h>
-#include <qtkwidget.h>
-#include <mesh.h>
 #include <abstractscene.h>
+#include <input.h>
+#include <mesh.h>
+#include <qtkwidget.h>
 
 using namespace Qtk;
 
@@ -19,57 +19,50 @@ using namespace Qtk;
  * Constructors, Destructors
  ******************************************************************************/
 
-QtkWidget::QtkWidget() : mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR)
-{
+QtkWidget::QtkWidget() : mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR) {
   initializeWidget();
 }
 
 // Constructor for using this widget in QtDesigner
-QtkWidget::QtkWidget(QWidget *parent) : QOpenGLWidget(parent),
-    mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR)
-{
+QtkWidget::QtkWidget(QWidget * parent) :
+    QOpenGLWidget(parent), mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR) {
   initializeWidget();
 }
 
-QtkWidget::QtkWidget(const QSurfaceFormat &format)
-    : mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR)
-{
+QtkWidget::QtkWidget(const QSurfaceFormat & format) :
+    mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR) {
   setFormat(format);
   setFocusPolicy(Qt::ClickFocus);
 }
 
-QtkWidget::~QtkWidget()
-{
+QtkWidget::~QtkWidget() {
   makeCurrent();
   teardownGL();
 }
-
 
 /*******************************************************************************
  * Private Member Functions
  ******************************************************************************/
 
-void QtkWidget::teardownGL()
-{
+void QtkWidget::teardownGL() {
   // Nothing to teardown yet...
 }
-
 
 /*******************************************************************************
  * Inherited Virtual Member Functions
  ******************************************************************************/
 
-void QtkWidget::paintGL()
-{
+void QtkWidget::paintGL() {
   // Clear buffers
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
   // Draw the scene first, since it handles drawing our skybox
-  if (mScene != Q_NULLPTR) mScene->draw();
+  if(mScene != Q_NULLPTR) {
+    mScene->draw();
+  }
 }
 
-void QtkWidget::initializeGL()
-{
+void QtkWidget::initializeGL() {
   initializeOpenGLFunctions();
   // Connect the frameSwapped signal to call the update() function
   connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
@@ -77,17 +70,18 @@ void QtkWidget::initializeGL()
   // Initialize OpenGL debug context
 #ifdef QTK_DEBUG
   mDebugLogger = new QOpenGLDebugLogger(this);
-  if (mDebugLogger->initialize()) {
+  if(mDebugLogger->initialize()) {
     qDebug() << "GL_DEBUG Debug Logger" << mDebugLogger << "\n";
-    connect(mDebugLogger, SIGNAL(messageLogged(QOpenGLDebugMessage)),
-            this, SLOT(messageLogged(QOpenGLDebugMessage)));
+    connect(
+        mDebugLogger, SIGNAL(messageLogged(QOpenGLDebugMessage)), this,
+        SLOT(messageLogged(QOpenGLDebugMessage)));
     mDebugLogger->startLogging();
   }
-#endif // QTK_DEBUG
+#endif  // QTK_DEBUG
 
   printContextInformation();
 
-// Initialize opengl settings
+  // Initialize opengl settings
   glEnable(GL_MULTISAMPLE);
   glEnable(GL_DEPTH_TEST);
   glDepthMask(GL_TRUE);
@@ -98,35 +92,31 @@ void QtkWidget::initializeGL()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void QtkWidget::resizeGL(int width, int height)
-{
+void QtkWidget::resizeGL(int width, int height) {
   Scene::Projection().setToIdentity();
-  Scene::Projection().perspective(45.0f,
-                          float(width) / float(height),
-                          0.1f, 1000.0f);
+  Scene::Projection().perspective(
+      45.0f, float(width) / float(height), 0.1f, 1000.0f);
 }
-
 
 /*******************************************************************************
  * Protected Slots
  ******************************************************************************/
 
-void QtkWidget::update()
-{
+void QtkWidget::update() {
   updateCameraInput();
 
-  if (mScene != Q_NULLPTR) mScene->update();
+  if(mScene != Q_NULLPTR) {
+    mScene->update();
+  }
 
   QWidget::update();
 }
 
-void QtkWidget::messageLogged(const QOpenGLDebugMessage &msg)
-{
+void QtkWidget::messageLogged(const QOpenGLDebugMessage & msg) {
   QString error;
 
   // Format based on severity
-  switch (msg.severity())
-  {
+  switch(msg.severity()) {
     case QOpenGLDebugMessage::NotificationSeverity:
       error += "--";
       break;
@@ -144,9 +134,11 @@ void QtkWidget::messageLogged(const QOpenGLDebugMessage &msg)
   error += " (";
 
   // Format based on source
-#define CASE(c) case QOpenGLDebugMessage::c: error += #c; break
-  switch (msg.source())
-  {
+#define CASE(c)                \
+  case QOpenGLDebugMessage::c: \
+    error += #c;               \
+    break
+  switch(msg.source()) {
     CASE(APISource);
     CASE(WindowSystemSource);
     CASE(ShaderCompilerSource);
@@ -160,9 +152,11 @@ void QtkWidget::messageLogged(const QOpenGLDebugMessage &msg)
   error += " : ";
 
 // Format based on type
-#define CASE(c) case QOpenGLDebugMessage::c: error += #c; break
-  switch (msg.type())
-  {
+#define CASE(c)                \
+  case QOpenGLDebugMessage::c: \
+    error += #c;               \
+    break
+  switch(msg.type()) {
     CASE(InvalidType);
     CASE(ErrorType);
     CASE(DeprecatedBehaviorType);
@@ -180,14 +174,12 @@ void QtkWidget::messageLogged(const QOpenGLDebugMessage &msg)
   qDebug() << qPrintable(error) << "\n" << qPrintable(msg.message()) << "\n";
 }
 
-
 /*******************************************************************************
  * Protected Helpers
  ******************************************************************************/
 
-void QtkWidget::keyPressEvent(QKeyEvent *event)
-{
-  if (event->isAutoRepeat()) {
+void QtkWidget::keyPressEvent(QKeyEvent * event) {
+  if(event->isAutoRepeat()) {
     // Do not repeat input while a key is held down
     event->ignore();
   } else {
@@ -195,32 +187,27 @@ void QtkWidget::keyPressEvent(QKeyEvent *event)
   }
 }
 
-void QtkWidget::keyReleaseEvent(QKeyEvent *event)
-{
-  if (event->isAutoRepeat()) {
+void QtkWidget::keyReleaseEvent(QKeyEvent * event) {
+  if(event->isAutoRepeat()) {
     event->ignore();
   } else {
     Input::registerKeyRelease(event->key());
   }
 }
 
-void QtkWidget::mousePressEvent(QMouseEvent *event)
-{
+void QtkWidget::mousePressEvent(QMouseEvent * event) {
   Input::registerMousePress(event->button());
 }
 
-void QtkWidget::mouseReleaseEvent(QMouseEvent *event)
-{
+void QtkWidget::mouseReleaseEvent(QMouseEvent * event) {
   Input::registerMouseRelease(event->button());
 }
-
 
 /*******************************************************************************
  * Private Helpers
  ******************************************************************************/
 
-void QtkWidget::initializeWidget()
-{
+void QtkWidget::initializeWidget() {
   QSurfaceFormat format;
   format.setRenderableType(QSurfaceFormat::OpenGL);
   format.setProfile(QSurfaceFormat::CoreProfile);
@@ -237,8 +224,7 @@ void QtkWidget::initializeWidget()
   setFocusPolicy(Qt::ClickFocus);
 }
 
-void QtkWidget::printContextInformation()
-{
+void QtkWidget::printContextInformation() {
   QString glType;
   QString glVersion;
   QString glProfile;
@@ -246,65 +232,62 @@ void QtkWidget::printContextInformation()
   QString glVendor;
   QString glRenderer;
 
-
   // Get Version Information
   glType = (context()->isOpenGLES()) ? "OpenGL ES" : "OpenGL";
   glVersion = reinterpret_cast<const char *>(glGetString(GL_VERSION));
-  glVendor =
-      reinterpret_cast<const char *>(glGetString(GL_VENDOR));
-  glRenderer =
-      reinterpret_cast<const char *>(glGetString(GL_RENDERER));
+  glVendor = reinterpret_cast<const char *>(glGetString(GL_VENDOR));
+  glRenderer = reinterpret_cast<const char *>(glGetString(GL_RENDERER));
 
   // Get Profile Information
-#define CASE(c) case QSurfaceFormat::c: glProfile = #c; break
-  switch (format().profile()) {
+#define CASE(c)           \
+  case QSurfaceFormat::c: \
+    glProfile = #c;       \
+    break
+  switch(format().profile()) {
     CASE(NoProfile);
     CASE(CoreProfile);
     CASE(CompatibilityProfile);
   }
 #undef CASE
 
-// qPrintable() will print our QString w/o quotes around it.
+  // qPrintable() will print our QString w/o quotes around it.
   qDebug() << qPrintable(glType) << qPrintable(glVersion) << "("
            << qPrintable(glProfile) << ")"
            << "\nOpenGL Vendor: " << qPrintable(glVendor)
            << "\nRendering Device: " << qPrintable(glRenderer) << "\n";
-
-
 }
 
-void QtkWidget::updateCameraInput()
-{
+void QtkWidget::updateCameraInput() {
   Input::update();
   // Camera Transformation
-  if (Input::buttonPressed(Qt::RightButton)) {
+  if(Input::buttonPressed(Qt::RightButton)) {
     static const float transSpeed = 0.1f;
     static const float rotSpeed = 0.5f;
 
     // Handle rotations
-    Scene::Camera().transform().rotate(-rotSpeed * Input::mouseDelta().x(),
-                               Camera3D::LocalUp);
-    Scene::Camera().transform().rotate(-rotSpeed * Input::mouseDelta().y(),
-                               Scene::Camera().right());
+    Scene::Camera().transform().rotate(
+        -rotSpeed * Input::mouseDelta().x(), Camera3D::LocalUp);
+    Scene::Camera().transform().rotate(
+        -rotSpeed * Input::mouseDelta().y(), Scene::Camera().right());
 
     // Handle translations
     QVector3D translation;
-    if (Input::keyPressed(Qt::Key_W)) {
+    if(Input::keyPressed(Qt::Key_W)) {
       translation += Scene::Camera().forward();
     }
-    if (Input::keyPressed(Qt::Key_S)) {
+    if(Input::keyPressed(Qt::Key_S)) {
       translation -= Scene::Camera().forward();
     }
-    if (Input::keyPressed(Qt::Key_A)) {
+    if(Input::keyPressed(Qt::Key_A)) {
       translation -= Scene::Camera().right();
     }
-    if (Input::keyPressed(Qt::Key_D)) {
+    if(Input::keyPressed(Qt::Key_D)) {
       translation += Scene::Camera().right();
     }
-    if (Input::keyPressed(Qt::Key_Q)) {
+    if(Input::keyPressed(Qt::Key_Q)) {
       translation -= Scene::Camera().up() / 2.0f;
     }
-    if (Input::keyPressed(Qt::Key_E)) {
+    if(Input::keyPressed(Qt::Key_E)) {
       translation += Scene::Camera().up() / 2.0f;
     }
     Scene::Camera().transform().translate(transSpeed * translation);

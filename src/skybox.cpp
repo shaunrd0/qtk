@@ -12,50 +12,50 @@
 
 using namespace Qtk;
 
-Skybox::Skybox(std::string right, std::string top, std::string front,
-               std::string left, std::string bottom, std::string back,
-               const std::string & name)
-    : mVBO(QOpenGLBuffer::VertexBuffer),
-      mVertices(Cube(QTK_DRAW_ELEMENTS).vertices()),
-      mIndices(Cube(QTK_DRAW_ELEMENTS).indices())
-{
+Skybox::Skybox(
+    const std::string & right, const std::string & top,
+    const std::string & front, const std::string & left,
+    const std::string & bottom, const std::string & back,
+    const std::string & name) :
+    mVBO(QOpenGLBuffer::VertexBuffer),
+    mVertices(Cube(QTK_DRAW_ELEMENTS).getVertices()),
+    mIndices(Cube(QTK_DRAW_ELEMENTS).getIndexData()) {
   init();
-  mCubeMap = Texture::initCubeMap(
+  mTexture.setCubeMap(
       QImage(right.c_str()).mirrored(), QImage(top.c_str()),
-      QImage(front.c_str()), QImage(left.c_str()),
-      QImage(bottom.c_str()), QImage(back.c_str()));
+      QImage(front.c_str()), QImage(left.c_str()), QImage(bottom.c_str()),
+      QImage(back.c_str()));
 }
 
-Skybox::Skybox(std::string name)
-    : Skybox(":/right.png", ":/top.png", ":/front.png",
-             ":/left.png", ":/bottom.png", ":/back.png",
-             name)
-{}
+Skybox::Skybox(const std::string & name) :
+    Skybox(
+        ":/right.png", ":/top.png", ":/front.png", ":/left.png", ":/bottom.png",
+        ":/back.png", name) {}
 
-Skybox::Skybox(QOpenGLTexture * cubeMap, const std::string & name)
-    : mCubeMap(cubeMap) { init();}
-
+Skybox::Skybox(QOpenGLTexture * cubeMap, const std::string & name) :
+    mTexture(cubeMap) {
+  init();
+}
 
 /*******************************************************************************
  * Public Member Functions
  ******************************************************************************/
 
-void Skybox::draw()
-{
+void Skybox::draw() {
   glDepthFunc(GL_LEQUAL);
   glDepthMask(GL_FALSE);
 
   mVAO.bind();
   mProgram.bind();
-  mCubeMap->bind();
+  mTexture.getOpenGLTexture().bind();
 
   mProgram.setUniformValue("uProjectionMatrix", Scene::Projection());
   mProgram.setUniformValue("uViewMatrix", Scene::Camera().toMatrix());
   mProgram.setUniformValue("uTexture", 0);
-  glDrawElements(GL_TRIANGLES, mIndices.size(),
-                 GL_UNSIGNED_INT, mIndices.data());
+  glDrawElements(
+      GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, mIndices.data());
 
-  mCubeMap->release();
+  mTexture.getOpenGLTexture().bind();
   mProgram.release();
   mVAO.release();
 
@@ -64,13 +64,11 @@ void Skybox::draw()
   glActiveTexture(GL_TEXTURE0);
 }
 
-
 /*******************************************************************************
  * Private Member Functions
  ******************************************************************************/
 
-void Skybox::init()
-{
+void Skybox::init() {
   initializeOpenGLFunctions();
 
   // Set up shader program

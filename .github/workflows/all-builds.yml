@@ -1,4 +1,4 @@
-name: Build Test
+name: All Builds
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: crazy-max/ghaction-chocolatey@v2.0.0
         with:
-          args: install pkgconfiglite
+          args: install pkgconfiglite --checksum e87b5ea3c9142256af60f2d5b917aa63b571e6a0 --checksum-type sha1
 
       - name: Build Qtk
         shell: bash

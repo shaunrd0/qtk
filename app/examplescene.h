@@ -15,22 +15,20 @@
 
 #include <QMatrix4x4>
 
-
 class ExampleScene : public Qtk::Scene {
-public:
-  ExampleScene();
-  ~ExampleScene();
+  public:
+    ExampleScene();
+    ~ExampleScene();
 
-  virtual void init();
-  virtual void draw() override;
-  virtual void update();
+    void init() override;
+    void draw() override;
+    void update() override;
 
-private:
-
-  Qtk::MeshRenderer * mTestPhong;
-  Qtk::MeshRenderer * mTestSpecular;
-  Qtk::MeshRenderer * mTestDiffuse;
-  Qtk::MeshRenderer * mTestAmbient;
+  private:
+    Qtk::MeshRenderer * mTestPhong {};
+    Qtk::MeshRenderer * mTestSpecular {};
+    Qtk::MeshRenderer * mTestDiffuse {};
+    Qtk::MeshRenderer * mTestAmbient {};
 };
 
-#endif // QTK_EXAMPLE_SCENE_H
+#endif  // QTK_EXAMPLE_SCENE_H

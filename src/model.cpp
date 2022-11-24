@@ -19,18 +19,15 @@ using namespace Qtk;
 Model::ModelManager Model::mManager;
 
 // Static function to access ModelManager for getting Models by name
-Model * Model::getInstance(const char * name)
-{
+Model * Model::getInstance(const char * name) {
   return mManager[name];
 }
-
 
 /*******************************************************************************
  * ModelMesh Private Member Functions
  ******************************************************************************/
 
-void ModelMesh::initMesh(const char * vert, const char * frag)
-{
+void ModelMesh::initMesh(const char * vert, const char * frag) {
   initializeOpenGLFunctions();
 
   // Create VAO, VBO, EBO
@@ -44,14 +41,12 @@ void ModelMesh::initMesh(const char * vert, const char * frag)
   mVBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
   mVBO->bind();
 
-  mVBO->allocate(mVertices.data(),
-                 mVertices.size() * sizeof(mVertices[0]));
+  mVBO->allocate(mVertices.data(), mVertices.size() * sizeof(mVertices[0]));
 
   // Allocate EBO
   mEBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
   mEBO->bind();
-  mEBO->allocate(mIndices.data(),
-                 mIndices.size() * sizeof(mIndices[0]));
+  mEBO->allocate(mIndices.data(), mIndices.size() * sizeof(mIndices[0]));
   mEBO->release();
 
   // Load and link shaders
@@ -62,46 +57,40 @@ void ModelMesh::initMesh(const char * vert, const char * frag)
 
   // Positions
   mProgram->enableAttributeArray(0);
-  mProgram->setAttributeBuffer(0, GL_FLOAT,
-                               offsetof(ModelVertex, mPosition), 3,
-                               sizeof(ModelVertex));
+  mProgram->setAttributeBuffer(
+      0, GL_FLOAT, offsetof(ModelVertex, mPosition), 3, sizeof(ModelVertex));
 
   // Normals
   mProgram->enableAttributeArray(1);
-  mProgram->setAttributeBuffer(1, GL_FLOAT,
-                               offsetof(ModelVertex, mNormal), 3,
-                               sizeof(ModelVertex));
+  mProgram->setAttributeBuffer(
+      1, GL_FLOAT, offsetof(ModelVertex, mNormal), 3, sizeof(ModelVertex));
 
   // Texture Coordinates
   mProgram->enableAttributeArray(2);
-  mProgram->setAttributeBuffer(2, GL_FLOAT,
-                               offsetof(ModelVertex, mTextureCoord), 2,
-                               sizeof(ModelVertex));
+  mProgram->setAttributeBuffer(
+      2, GL_FLOAT, offsetof(ModelVertex, mTextureCoord), 2,
+      sizeof(ModelVertex));
 
   // Vertex tangents
   mProgram->enableAttributeArray(3);
-  mProgram->setAttributeBuffer(3, GL_FLOAT,
-                               offsetof(ModelVertex, mTangent), 3,
-                               sizeof(ModelVertex));
+  mProgram->setAttributeBuffer(
+      3, GL_FLOAT, offsetof(ModelVertex, mTangent), 3, sizeof(ModelVertex));
 
   // Vertex bitangents
   mProgram->enableAttributeArray(4);
-  mProgram->setAttributeBuffer(4, GL_FLOAT,
-                               offsetof(ModelVertex, mBitangent), 3,
-                               sizeof(ModelVertex));
+  mProgram->setAttributeBuffer(
+      4, GL_FLOAT, offsetof(ModelVertex, mBitangent), 3, sizeof(ModelVertex));
 
   mProgram->release();
   mVBO->release();
   mVAO->release();
 }
 
-
 /*******************************************************************************
  * ModelMesh Public Member Functions
  ******************************************************************************/
 
-void ModelMesh::draw(QOpenGLShaderProgram & shader)
-{
+void ModelMesh::draw(QOpenGLShaderProgram & shader) {
   mVAO->bind();
   // Bind shader
   shader.bind();
@@ -114,7 +103,7 @@ void ModelMesh::draw(QOpenGLShaderProgram & shader)
   GLuint diffuseCount = 1;
   GLuint specularCount = 1;
   GLuint normalCount = 1;
-  for (GLuint i = 0; i < mTextures.size(); i++) {
+  for(GLuint i = 0; i < mTextures.size(); i++) {
     // Activate the current texture index by adding offset to GL_TEXTURE0
     glActiveTexture(GL_TEXTURE0 + i);
     mTextures[i].mTexture->bind();
@@ -124,20 +113,26 @@ void ModelMesh::draw(QOpenGLShaderProgram & shader)
     // Specular:   material.texture_specular1, material.texture_specular2, ...
     std::string number;
     std::string name = mTextures[i].mType;
-    if (name == "texture_diffuse") number = std::to_string(diffuseCount++);
-    if (name == "texture_specular") number = std::to_string(specularCount++);
-    if (name == "texture_normal") number = std::to_string(normalCount++);
+    if(name == "texture_diffuse") {
+      number = std::to_string(diffuseCount++);
+    }
+    if(name == "texture_specular") {
+      number = std::to_string(specularCount++);
+    }
+    if(name == "texture_normal") {
+      number = std::to_string(normalCount++);
+    }
 
     // Set the uniform to track this texture ID using our naming convention
     shader.setUniformValue((name + number).c_str(), i);
   }
 
   // Draw the mesh
-  glDrawElements(GL_TRIANGLES, mIndices.size(),
-                 GL_UNSIGNED_INT, mIndices.data());
+  glDrawElements(
+      GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, mIndices.data());
 
   // Release shader, textures
-  for (const auto & texture : mTextures) {
+  for(const auto & texture : mTextures) {
     texture.mTexture->release();
   }
   shader.release();
@@ -145,47 +140,41 @@ void ModelMesh::draw(QOpenGLShaderProgram & shader)
   glActiveTexture(GL_TEXTURE0);
 }
 
-
 /*******************************************************************************
  * Model Public Member Functions
  ******************************************************************************/
 
-void Model::draw()
-{
-  for (GLuint i = 0; i < mMeshes.size(); i++) {
-    mMeshes[i].mTransform = mTransform;
-    mMeshes[i].draw();
+void Model::draw() {
+  for(auto & mMeshe : mMeshes) {
+    mMeshe.mTransform = mTransform;
+    mMeshe.draw();
   }
 }
 
-void Model::draw(QOpenGLShaderProgram & shader)
-{
-  for (GLuint i = 0; i < mMeshes.size(); i++) {
-    mMeshes[i].mTransform = mTransform;
-    mMeshes[i].draw(shader);
+void Model::draw(QOpenGLShaderProgram & shader) {
+  for(auto & mMeshe : mMeshes) {
+    mMeshe.mTransform = mTransform;
+    mMeshe.draw(shader);
   }
 }
 
-void Model::flipTexture(const std::string & fileName, bool flipX, bool flipY)
-{
+void Model::flipTexture(const std::string & fileName, bool flipX, bool flipY) {
   bool modified = false;
   std::string fullPath = mDirectory + '/' + fileName;
-  for (auto & texture : mTexturesLoaded) {
-    if (texture.mPath == fileName) {
+  for(auto & texture : mTexturesLoaded) {
+    if(texture.mPath == fileName) {
       texture.mTexture->destroy();
       texture.mTexture->create();
       texture.mTexture->setData(
-          *Texture::initImage(fullPath.c_str(), flipX, flipY));
+          *OpenGLTextureFactory::initImage(fullPath.c_str(), flipX, flipY));
       modified = true;
     }
   }
-  if (!modified) {
+  if(!modified) {
     qDebug() << "Attempt to flip texture that doesn't exist: "
              << fullPath.c_str() << "\n";
   }
-
 }
-
 
 /*******************************************************************************
  * Model Private Member Functions
@@ -206,31 +195,25 @@ void Model::flipTexture(const std::string & fileName, bool flipX, bool flipY)
  *
  * @param path Absolute path to a model .obj or other format accepted by assimp
  */
-void Model::loadModel(const std::string & path)
-{
+void Model::loadModel(const std::string & path) {
   Assimp::Importer import;
 
   // JIC a relative path was used, get the absolute file path
   QFileInfo info(path.c_str());
   info.makeAbsolute();
   mDirectory = path[0] == ':' ? RM::getPath(path)
-      : info.absoluteFilePath().toStdString();
+                              : info.absoluteFilePath().toStdString();
 
   // Import the model, converting non-triangular geometry to triangles
   // + And flipping texture UVs, etc..
   // Assimp options: http://assimp.sourceforge.net/lib_html/postprocess_8h.html
-  const aiScene * scene =
-      import.ReadFile(mDirectory, aiProcess_Triangulate
-                            | aiProcess_FlipUVs
-                            | aiProcess_GenSmoothNormals
-                            | aiProcess_CalcTangentSpace
-                            | aiProcess_OptimizeMeshes
-                            | aiProcess_SplitLargeMeshes
-      );
-
+  const aiScene * scene = import.ReadFile(
+      mDirectory, aiProcess_Triangulate | aiProcess_FlipUVs
+                      | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace
+                      | aiProcess_OptimizeMeshes | aiProcess_SplitLargeMeshes);
 
   // If there were errors, print and return
-  if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+  if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
     qDebug() << "Error::ASSIMP::" << import.GetErrorString() << "\n";
     return;
   }
@@ -250,28 +233,26 @@ void Model::loadModel(const std::string & path)
   mManager.insert(mName, this);
 }
 
-void Model::processNode(aiNode * node, const aiScene * scene)
-{
+void Model::processNode(aiNode * node, const aiScene * scene) {
   // Process each mesh that is available for this node
-  for (GLuint i  = 0; i < node->mNumMeshes; i++) {
+  for(GLuint i = 0; i < node->mNumMeshes; i++) {
     aiMesh * mesh = scene->mMeshes[node->mMeshes[i]];
     mMeshes.push_back(processMesh(mesh, scene));
   }
 
   // Process each child node for this mesh using recursion
-  for (GLuint i  = 0; i < node->mNumChildren; i++) {
+  for(GLuint i = 0; i < node->mNumChildren; i++) {
     processNode(node->mChildren[i], scene);
   }
 }
 
-ModelMesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
-{
+ModelMesh Model::processMesh(aiMesh * mesh, const aiScene * scene) {
   ModelMesh::Vertices vertices;
   ModelMesh::Indices indices;
   ModelMesh::Textures textures;
 
   // For each vertex in the aiMesh
-  for (GLuint i = 0; i < mesh->mNumVertices; i++) {
+  for(GLuint i = 0; i < mesh->mNumVertices; i++) {
     // Create a local vertex object for positions, normals, and texture coords
     ModelVertex vertex;
 
@@ -285,7 +266,7 @@ ModelMesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
     // Set the position of our local vertex to the local vector object
     vertex.mPosition = vector3D;
 
-    if (mesh->HasNormals()) {
+    if(mesh->HasNormals()) {
       // Initialize vertex normal
       vector3D.setX(mesh->mNormals[i].x);
       vector3D.setY(mesh->mNormals[i].y);
@@ -295,7 +276,7 @@ ModelMesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
     }
 
     // Initialize texture coordinates, if any are available
-    if (mesh->mTextureCoords[0]) {
+    if(mesh->mTextureCoords[0]) {
       QVector2D vector2D;
       // Texture coordinates
       vector2D.setX(mesh->mTextureCoords[0][i].x);
@@ -313,8 +294,7 @@ ModelMesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
       vector3D.setY(mesh->mBitangents[i].y);
       vector3D.setZ(mesh->mBitangents[i].z);
       vertex.mBitangent = vector3D;
-    }
-    else {
+    } else {
       vertex.mTextureCoord = {0.0f, 0.0f};
     }
 
@@ -323,62 +303,56 @@ ModelMesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
   }
 
   // For each face on the mesh, process its indices
-  for (GLuint i = 0; i < mesh->mNumFaces; i++) {
+  for(GLuint i = 0; i < mesh->mNumFaces; i++) {
     aiFace face = mesh->mFaces[i];
-    for (GLuint j = 0; j < face.mNumIndices; j++) {
+    for(GLuint j = 0; j < face.mNumIndices; j++) {
       // Add the index to out container of indices
       indices.push_back(face.mIndices[j]);
     }
   }
 
   // Process material
-  if (mesh->mMaterialIndex >= 0) {
+  if(mesh->mMaterialIndex >= 0) {
     // Get the material attached to the model using Assimp
     aiMaterial * material = scene->mMaterials[mesh->mMaterialIndex];
 
     // Get all diffuse textures from the material
-    ModelMesh::Textures diffuseMaps =
-        loadMaterialTextures(material, aiTextureType_DIFFUSE,
-                             "texture_diffuse");
+    ModelMesh::Textures diffuseMaps = loadMaterialTextures(
+        material, aiTextureType_DIFFUSE, "texture_diffuse");
     // Insert all diffuse textures found into our textures container
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
     // Get all specular textures from the material
-    ModelMesh::Textures specularMaps =
-        loadMaterialTextures(material, aiTextureType_SPECULAR,
-                             "texture_specular");
+    ModelMesh::Textures specularMaps = loadMaterialTextures(
+        material, aiTextureType_SPECULAR, "texture_specular");
     // Insert all specular textures found into our textures container
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
     // Get all normal textures from the material
     ModelMesh::Textures normalMaps =
-        loadMaterialTextures(material, aiTextureType_HEIGHT,
-                             "texture_normal");
+        loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
     // Insert all normal maps found into our textures container
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
   }
 
-  return ModelMesh(vertices, indices, textures,
-                   mVertexShader, mFragmentShader);
+  return {vertices, indices, textures, mVertexShader, mFragmentShader};
 }
 
 ModelMesh::Textures Model::loadMaterialTextures(
-    aiMaterial * mat, aiTextureType type, const std::string & typeName)
-{
+    aiMaterial * mat, aiTextureType type, const std::string & typeName) {
   ModelMesh::Textures textures;
 
-  for  (GLuint i = 0; i < mat->GetTextureCount(type); i++) {
-
+  for(GLuint i = 0; i < mat->GetTextureCount(type); i++) {
     // Call GetTexture to get the name of the texture file to load
     aiString fileName;
     mat->GetTexture(type, i, &fileName);
 
     // Check if we have already loaded this texture
     bool skip = false;
-    for (GLuint j = 0; j < mTexturesLoaded.size(); j++) {
+    for(auto & j : mTexturesLoaded) {
       // If the path to the texture already exists in m_texturesLoaded, skip it
-      if (std::strcmp(mTexturesLoaded[j].mPath.data(), fileName.C_Str()) == 0) {
-        textures.push_back(mTexturesLoaded[j]);
+      if(std::strcmp(j.mPath.data(), fileName.C_Str()) == 0) {
+        textures.push_back(j);
         // If we have loaded the texture, do not load it again
         skip = true;
         break;
@@ -386,11 +360,11 @@ ModelMesh::Textures Model::loadMaterialTextures(
     }
 
     // If the texture has not yet been loaded
-    if (!skip) {
+    if(!skip) {
       ModelTexture texture;
-      texture.mTexture = Texture::initTexture2D(
-          std::string(mDirectory + '/' + fileName.C_Str()).c_str(),
-          false, false);
+      texture.mTexture = OpenGLTextureFactory::initTexture2D(
+          std::string(mDirectory + '/' + fileName.C_Str()).c_str(), false,
+          false);
       texture.mID = texture.mTexture->textureId();
       texture.mType = typeName;
       texture.mPath = fileName.C_Str();
@@ -399,22 +373,20 @@ ModelMesh::Textures Model::loadMaterialTextures(
       // Add the texture to the loaded textures to avoid loading it twice
       mTexturesLoaded.push_back(texture);
     }
-
   }
 
   // Return the resulting textures
   return textures;
 }
 
-void Model::sortModels()
-{
+void Model::sortModels() {
   auto cameraPos = Scene::Camera().transform();
-  auto cameraDistance = [&cameraPos](const ModelMesh &a, const ModelMesh &b)
-  {
-    // Sort by the first vertex position, since all transforms will be the same
-    return (cameraPos.translation().distanceToPoint(a.mVertices[0].mPosition))
-           < (cameraPos.translation().distanceToPoint(b.mVertices[0].mPosition));
+  auto cameraDistance = [&cameraPos](const ModelMesh & a, const ModelMesh & b) {
+    // Sort by the first vertex position in the model
+    return (cameraPos.getTranslation().distanceToPoint(
+               a.mVertices[0].mPosition))
+           < (cameraPos.getTranslation().distanceToPoint(
+               b.mVertices[0].mPosition));
   };
   std::sort(mMeshes.begin(), mMeshes.end(), cameraDistance);
 }
-

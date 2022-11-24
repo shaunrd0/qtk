@@ -16,33 +16,39 @@ using namespace Qtk;
 Camera3D Scene::mCamera;
 QMatrix4x4 Scene::mProjection;
 
-
 /*******************************************************************************
  * Constructors, Destructors
  ******************************************************************************/
 
-Scene::Scene()
-{
+Scene::Scene() {
   mCamera.transform().setTranslation(0.0f, 0.0f, 20.0f);
   mCamera.transform().setRotation(-5.0f, 0.0f, 1.0f, 0.0f);
 }
 
-Scene::~Scene()
-{
-  for (auto & mesh : mMeshes) delete mesh;
-  for (auto & model : mModels) delete model;
-  if (mSkybox != Q_NULLPTR) delete mSkybox;
+Scene::~Scene() {
+  for(auto & mesh : mMeshes) {
+    delete mesh;
+  }
+  for(auto & model : mModels) {
+    delete model;
+  }
+
+  delete mSkybox;
 }
 
-void Scene::privDraw()
-{
-  if (!mInit) {
+void Scene::privDraw() {
+  if(!mInit) {
     initializeOpenGLFunctions();
     init();
     mInit = true;
   }
-  if (mSkybox != Q_NULLPTR) mSkybox->draw();
-  for (auto & model : mModels) model->draw();
-  for (const auto & mesh : mMeshes) mesh->draw();
+  if(mSkybox != Q_NULLPTR) {
+    mSkybox->draw();
+  }
+  for(auto & model : mModels) {
+    model->draw();
+  }
+  for(const auto & mesh : mMeshes) {
+    mesh->draw();
+  }
 }
-
