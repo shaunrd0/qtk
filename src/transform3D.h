@@ -23,15 +23,22 @@
 #include <qtkapi.h>
 
 namespace Qtk {
+  /**
+   * Transform3D class to represent and modify object position in 3D space.
+   */
   class QTKAPI Transform3D {
     public:
-      // Constructors
+      /*************************************************************************
+       * Constructors, Destructors
+       ************************************************************************/
+
       inline Transform3D() :
           m_dirty(true), mScale(1.0f, 1.0f, 1.0f),
           mTranslation(0.0f, 0.0f, 0.0f) {}
 
-      //
-      // Transformations
+      /*************************************************************************
+       * Transformations
+       ************************************************************************/
 
       void translate(const QVector3D & dt);
 
@@ -72,8 +79,9 @@ namespace Qtk {
         grow(QVector3D(factor, factor, factor));
       }
 
-      //
-      // Setters
+      /*************************************************************************
+       * Setters
+       ************************************************************************/
 
       // Set object position
       void setTranslation(const QVector3D & t);
@@ -102,8 +110,9 @@ namespace Qtk {
         setRotation(QQuaternion::fromAxisAndAngle(ax, ay, az, angle));
       }
 
-      //
-      // Accessors
+      /*************************************************************************
+       * Getters
+       ************************************************************************/
 
       [[nodiscard]] inline const QVector3D & getTranslation() const {
         return mTranslation;
@@ -121,9 +130,17 @@ namespace Qtk {
       [[nodiscard]] QVector3D getUp() const;
       [[nodiscard]] QVector3D getRight() const;
 
+      /*************************************************************************
+       * Public members
+       ************************************************************************/
+
       static const QVector3D LocalForward, LocalUp, LocalRight;
 
     private:
+      /*************************************************************************
+       * Private members
+       ************************************************************************/
+
       QVector3D mTranslation;
       QQuaternion mRotation;
       QVector3D mScale;

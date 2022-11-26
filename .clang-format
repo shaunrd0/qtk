@@ -1,8 +1,5 @@
-
 ---
-# clang-format off
 BasedOnStyle: Google
-# clang-format on
 AlignAfterOpenBracket: AlwaysBreak
 AlignArrayOfStructures: Left
 AlignConsecutiveAssignments: None

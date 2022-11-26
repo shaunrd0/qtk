@@ -28,7 +28,7 @@ QImage * OpenGLTextureFactory::initImage(
   return loadedImage;
 }
 
-QOpenGLTexture * OpenGLTextureFactory::initTexture2D(
+QOpenGLTexture * OpenGLTextureFactory::initTexture(
     const char * texture, bool flipX, bool flipY) {
   QImage * image = initImage(texture, flipX, flipY);
   auto newTexture = new QOpenGLTexture(QOpenGLTexture::Target2D);

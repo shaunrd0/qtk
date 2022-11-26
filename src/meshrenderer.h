@@ -15,31 +15,19 @@
 #include <utility>
 
 namespace Qtk {
-  class QTKAPI ShaderBindScope {
-    public:
-      explicit ShaderBindScope(
-          QOpenGLShaderProgram * program, bool was_locked) :
-          mWasBound(was_locked) {
-        mProgram = program;
-        if(!mWasBound) {
-          mProgram->bind();
-        }
-      }
-
-      ~ShaderBindScope() {
-        if(!mWasBound) {
-          mProgram->release();
-        }
-      }
-
-    private:
-      QOpenGLShaderProgram * mProgram;
-      bool mWasBound;
-  };
-
-
   class QTKAPI MeshRenderer : public Object {
     public:
+      /*************************************************************************
+       * Typedefs
+       ************************************************************************/
+
+      /* Static QHash of all mesh objects within the scene. */
+      typedef QHash<QString, MeshRenderer *> MeshManager;
+
+      /*************************************************************************
+       * Constructors / Destructors
+       ************************************************************************/
+
       // Delegate constructors
       MeshRenderer(
           const char * name, Vertices vertices, Indices indices,
@@ -54,11 +42,27 @@ namespace Qtk {
       MeshRenderer(const char * name, const ShapeBase & shape);
       ~MeshRenderer() override;
 
-      // Retrieve a mesh by name stored within a static QHash
-      static MeshRenderer * getInstance(const QString & name);
+      /*************************************************************************
+       * Public Methods
+       ************************************************************************/
 
       void init();
       void draw();
+
+      inline void enableAttributeArray(int location) {
+        ShaderBindScope lock(&mProgram, mBound);
+        mVAO.bind();
+        mProgram.enableAttributeArray(location);
+        mVAO.release();
+      }
+
+      void reallocateTexCoords(const TexCoords & t, unsigned dims = 2);
+
+      void reallocateNormals(const Normals & n, unsigned dims = 3);
+
+      /*************************************************************************
+       * Setters
+       ************************************************************************/
 
       // Draw types like GL_TRIANGLES, GL_POINTS, GL_LINES, etc
       void setDrawType(int drawType) { mDrawType = drawType; }
@@ -105,21 +109,24 @@ namespace Qtk {
         mVAO.release();
       }
 
-      inline void enableAttributeArray(int location) {
-        ShaderBindScope lock(&mProgram, mBound);
-        mVAO.bind();
-        mProgram.enableAttributeArray(location);
-        mVAO.release();
-      }
+      /*************************************************************************
+       * Accessors
+       ************************************************************************/
 
-      void reallocateTexCoords(const TexCoords & t, unsigned dims = 2);
+      /**
+       * Retrieve a mesh by name stored within static QHash private member
+       * @param name The name of the MeshRenderer we want to retrieve.
+       * @return Pointer to the MeshRenderer, or nullptr if not found.
+       */
+      static MeshRenderer * getInstance(const QString & name);
 
-      void reallocateNormals(const Normals & n, unsigned dims = 3);
-
-      // Static QHash of all mesh objects within the scene
-      typedef QHash<QString, MeshRenderer *> MeshManager;
+      Transform3D & getTransform() { return mTransform; }
 
     private:
+      /*************************************************************************
+       * Private Members
+       ************************************************************************/
+
       static MeshManager sInstances;
 
       int mDrawType {};

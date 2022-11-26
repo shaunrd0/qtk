@@ -8,8 +8,8 @@
 
 #include <QImageReader>
 
-#include <abstractscene.h>
 #include <meshrenderer.h>
+#include <scene.h>
 #include <texture.h>
 
 using namespace Qtk;
@@ -31,6 +31,13 @@ MeshRenderer::~MeshRenderer() {
 
 // Static member function to retrieve instances of MeshRenderers
 MeshRenderer * MeshRenderer::getInstance(const QString & name) {
+  if(!sInstances.contains(name)) {
+#if QTK_DEBUG
+    qDebug() << "Attempt to access MeshRenderer instance that does not exist! ("
+             << qPrintable(name) << ")\n";
+#endif
+    return nullptr;
+  }
   return sInstances[name];
 }
 
@@ -126,8 +133,8 @@ void MeshRenderer::setShaders(
 void MeshRenderer::setUniformMVP(
     const char * model, const char * view, const char * projection) {
   ShaderBindScope lock(&mProgram, mBound);
-  mProgram.setUniformValue(projection, Scene::Projection());
-  mProgram.setUniformValue(view, Scene::View());
+  mProgram.setUniformValue(projection, Scene::getProjectionMatrix());
+  mProgram.setUniformValue(view, Scene::getViewMatrix());
   mProgram.setUniformValue(model, mTransform.toMatrix());
 }
 
@@ -141,6 +148,8 @@ void MeshRenderer::setColor(const QVector3D & color) {
       mShape.mColors[i] = color;
     }
   }
+  // TODO: Factor this out so we don't need to reinitialize
+  init();
 }
 
 void MeshRenderer::reallocateTexCoords(const TexCoords & t, unsigned dims) {

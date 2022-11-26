@@ -17,10 +17,15 @@
 
 namespace Qtk {
   class QTKAPI Input {
+    public:
+      /*************************************************************************
+       * Typedefs
+       ************************************************************************/
       friend class Qtk::QtkWidget;
 
-    public:
-      // Possible key states
+      /**
+       * Possible key states
+       */
       enum InputState {
         InputInvalid,
         InputRegistered,
@@ -29,6 +34,10 @@ namespace Qtk {
         InputPressed,
         InputReleased
       };
+
+      /*************************************************************************
+       * Public Methods
+       ************************************************************************/
 
       // State checking
       inline static bool keyTriggered(Qt::Key key) {
@@ -63,6 +72,10 @@ namespace Qtk {
       static QPoint mouseDelta();
 
     private:
+      /*************************************************************************
+       * Private Methods
+       ************************************************************************/
+
       // State updating
       static void update();
       static void registerKeyPress(int key);

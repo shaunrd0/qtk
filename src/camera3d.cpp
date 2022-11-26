@@ -32,22 +32,22 @@ const QMatrix4x4 & Camera3D::toMatrix() {
  ******************************************************************************/
 
 QDataStream & operator<<(QDataStream & out, Camera3D & transform) {
-  out << transform.transform();
+  out << transform.getTransform();
   return out;
 }
 
 QDataStream & operator>>(QDataStream & in, Camera3D & transform) {
-  in >> transform.transform();
+  in >> transform.getTransform();
   return in;
 }
 
 QDebug operator<<(QDebug dbg, const Camera3D & transform) {
   dbg << "Camera3D\n{\n";
-  dbg << "Position: <" << transform.translation().x() << ", "
-      << transform.translation().y() << ", " << transform.translation().z()
-      << ">\n";
-  dbg << "Rotation: <" << transform.rotation().x() << ", "
-      << transform.rotation().y() << ", " << transform.rotation().z() << " | "
-      << transform.rotation().scalar() << ">\n}";
+  dbg << "Position: <" << transform.getTranslation().x() << ", "
+      << transform.getTranslation().y() << ", "
+      << transform.getTranslation().z() << ">\n";
+  dbg << "Rotation: <" << transform.getRotation().x() << ", "
+      << transform.getRotation().y() << ", " << transform.getRotation().z()
+      << " | " << transform.getRotation().scalar() << ">\n}";
   return dbg;
 }

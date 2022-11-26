@@ -30,8 +30,8 @@ option(QTK_DEBUG "Enable debugger" ON)
 message(STATUS "[Qtk] Compiling with QTK_DEBUG=${QTK_DEBUG}")
 option(QTK_UPDATE_SUBMODULES "Update external project (assimp) submodule" ON)
 message(
-  STATUS
-  "[Qtk] Compiling with QTK_UPDATE_SUBMODULES=${QTK_UPDATE_SUBMODULES}"
+    STATUS
+    "[Qtk] Compiling with QTK_UPDATE_SUBMODULES=${QTK_UPDATE_SUBMODULES}"
 )
 
 # Qt options
@@ -55,7 +55,7 @@ list(APPEND CMAKE_PREFIX_PATH "${QT_DIR}")
 
 # Find Qt
 find_package(Qt6 COMPONENTS OpenGLWidgets)
-if (NOT Qt6_FOUND)
+if(NOT Qt6_FOUND)
   message(
       SEND_ERROR "[Qtk] Error: Unable to find Qt6 at CMAKE_PREFIX_PATH: "
       "${CMAKE_PREFIX_PATH}"
@@ -68,7 +68,7 @@ if (NOT Qt6_FOUND)
   )
 endif()
 
-if (QTK_UPDATE_SUBMODULES)
+if(QTK_UPDATE_SUBMODULES)
   message(STATUS "[Qtk] Updating submodules...")
   include("${CMAKE_SOURCE_DIR}/cmake/include/git_submodule.cmake")
   submodule_update("${CMAKE_CURRENT_SOURCE_DIR}/extern/assimp/assimp/")
@@ -83,34 +83,34 @@ endif()
 ################################################################################
 
 set(
-  PUBLIC_HEADERS
-  src/qtkwidget.h
-  src/abstractscene.h
-  src/camera3d.h
-  src/mesh.h
-  src/meshrenderer.h
-  src/model.h
-  src/object.h
-  src/skybox.h
-  src/texture.h
-  src/transform3D.h
+    PUBLIC_HEADERS
+    src/qtkwidget.h
+    src/scene.h
+    src/camera3d.h
+    src/mesh.h
+    src/meshrenderer.h
+    src/model.h
+    src/object.h
+    src/skybox.h
+    src/texture.h
+    src/transform3D.h
 )
 
 set(
-  SOURCE_FILES
-  src/qtkwidget.cpp
-  src/abstractscene.cpp
-  src/camera3d.cpp
-  src/input.cpp
-  src/input.h
-  src/mesh.cpp
-  src/meshrenderer.cpp
-  src/model.cpp
-  src/object.cpp
-  src/qtkapi.h
-  src/skybox.cpp
-  src/texture.cpp
-  src/transform3D.cpp
+    SOURCE_FILES
+    src/qtkwidget.cpp
+    src/scene.cpp
+    src/camera3d.cpp
+    src/input.cpp
+    src/input.h
+    src/mesh.cpp
+    src/meshrenderer.cpp
+    src/model.cpp
+    src/object.cpp
+    src/qtkapi.h
+    src/skybox.cpp
+    src/texture.cpp
+    src/transform3D.cpp
 )
 
 include(GenerateExportHeader)
@@ -118,7 +118,8 @@ include(GenerateExportHeader)
 add_library(qtk-widget STATIC ${PUBLIC_HEADERS} ${SOURCE_FILES})
 target_include_directories(qtk-widget PRIVATE src/ app/)
 
-set_target_properties(qtk-widget PROPERTIES
+set_target_properties(
+    qtk-widget PROPERTIES
     PUBLIC_HEADER "${PUBLIC_HEADERS}"
     VERSION ${PROJECT_VERSION}
 )
@@ -126,7 +127,7 @@ set_target_properties(qtk-widget PROPERTIES
 target_link_libraries(qtk-widget PUBLIC Qt6::OpenGLWidgets)
 target_link_libraries(qtk-widget PUBLIC Qt6::Widgets)
 
-if (QTK_UPDATE_SUBMODULES OR NOT ASSIMP_NEW_INTERFACE)
+if(QTK_UPDATE_SUBMODULES OR NOT ASSIMP_NEW_INTERFACE)
   target_link_libraries(qtk-widget PUBLIC assimp)
 elseif(ASSIMP_NEW_INTERFACE)
   target_link_libraries(qtk-widget PUBLIC assimp::assimp)
@@ -144,7 +145,8 @@ if(WIN32)
 endif()
 
 # Install files
-install(TARGETS qtk-widget
+install(
+    TARGETS qtk-widget
     # Associate qtk-widget target with qtk-export
     EXPORT qtk-export
     # <prefix>/bin on DLL systems and <prefix>/lib on non-dll systems
@@ -157,7 +159,8 @@ install(TARGETS qtk-widget
 # Install export
 # qtkTargets.cmake will only be installed when one of the CONFIGURATIONS is installed
 # + The generated import will only reference that qtk configuration
-install(EXPORT qtk-export
+install(
+    EXPORT qtk-export
     FILE qtkTargets.cmake
     CONFIGURATIONS Debug|Release
     DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake
@@ -175,9 +178,14 @@ configure_file(
 )
 
 # Add our Qt resources.qrc file to our application
-set(QTK_APP_SOURCES app/main.cpp
-    app/examplescene.cpp app/examplescene.h
-    app/mainwindow.cpp app/mainwindow.h app/mainwindow.ui
+set(
+    QTK_APP_SOURCES
+    app/main.cpp
+    app/examplescene.cpp
+    app/examplescene.h
+    app/mainwindow.cpp
+    app/mainwindow.h
+    app/mainwindow.ui
     app/resourcemanager.h
     src/qtkresources.h.in
 )
@@ -189,13 +197,15 @@ target_include_directories(qtk-main PRIVATE src/ app/)
 # Link qtk-main executable to main qtk-widget library
 target_link_libraries(qtk-main PUBLIC qtk-widget)
 
-set_target_properties(qtk-main PROPERTIES
+set_target_properties(
+    qtk-main PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
-install(TARGETS qtk-main
+install(
+    TARGETS qtk-main
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
@@ -206,17 +216,18 @@ if(WIN32)
   execute_process(COMMAND "${_qt6_qmake_location}" -query QT_INSTALL_PREFIX RESULT_VARIABLE return_code OUTPUT_VARIABLE qt6_install_prefix OUTPUT_STRIP_TRAILING_WHITESPACE)
   file(TO_NATIVE_PATH "${qt6_install_prefix}/bin" qt6_install_prefix)
   if(TARGET Qt6::windeployqt)
-    add_custom_command(TARGET qtk-main
+    add_custom_command(
+        TARGET qtk-main
         POST_BUILD
         COMMAND set PATH=%PATH%$<SEMICOLON>${qt6_install_prefix}
         COMMAND Qt6::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:qtk-main>/$<TARGET_FILE_NAME:qtk-main>"
-        )
+    )
     install(DIRECTORY "${CMAKE_BINARY_DIR}/windeployqt/" DESTINATION bin)
   endif()
   if(MSVC AND TARGET Qt6::qmake)
     set(VSUSER_FILE ${CMAKE_CURRENT_BINARY_DIR}/qtk-main.vcxproj.user)
     file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/extern/assimp/assimp/bin" assimp_bin)
-    file(WRITE  ${VSUSER_FILE} "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+    file(WRITE ${VSUSER_FILE} "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
     file(APPEND ${VSUSER_FILE} "<Project xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n")
     file(APPEND ${VSUSER_FILE} "  <PropertyGroup>\n")
     file(APPEND ${VSUSER_FILE} "    <LocalDebuggerEnvironment>Path=$(SolutionDir)\\lib\\$(Configuration);${qt6_install_prefix};${assimp_bin};$(Path)\n")

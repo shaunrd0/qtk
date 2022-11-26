@@ -18,11 +18,23 @@
 #include <texture.h>
 
 namespace Qtk {
+  /**
+   * Object base class for objects that can exist within a scene.
+   * An object could be a Cube, Skybox, 3D Model, or other standalone entities.
+   */
   class QTKAPI Object : public QObject {
       Q_OBJECT
 
     public:
+      /*************************************************************************
+       * Typedefs
+       ************************************************************************/
+
       friend MeshRenderer;
+
+      /*************************************************************************
+       * Constructors / Destructors
+       ************************************************************************/
 
       // Initialize an object with no shape data assigned
       explicit Object(const char * name) :
@@ -35,19 +47,39 @@ namespace Qtk {
 
       ~Object() override = default;
 
-      inline const Colors & getColors() { return mShape.mColors; }
+      /*************************************************************************
+       * Accessors
+       ************************************************************************/
 
-      inline const Indices & getIndexData() { return mShape.mIndices; }
+      [[nodiscard]] inline const Colors & getColors() const {
+        return mShape.mColors;
+      }
 
-      inline const Normals & getNormals() { return mShape.mNormals; }
+      [[nodiscard]] inline const Indices & getIndexData() const {
+        return mShape.mIndices;
+      }
+
+      [[nodiscard]] inline const Normals & getNormals() const {
+        return mShape.mNormals;
+      }
 
       [[nodiscard]] inline const Shape & getShape() const { return mShape; }
 
-      inline const TexCoords & getTexCoords() { return mShape.mTexCoords; }
+      [[nodiscard]] inline const TexCoords & getTexCoords() const {
+        return mShape.mTexCoords;
+      }
 
-      inline Texture & getTexture() { return mTexture; }
+      [[nodiscard]] inline const Texture & getTexture() const {
+        return mTexture;
+      }
 
-      inline const Vertices & getVertices() { return mShape.mVertices; }
+      [[nodiscard]] inline const Vertices & getVertices() const {
+        return mShape.mVertices;
+      }
+
+      /*************************************************************************
+       * Setters
+       ************************************************************************/
 
       virtual inline void setColors(const Colors & value) {
         mShape.mColors = value;
@@ -84,6 +116,10 @@ namespace Qtk {
         mShape.mVertices = value;
       }
 
+      /*************************************************************************
+       * Public Methods
+       ************************************************************************/
+
       virtual inline void bindShaders() {
         mBound = true;
         mProgram.bind();
@@ -94,21 +130,19 @@ namespace Qtk {
         mProgram.release();
       }
 
+    private:
+      /*************************************************************************
+       * Private Members
+       ************************************************************************/
+
+      QOpenGLShaderProgram mProgram;
       QOpenGLBuffer mVBO, mNBO;
       QOpenGLVertexArrayObject mVAO;
-
       Transform3D mTransform;
       Shape mShape;
       Texture mTexture;
       const char * mName;
       bool mBound;
-
-    private:
-      virtual inline void setTexture(QOpenGLTexture * value) {
-        mTexture.setTexture(value);
-      }
-
-      QOpenGLShaderProgram mProgram;
   };
 }  // namespace Qtk
 

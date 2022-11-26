@@ -6,7 +6,7 @@
 ## Contact: shaunrd0@gmail.com  | URL: www.shaunreed.com | GitHub: shaunrd0   ##
 ##############################################################################*/
 
-#include <abstractscene.h>
+#include <scene.h>
 #include <skybox.h>
 #include <texture.h>
 
@@ -32,8 +32,8 @@ Skybox::Skybox(const std::string & name) :
         ":/right.png", ":/top.png", ":/front.png", ":/left.png", ":/bottom.png",
         ":/back.png", name) {}
 
-Skybox::Skybox(QOpenGLTexture * cubeMap, const std::string & name) :
-    mTexture(cubeMap) {
+Skybox::Skybox(QOpenGLTexture * cubeMap, const std::string & name) {
+  mTexture.setTexture(cubeMap);
   init();
 }
 
@@ -49,8 +49,8 @@ void Skybox::draw() {
   mProgram.bind();
   mTexture.getOpenGLTexture().bind();
 
-  mProgram.setUniformValue("uProjectionMatrix", Scene::Projection());
-  mProgram.setUniformValue("uViewMatrix", Scene::Camera().toMatrix());
+  mProgram.setUniformValue("uProjectionMatrix", Scene::getProjectionMatrix());
+  mProgram.setUniformValue("uViewMatrix", Scene::getCamera().toMatrix());
   mProgram.setUniformValue("uTexture", 0);
   glDrawElements(
       GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, mIndices.data());

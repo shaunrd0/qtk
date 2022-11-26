@@ -17,19 +17,25 @@
 namespace Qtk {
   class QTKAPI Camera3D {
     public:
-      // Constants
+      /*************************************************************************
+       * Constants
+       ************************************************************************/
+
       static const QVector3D LocalForward;
       static const QVector3D LocalUp;
       static const QVector3D LocalRight;
 
-      // Accessors
-      inline Transform3D & transform() { return mTransform; }
+      /*************************************************************************
+       * Accessors
+       ************************************************************************/
 
-      [[nodiscard]] inline const QVector3D & translation() const {
+      inline Transform3D & getTransform() { return mTransform; }
+
+      [[nodiscard]] inline const QVector3D & getTranslation() const {
         return mTransform.getTranslation();
       }
 
-      [[nodiscard]] inline const QQuaternion & rotation() const {
+      [[nodiscard]] inline const QQuaternion & getRotation() const {
         return mTransform.getRotation();
       }
 
@@ -49,8 +55,16 @@ namespace Qtk {
       }
 
     private:
+      /*************************************************************************
+       * Private Members
+       ************************************************************************/
+
       Transform3D mTransform;
       QMatrix4x4 mWorld;
+
+      /*************************************************************************
+       * Private Methods
+       ************************************************************************/
 
 #ifndef QT_NO_DATASTREAM
       friend QDataStream & operator<<(QDataStream & out, Camera3D & transform);

@@ -2,7 +2,6 @@
 [![All Builds](https://github.com/shaunrd0/qtk/actions/workflows/all-builds.yml/badge.svg)](https://github.com/shaunrd0/qtk/actions/workflows/all-builds.yml)
 [![Linting](https://github.com/shaunrd0/qtk/actions/workflows/linting.yml/badge.svg)](https://github.com/shaunrd0/qtk/actions/workflows/linting.yml)
 
-Practice project for learning about using OpenGL in Qt widget applications.
 Model loader using [Assimp](https://assimp.org/) within a Qt widget application.
 
 You can import your own models within `app/examplescene.cpp`, inside the
@@ -12,6 +11,41 @@ happen in `ExampleScene::update()`.
 To get textures loading on models look into [material files](http://www.paulbourke.net/dataformats/mtl/)
 and see some examples in the `resources/models/` directory.
 
+The syntax for adding shapes and models is seen in the example below.
+This would result in a scene with a red cube and a miniature spartan model placed on top.
+
+```C++
+// From: qtk/app/examplescene.cpp
+
+void ExampleScene::init() {
+  // Add a skybox to the scene using default cube map images and settings.
+  setSkybox(new Qtk::Skybox("Skybox"));
+
+  /* Create a red cube with a mini master chief on top. */
+  auto myCube = new MeshRenderer("My cube", Cube(Qtk::QTK_DRAW_ELEMENTS));
+  myCube->setColor(RED);
+  mMeshes.push_back(myCube);
+
+  auto mySpartan = new Model("My spartan", ":/models/spartan/spartan.obj");
+  mySpartan->getTransform().setTranslation(0.0f, 0.5f, 0.0f);
+  mySpartan->getTransform().setScale(0.5f);
+  mModels.push_back(mySpartan);
+}
+```
+
+If we want to make our spartan spin, we need to apply rotation in `update`
+
+```C++
+// From: qtk/app/examplescene.cpp
+
+void ExampleScene::update() {
+  auto mySpartan = Model::getInstance("My spartan");
+  mySpartan->getTransform().rotate(0.75f, 0.0f, 1.0f, 0.0f);
+
+  auto myCube = MeshRenderer::getInstance("My cube");
+  myCube->getTransform().rotate(-0.75f, 0.0f, 1.0f, 0.0f);
+}
+```
 
 ### Source Builds
 
@@ -132,7 +166,6 @@ Spartan with normals -
 
 ### QtkWidget in Qt Creator
 
-The `QtkWidget` class is exported as a shared library for use in Qt Creator's design mode.
 We can add more QtkWidgets to view and render the scene from multiple perspectives.
 There is still some work to be done here, so there isn't a builtin way to add an additional view within the application.
 

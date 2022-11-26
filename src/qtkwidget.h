@@ -15,60 +15,141 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
 
-#include <abstractscene.h>
 #include <qtkapi.h>
+#include <scene.h>
 
 namespace Qtk {
+  /**
+   * QtkWidget class to define required QOpenGLWidget functionality.
+   *
+   * This object has a Scene attached which manages the objects to render.
+   * Client input is passed through this widget to control the camera view.
+   */
   class QTKAPI QtkWidget : public QOpenGLWidget, protected QOpenGLFunctions {
       Q_OBJECT;
 
     public:
-      // Constructors
+      /*************************************************************************
+       * Contructors / Destructors
+       ************************************************************************/
+
+      /**
+       * Default ctor will configure a QSurfaceFormat with default settings.
+       */
       QtkWidget();
+
+      /**
+       * Qt Designer will call this ctor when creating this widget as a child.
+       *
+       * @param parent The parent QWidget
+       */
       explicit QtkWidget(QWidget * parent);
+
+      /**
+       * Allow constructing the widget with a preconfigured QSurfaceFormat.
+       *
+       * @param format QSurfaceFormat already configured by the caller.
+       */
       explicit QtkWidget(const QSurfaceFormat & format);
+
       ~QtkWidget() override;
 
     private:
-      void teardownGL();
+      /*************************************************************************
+       * Private Methods
+       ************************************************************************/
+
+      // clang-format off
+      void teardownGL() { /* Nothing to teardown yet... */ }
+      // clang-format on
 
     public:
-      // Inherited virtual Members
-      void paintGL() override;
+      /*************************************************************************
+       * Public Inherited Virtual Methods
+       ************************************************************************/
+
+      /**
+       * Called when the widget is first constructed.
+       */
       void initializeGL() override;
+
+      /**
+       * Called when the application window is resized.
+       *
+       * @param width The new width of the window.
+       * @param height The new height of the window.
+       */
       void resizeGL(int width, int height) override;
+
+      /**
+       * Called when OpenGL repaints the widget.
+       */
+      void paintGL() override;
+
+      /*************************************************************************
+       * Accessors
+       ************************************************************************/
 
       inline Qtk::Scene * getScene() { return mScene; }
 
+      /*************************************************************************
+       * Setters
+       ************************************************************************/
+
       inline void setScene(Qtk::Scene * scene) {
         delete mScene;
-
         mScene = scene;
       }
 
     protected slots:
+      /*************************************************************************
+       * Qt Slots
+       ************************************************************************/
+
+      /**
+       * Called when the `frameSwapped` signal is caught.
+       * See definition of initializeGL()
+       */
       void update();
+
 #ifdef QTK_DEBUG
+      /**
+       * Called when the `messageLogged` signal is caught.
+       * See definition of initializeGL()
+       *
+       * @param msg The message logged.
+       */
       static void messageLogged(const QOpenGLDebugMessage & msg);
 #endif
 
-      // Protected Helpers
     protected:
+      /*************************************************************************
+       * Protected Methods
+       ************************************************************************/
+
       void keyPressEvent(QKeyEvent * event) override;
       void keyReleaseEvent(QKeyEvent * event) override;
       void mousePressEvent(QMouseEvent * event) override;
       void mouseReleaseEvent(QMouseEvent * event) override;
 
     private:
-      // Private helpers
+      /*************************************************************************
+       * Private Methods
+       ************************************************************************/
+
       void initializeWidget();
       static void updateCameraInput();
 
-      Qtk::Scene * mScene;
 #ifdef QTK_DEBUG
       void printContextInformation();
       QOpenGLDebugLogger * mDebugLogger;
 #endif
+
+      /*************************************************************************
+       * Private Members
+       ************************************************************************/
+
+      Qtk::Scene * mScene;
   };
 }  // namespace Qtk
 

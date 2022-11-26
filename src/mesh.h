@@ -46,21 +46,22 @@ namespace Qtk {
 #define VECTOR_ONE  QVector3D(1.0f, 1.0f, 1.0f)
 #define VECTOR_ZERO QVector3D(0.0f, 0.0f, 0.0f)
 
+// clang-format off
 // A series of direction vectors to represent cube face normal
-#define FACE_TOP \
-  VECTOR_UP, VECTOR_UP, VECTOR_UP, VECTOR_UP, VECTOR_UP, VECTOR_UP
-#define FACE_BOTTOM \
-  VECTOR_DOWN, VECTOR_DOWN, VECTOR_DOWN, VECTOR_DOWN, VECTOR_DOWN, VECTOR_DOWN
-#define FACE_LEFT \
-  VECTOR_LEFT, VECTOR_LEFT, VECTOR_LEFT, VECTOR_LEFT, VECTOR_LEFT, VECTOR_LEFT
-#define FACE_RIGHT                                                      \
-  VECTOR_RIGHT, VECTOR_RIGHT, VECTOR_RIGHT, VECTOR_RIGHT, VECTOR_RIGHT, \
-      VECTOR_RIGHT
-#define FACE_FRONT                                                \
-  VECTOR_FORWARD, VECTOR_FORWARD, VECTOR_FORWARD, VECTOR_FORWARD, \
-      VECTOR_FORWARD, VECTOR_FORWARD
-#define FACE_BACK \
-  VECTOR_BACK, VECTOR_BACK, VECTOR_BACK, VECTOR_BACK, VECTOR_BACK, VECTOR_BACK
+#define FACE_TOP    VECTOR_UP, VECTOR_UP, VECTOR_UP, \
+                      VECTOR_UP, VECTOR_UP, VECTOR_UP
+#define FACE_BOTTOM VECTOR_DOWN, VECTOR_DOWN, VECTOR_DOWN, \
+                      VECTOR_DOWN, VECTOR_DOWN, VECTOR_DOWN
+#define FACE_LEFT   VECTOR_LEFT, VECTOR_LEFT, VECTOR_LEFT, \
+                      VECTOR_LEFT, VECTOR_LEFT, VECTOR_LEFT
+#define FACE_RIGHT  VECTOR_RIGHT, VECTOR_RIGHT, VECTOR_RIGHT, \
+                      VECTOR_RIGHT, VECTOR_RIGHT, VECTOR_RIGHT
+#define FACE_FRONT  VECTOR_FORWARD, VECTOR_FORWARD, VECTOR_FORWARD, \
+                      VECTOR_FORWARD, VECTOR_FORWARD, VECTOR_FORWARD
+#define FACE_BACK   VECTOR_BACK, VECTOR_BACK, VECTOR_BACK, \
+                      VECTOR_BACK, VECTOR_BACK, VECTOR_BACK
+// clang-format on
+
 
 // Colors using QVector3Ds as RGB values
 #define WHITE   VECTOR_ONE
@@ -84,13 +85,26 @@ namespace Qtk {
   typedef std::vector<QVector2D> TexCoords;
   typedef std::vector<QVector3D> Normals;
 
+  /**
+   * The OpenGL draw mode to initialize QTK shape data for.
+   * Different draw modes require different organization of data.
+   * This enum allows us to predefine simple geometry for different draw modes.
+   */
   enum DrawMode {
     QTK_DRAW_ARRAYS,
     QTK_DRAW_ELEMENTS,
     QTK_DRAW_ELEMENTS_NORMALS
   };
 
+  /**
+   * Base class for all simple shape objects.
+   */
   struct QTKAPI ShapeBase {
+    public:
+      /*************************************************************************
+       * Constructors / Destructors
+       ************************************************************************/
+
       explicit ShapeBase(
           DrawMode mode = QTK_DRAW_ARRAYS, Vertices v = {}, Indices i = {},
           Colors c = {}, TexCoords t = {}, Normals n = {}) :
@@ -98,6 +112,10 @@ namespace Qtk {
           mVertices(std::move(v)), mColors(std::move(c)),
           mIndices(std::move(i)), mTexCoords(std::move(t)),
           mNormals(std::move(n)) {}
+
+      /*************************************************************************
+       * Accessors
+       ************************************************************************/
 
       [[nodiscard]] inline const Vertices & getVertices() const {
         return mVertices;
@@ -122,6 +140,10 @@ namespace Qtk {
       }
 
     protected:
+      /*************************************************************************
+       * Protected Members
+       ************************************************************************/
+
       DrawMode mDrawMode;
 
       Vertices mVertices {};
@@ -132,12 +154,25 @@ namespace Qtk {
   };
 
   struct Shape : public ShapeBase {
+    public:
+      /*************************************************************************
+       * Typedefs
+       ************************************************************************/
+
       friend MeshRenderer;
       friend Object;
+
+      /*************************************************************************
+       * Constructors / Destructors
+       ************************************************************************/
 
       Shape() = default;
 
       explicit Shape(const ShapeBase & rhs) : ShapeBase(rhs) {}
+
+      /*************************************************************************
+       * Setters
+       ************************************************************************/
 
       virtual inline void setVertices(const Vertices & value) {
         mVertices = value;
@@ -160,13 +195,15 @@ namespace Qtk {
       virtual inline void setShape(const Shape & value) { *this = value; }
   };
 
-  // Primitives inherit from ShapeBase, does not allow setting of shape values
+  /* Primitives inherit from ShapeBase, doesn't allow setting shape values. */
   class QTKAPI Mesh {};
 
+  /* Simple Cube shape. */
   struct QTKAPI Cube : public ShapeBase {
       explicit Cube(DrawMode mode = QTK_DRAW_ARRAYS);
   };
 
+  /* Simple Triangle shape. */
   struct QTKAPI Triangle : public ShapeBase {
       explicit Triangle(DrawMode mode = QTK_DRAW_ARRAYS);
   };

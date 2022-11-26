@@ -9,9 +9,9 @@
 
 #include <QFileInfo>
 
-#include <abstractscene.h>
 #include <model.h>
 #include <resourcemanager.h>
+#include <scene.h>
 #include <texture.h>
 
 using namespace Qtk;
@@ -97,8 +97,8 @@ void ModelMesh::draw(QOpenGLShaderProgram & shader) {
 
   // Set Model View Projection values
   shader.setUniformValue("uModel", mTransform.toMatrix());
-  shader.setUniformValue("uView", Scene::View());
-  shader.setUniformValue("uProjection", Scene::Projection());
+  shader.setUniformValue("uView", Scene::getViewMatrix());
+  shader.setUniformValue("uProjection", Scene::getProjectionMatrix());
 
   GLuint diffuseCount = 1;
   GLuint specularCount = 1;
@@ -180,21 +180,6 @@ void Model::flipTexture(const std::string & fileName, bool flipX, bool flipY) {
  * Model Private Member Functions
  ******************************************************************************/
 
-/**
- * Loads a model in .obj, .fbx, .gltf, and other formats
- * For a full list of formats see assimp documentation:
- *  https://github.com/assimp/assimp/blob/master/doc/Fileformats.md
- *
- * Models should not be loaded into Qt resource system
- * Instead pass an *absolute* path to this function
- * Relative paths will break if Qtk is executed from different locations
- *
- * Models can also be loaded from the `qtk/resource` directory using qrc format
- *  loadModel(":/models/backpack/backpack.obj")
- * See resourcemanager.h for more information
- *
- * @param path Absolute path to a model .obj or other format accepted by assimp
- */
 void Model::loadModel(const std::string & path) {
   Assimp::Importer import;
 
@@ -362,7 +347,7 @@ ModelMesh::Textures Model::loadMaterialTextures(
     // If the texture has not yet been loaded
     if(!skip) {
       ModelTexture texture;
-      texture.mTexture = OpenGLTextureFactory::initTexture2D(
+      texture.mTexture = OpenGLTextureFactory::initTexture(
           std::string(mDirectory + '/' + fileName.C_Str()).c_str(), false,
           false);
       texture.mID = texture.mTexture->textureId();
@@ -380,7 +365,7 @@ ModelMesh::Textures Model::loadMaterialTextures(
 }
 
 void Model::sortModels() {
-  auto cameraPos = Scene::Camera().transform();
+  auto cameraPos = Scene::getCamera().getTransform();
   auto cameraDistance = [&cameraPos](const ModelMesh & a, const ModelMesh & b) {
     // Sort by the first vertex position in the model
     return (cameraPos.getTranslation().distanceToPoint(

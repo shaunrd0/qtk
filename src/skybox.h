@@ -21,13 +21,23 @@
 #include <texture.h>
 
 namespace Qtk {
+  /**
+   * Skybox object for rendering a skybox within a Scene.
+   * A skybox is typically implemented using a cube map texture centered around
+   * the camera and projected outwards in all directions.
+   */
   class QTKAPI Skybox : protected QOpenGLFunctions {
     public:
+      /*************************************************************************
+       * Constructors / Destructors
+       ************************************************************************/
+
       // Delegate this constructor to use default skybox images
       explicit Skybox(const std::string & name = "Skybox");
+
       explicit Skybox(
           QOpenGLTexture * cubeMap, const std::string & name = "Skybox");
-      // Constructor, Destructor
+
       Skybox(
           const std::string & right, const std::string & top,
           const std::string & front, const std::string & left,
@@ -36,10 +46,22 @@ namespace Qtk {
 
       ~Skybox() = default;
 
+      /*************************************************************************
+       * Public Methods
+       ************************************************************************/
+
       void draw();
 
     private:
+      /*************************************************************************
+       * Private Methods
+       ************************************************************************/
+
       void init();
+
+      /*************************************************************************
+       * Private Members
+       ************************************************************************/
 
       Vertices mVertices {};
       Indices mIndices {};

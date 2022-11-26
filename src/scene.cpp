@@ -6,9 +6,9 @@
 ## Contact: shaunrd0@gmail.com  | URL: www.shaunreed.com | GitHub: shaunrd0   ##
 ##############################################################################*/
 
-#include <abstractscene.h>
 #include <camera3d.h>
 #include <resourcemanager.h>
+#include <scene.h>
 #include <texture.h>
 
 using namespace Qtk;
@@ -21,8 +21,8 @@ QMatrix4x4 Scene::mProjection;
  ******************************************************************************/
 
 Scene::Scene() {
-  mCamera.transform().setTranslation(0.0f, 0.0f, 20.0f);
-  mCamera.transform().setRotation(-5.0f, 0.0f, 1.0f, 0.0f);
+  mCamera.getTransform().setTranslation(0.0f, 0.0f, 20.0f);
+  mCamera.getTransform().setRotation(-5.0f, 0.0f, 1.0f, 0.0f);
 }
 
 Scene::~Scene() {
@@ -32,11 +32,10 @@ Scene::~Scene() {
   for(auto & model : mModels) {
     delete model;
   }
-
   delete mSkybox;
 }
 
-void Scene::privDraw() {
+void Scene::privateDraw() {
   if(!mInit) {
     initializeOpenGLFunctions();
     init();

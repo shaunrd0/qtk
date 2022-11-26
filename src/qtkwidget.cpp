@@ -8,10 +8,10 @@
 
 #include <QKeyEvent>
 
-#include <abstractscene.h>
 #include <input.h>
 #include <mesh.h>
 #include <qtkwidget.h>
+#include <scene.h>
 
 using namespace Qtk;
 
@@ -23,7 +23,6 @@ QtkWidget::QtkWidget() : mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR) {
   initializeWidget();
 }
 
-// Constructor for using this widget in QtDesigner
 QtkWidget::QtkWidget(QWidget * parent) :
     QOpenGLWidget(parent), mScene(Q_NULLPTR), mDebugLogger(Q_NULLPTR) {
   initializeWidget();
@@ -41,26 +40,8 @@ QtkWidget::~QtkWidget() {
 }
 
 /*******************************************************************************
- * Private Member Functions
+ * Public Inherited Virtual Methods
  ******************************************************************************/
-
-void QtkWidget::teardownGL() {
-  // Nothing to teardown yet...
-}
-
-/*******************************************************************************
- * Inherited Virtual Member Functions
- ******************************************************************************/
-
-void QtkWidget::paintGL() {
-  // Clear buffers
-  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-  // Draw the scene first, since it handles drawing our skybox
-  if(mScene != Q_NULLPTR) {
-    mScene->draw();
-  }
-}
 
 void QtkWidget::initializeGL() {
   initializeOpenGLFunctions();
@@ -93,9 +74,17 @@ void QtkWidget::initializeGL() {
 }
 
 void QtkWidget::resizeGL(int width, int height) {
-  Scene::Projection().setToIdentity();
-  Scene::Projection().perspective(
+  Scene::getProjectionMatrix().setToIdentity();
+  Scene::getProjectionMatrix().perspective(
       45.0f, float(width) / float(height), 0.1f, 1000.0f);
+}
+
+void QtkWidget::paintGL() {
+  // Clear buffers and draw the scene if it is valid.
+  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+  if(mScene != Q_NULLPTR) {
+    mScene->draw();
+  }
 }
 
 /*******************************************************************************
@@ -175,7 +164,7 @@ void QtkWidget::messageLogged(const QOpenGLDebugMessage & msg) {
 }
 
 /*******************************************************************************
- * Protected Helpers
+ * Protected Methods
  ******************************************************************************/
 
 void QtkWidget::keyPressEvent(QKeyEvent * event) {
@@ -204,7 +193,7 @@ void QtkWidget::mouseReleaseEvent(QMouseEvent * event) {
 }
 
 /*******************************************************************************
- * Private Helpers
+ * Private Methods
  ******************************************************************************/
 
 void QtkWidget::initializeWidget() {
@@ -265,31 +254,31 @@ void QtkWidget::updateCameraInput() {
     static const float rotSpeed = 0.5f;
 
     // Handle rotations
-    Scene::Camera().transform().rotate(
+    Scene::getCamera().getTransform().rotate(
         -rotSpeed * Input::mouseDelta().x(), Camera3D::LocalUp);
-    Scene::Camera().transform().rotate(
-        -rotSpeed * Input::mouseDelta().y(), Scene::Camera().right());
+    Scene::getCamera().getTransform().rotate(
+        -rotSpeed * Input::mouseDelta().y(), Scene::getCamera().right());
 
     // Handle translations
     QVector3D translation;
     if(Input::keyPressed(Qt::Key_W)) {
-      translation += Scene::Camera().forward();
+      translation += Scene::getCamera().forward();
     }
     if(Input::keyPressed(Qt::Key_S)) {
-      translation -= Scene::Camera().forward();
+      translation -= Scene::getCamera().forward();
     }
     if(Input::keyPressed(Qt::Key_A)) {
-      translation -= Scene::Camera().right();
+      translation -= Scene::getCamera().right();
     }
     if(Input::keyPressed(Qt::Key_D)) {
-      translation += Scene::Camera().right();
+      translation += Scene::getCamera().right();
     }
     if(Input::keyPressed(Qt::Key_Q)) {
-      translation -= Scene::Camera().up() / 2.0f;
+      translation -= Scene::getCamera().up() / 2.0f;
     }
     if(Input::keyPressed(Qt::Key_E)) {
-      translation += Scene::Camera().up() / 2.0f;
+      translation += Scene::getCamera().up() / 2.0f;
     }
-    Scene::Camera().transform().translate(transSpeed * translation);
+    Scene::getCamera().getTransform().translate(transSpeed * translation);
   }
 }
