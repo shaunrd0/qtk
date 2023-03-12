@@ -1,0 +1,6 @@
+#ifndef QTK_RESOURCES_H_IN_H
+#define QTK_RESOURCES_H_IN_H
+
+// Not currently in use, but will be in the future.
+
+#endif  // QTK_RESOURCES_H_IN_H

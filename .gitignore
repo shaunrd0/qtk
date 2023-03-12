@@ -4,6 +4,7 @@
 # CMake build files
 **/cmake-build-debug/**
 **/build/**
+install
 
 # C++ objects and libs
 *.slo

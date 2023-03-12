@@ -1,0 +1,9 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/QtkTargets.cmake")
+
+set_and_check(QTK_EXECUTABLE "${PACKAGE_PREFIX_DIR}/bin/qtk_app")
+set_and_check(QTK_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/include")
+set_and_check(QTK_LIBRARIES "${PACKAGE_PREFIX_DIR}/lib")
+
+check_required_components(Qtk)

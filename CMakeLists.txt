@@ -1,17 +1,14 @@
 ################################################################################
-## Author: Shaun Reed | Contact: shaunrd0@gmail.com | URL: www.shaunreed.com  ##
-##                                                                            ##
 ## Project for working with OpenGL and Qt6 widgets                            ##
+##                                                                            ##
+## Author: Shaun Reed | Contact: shaunrd0@gmail.com | URL: www.shaunreed.com  ##
+## All Content (c) 2023 Shaun Reed, all rights reserved                       ##
 ################################################################################
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.23)
 
-project(
-    #[[NAME]]   Qtk
-    VERSION     1.0
-    DESCRIPTION "An example project using QT and OpenGL"
-    LANGUAGES   CXX C
-)
-
+################################################################################
+# Constants
+################################################################################
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -19,221 +16,158 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_MACOSX_BUNDLE ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+if(WIN32)
+  set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
   add_compile_options(/wd4131 /wd4127)
 endif()
-message(STATUS "[Qtk] Compiling with ${CMAKE_CXX_COMPILER_ID}")
+add_compile_options(-fPIC)
 
-# Qtk build options
-option(QTK_DEBUG "Enable debugger" ON)
-message(STATUS "[Qtk] Compiling with QTK_DEBUG=${QTK_DEBUG}")
-option(QTK_UPDATE_SUBMODULES "Update external project (assimp) submodule" ON)
-message(
-    STATUS
-    "[Qtk] Compiling with QTK_UPDATE_SUBMODULES=${QTK_UPDATE_SUBMODULES}"
+################################################################################
+# Project
+################################################################################
+project(
+    #[[NAME]]   Qtk
+    VERSION     0.2
+    DESCRIPTION "Qt OpenGL library and desktop application."
+    LANGUAGES   CXX C
 )
 
-# Qt options
-set(QT_DIR "$ENV{HOME}/Code/Clones/Qt/6.3.1/gcc_64/" CACHE PATH "Path to Qt6")
+################################################################################
+# Includes
+################################################################################
+include("${CMAKE_SOURCE_DIR}/cmake/include/git_submodule.cmake")
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
 
-# Options for bringing your own assimp installation; Otherwise not needed
+################################################################################
+# Options
+################################################################################
+option(QTK_DEBUG "Enable debugger" OFF)
+option(QTK_UPDATE_SUBMODULES "Update external project (assimp) submodule" OFF)
+option(QTK_BUILD_GUI "Build the Qtk desktop application" ON)
+option(QTK_INSTALL_LIBRARY "Install libqtk to CMAKE_INSTALL_PREFIX path." ON)
+option(QTK_INSTALL_PLUGINS "Install Qtk plugin collection to Qt Creator." OFF)
+option(QTK_BUILD_EXAMPLE "Build the Qtk example desktop application" ON)
+option(QTK_ENABLE_CCACHE "Enable ccache" ON)
+
+if (QTK_ENABLE_CCACHE)
+  set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
+endif()
+
+# Install Qtk for use within Qt Creator projects only, instead of system-wide.
+option(QTK_PREFIX_QTCREATOR "Install Qtk to Qt Creator. Untested." OFF)
+
+# Option for bringing your own assimp installation; Otherwise not needed
 # + If assimp is available system-wide we can just set QTK_UPDATE_SUBMODULES OFF
-option(ASSIMP_NEW_INTERFACE "Use the assimp::assimp interface (WIN / OSX)" OFF)
-message(
-    STATUS
-    "[Qtk] Compiling with ASSIMP_NEW_INTERFACE=${ASSIMP_NEW_INTERFACE}"
+option(
+    QTK_ASSIMP_NEW_INTERFACE
+    "Use the assimp::assimp interface (WIN / OSX)"
+    OFF
 )
 
-################################################################################
-# External Libraries
-################################################################################
+if(NOT QTK_DEBUG)
+  set(CMAKE_BUILD_TYPE Release)
+else()
+  set(CMAKE_BUILD_TYPE Debug)
+endif()
 
-# For CLion builds, point CMAKE_PREFIX_PATH to Qt6 install directory
-# + QtCreator will handle this for you if that is used instead
-list(APPEND CMAKE_PREFIX_PATH "${QT_DIR}")
+# This should be set to your Qt6 installation directory.
+set(QT_INSTALL_DIR "$ENV{HOME}/Qt/6.5.0/gcc_64" CACHE PATH "Path to Qt6 install.")
+# Point CMAKE_PREFIX_PATH to Qt6 install directory
+# If Qtk is built within Qt Creator this is not required.
+list(APPEND CMAKE_PREFIX_PATH "${QT_INSTALL_DIR}")
+if (QTK_PREFIX_QTCREATOR)
+  # TODO: This might be a bit strange and needs more testing.
+  set(CMAKE_INSTALL_PREFIX  "${QT_INSTALL_DIR}")
+endif()
 
+set(
+    QT_CREATOR_DIR
+    "${QT_INSTALL_DIR}/../../Tools/QtCreator"
+    CACHE PATH "Qt Creator path used to install Qtk plugins for Qt Designer."
+)
+# Qt Designer will look in different locations if WIN / Unix.
+# These paths are for using Qt Designer integrated within Qt Creator.
+# Standalone Qt Designer may use different paths.
+if (WIN32)
+  # These paths may be different on windows. I have not tested this.
+  set(QT_PLUGIN_INSTALL_DIR "${QT_CREATOR_DIR}/bin/plugins/designer")
+  set(QT_PLUGIN_LIBRARY_DIR "${QT_CREATOR_DIR}/lib/Qt/lib")
+else()
+  set(QT_PLUGIN_INSTALL_DIR "${QT_CREATOR_DIR}/lib/Qt/plugins/designer")
+  set(QT_PLUGIN_LIBRARY_DIR "${QT_CREATOR_DIR}/lib/Qt/lib")
+endif()
+set(QTK_PLUGIN_LIBRARY_DIR "${QT_PLUGIN_LIBRARY_DIR}")
+set(QTK_PLUGIN_INSTALL_DIR "${QT_PLUGIN_INSTALL_DIR}")
+
+message(STATUS "[Qtk] CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
+set(QTK_RESOURCES "${CMAKE_SOURCE_DIR}/resources")
+set(QTK_OSX_ICONS ${CMAKE_SOURCE_DIR}/resources/icons/osx/kilroy.icns)
+
+# Print all QTK options and their values.
+get_cmake_property(VAR_NAMES VARIABLES)
+list(FILTER VAR_NAMES INCLUDE REGEX "^Q[tT][kK]_.*$")
+list(SORT VAR_NAMES)
+foreach(VAR_NAME ${VAR_NAMES})
+  message(STATUS "[Qtk] ${VAR_NAME}=${${VAR_NAME}}")
+endforeach()
+
+################################################################################
+# External Dependencies
+################################################################################
 # Find Qt
-find_package(Qt6 COMPONENTS OpenGLWidgets)
+find_package(Qt6 COMPONENTS Core UiPlugin OpenGLWidgets)
+qt_standard_project_setup()
 if(NOT Qt6_FOUND)
   message(
       SEND_ERROR "[Qtk] Error: Unable to find Qt6 at CMAKE_PREFIX_PATH: "
       "${CMAKE_PREFIX_PATH}"
   )
   message(
-      FATAL_ERROR
-      "[Qtk] Error: Specify path to Qt6 with `cmake "
+      FATAL_ERROR "[Qtk] Error: Specify path to Qt6 with `cmake "
       "-DCMAKE_PREFIX_PATH=/path/to/Qt/6.x.x/gcc_64 -S /path/to/qtk -B "
       "/path/to/qtk/build && cmake --build /path/to/qtk/build -j $(nprocs)`"
   )
 endif()
 
+# Find Assimp.
 if(QTK_UPDATE_SUBMODULES)
+  # Required to statically link.
+  add_compile_options(-fPIC)
+  set(BUILD_SHARED_LIBS OFF CACHE STRING "Build static assimp libs" FORCE)
+  set(ASSIMP_BUILD_ZLIB ON CACHE STRING "Build Zlib with assimp." FORCE)
+  set(
+      ASSIMP_INSTALL
+      OFF CACHE STRING "Disable to use assimp as a submodule."
+      FORCE
+  )
+  set(ASSIMP_NO_EXPORT ON CACHE STRING "Disable to export assimp." FORCE)
+  set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE STRING "No warnings as errors." FORCE)
+  set(ASSIMP_BUILD_TESTS OFF CACHE STRING "Do not build assimp tests." FORCE)
   message(STATUS "[Qtk] Updating submodules...")
-  include("${CMAKE_SOURCE_DIR}/cmake/include/git_submodule.cmake")
   submodule_update("${CMAKE_CURRENT_SOURCE_DIR}/extern/assimp/assimp/")
-  add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/extern/assimp/assimp/")
+  add_subdirectory(
+      "${CMAKE_CURRENT_SOURCE_DIR}/extern/assimp/assimp/"
+      EXCLUDE_FROM_ALL
+  )
 else()
   find_package(assimp REQUIRED)
 endif()
 
+if(WIN32)
+  find_package(OpenGL REQUIRED)
+endif()
 
 ################################################################################
 # Qtk
 ################################################################################
+add_subdirectory(src)
 
-set(
-    PUBLIC_HEADERS
-    src/qtkwidget.h
-    src/scene.h
-    src/camera3d.h
-    src/mesh.h
-    src/meshrenderer.h
-    src/model.h
-    src/object.h
-    src/skybox.h
-    src/texture.h
-    src/transform3D.h
-)
-
-set(
-    SOURCE_FILES
-    src/qtkwidget.cpp
-    src/scene.cpp
-    src/camera3d.cpp
-    src/input.cpp
-    src/input.h
-    src/mesh.cpp
-    src/meshrenderer.cpp
-    src/model.cpp
-    src/object.cpp
-    src/qtkapi.h
-    src/skybox.cpp
-    src/texture.cpp
-    src/transform3D.cpp
-)
-
-include(GenerateExportHeader)
-
-add_library(qtk-widget STATIC ${PUBLIC_HEADERS} ${SOURCE_FILES})
-target_include_directories(qtk-widget PRIVATE src/ app/)
-
-set_target_properties(
-    qtk-widget PROPERTIES
-    PUBLIC_HEADER "${PUBLIC_HEADERS}"
-    VERSION ${PROJECT_VERSION}
-)
-
-target_link_libraries(qtk-widget PUBLIC Qt6::OpenGLWidgets)
-target_link_libraries(qtk-widget PUBLIC Qt6::Widgets)
-
-if(QTK_UPDATE_SUBMODULES OR NOT ASSIMP_NEW_INTERFACE)
-  target_link_libraries(qtk-widget PUBLIC assimp)
-elseif(ASSIMP_NEW_INTERFACE)
-  target_link_libraries(qtk-widget PUBLIC assimp::assimp)
-endif()
-
-if(QTK_DEBUG)
-  message(STATUS "[Qtk] Building with QTK_DEBUG=${QTK_DEBUG}")
-  target_compile_definitions(qtk-widget PUBLIC QTK_DEBUG)
-endif()
-
-
-if(WIN32)
-  find_package(OpenGL REQUIRED)
-  target_link_libraries(qtk-widget PUBLIC OpenGL::GL)
-endif()
-
-# Install files
-install(
-    TARGETS qtk-widget
-    # Associate qtk-widget target with qtk-export
-    EXPORT qtk-export
-    # <prefix>/bin on DLL systems and <prefix>/lib on non-dll systems
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib/static
-    RUNTIME DESTINATION bin
-    PUBLIC_HEADER DESTINATION include
-)
-
-# Install export
-# qtkTargets.cmake will only be installed when one of the CONFIGURATIONS is installed
-# + The generated import will only reference that qtk configuration
-install(
-    EXPORT qtk-export
-    FILE qtkTargets.cmake
-    CONFIGURATIONS Debug|Release
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake
-)
-
-################################################################################
-# Final Application
-################################################################################
-
-set(QTK_RESOURCES "${CMAKE_SOURCE_DIR}/resources")
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/qtkresources.h.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/src/qtkresources.h"
-    @ONLY
-)
-
-# Add our Qt resources.qrc file to our application
-set(
-    QTK_APP_SOURCES
-    app/main.cpp
-    app/examplescene.cpp
-    app/examplescene.h
-    app/mainwindow.cpp
-    app/mainwindow.h
-    app/mainwindow.ui
-    app/resourcemanager.h
-    src/qtkresources.h.in
-)
-qt6_add_big_resources(QTK_APP_SOURCES resources.qrc)
-
-qt_add_executable(qtk-main ${QTK_APP_SOURCES})
-target_include_directories(qtk-main PRIVATE src/ app/)
-
-# Link qtk-main executable to main qtk-widget library
-target_link_libraries(qtk-main PUBLIC qtk-widget)
-
-set_target_properties(
-    qtk-main PROPERTIES
-    WIN32_EXECUTABLE TRUE
-    MACOSX_BUNDLE TRUE
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-)
-install(
-    TARGETS qtk-main
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
-
-generate_export_header(qtk-widget)
-if(WIN32)
-  get_target_property(_qt6_qmake_location Qt6::qmake IMPORTED_LOCATION)
-  execute_process(COMMAND "${_qt6_qmake_location}" -query QT_INSTALL_PREFIX RESULT_VARIABLE return_code OUTPUT_VARIABLE qt6_install_prefix OUTPUT_STRIP_TRAILING_WHITESPACE)
-  file(TO_NATIVE_PATH "${qt6_install_prefix}/bin" qt6_install_prefix)
-  if(TARGET Qt6::windeployqt)
-    add_custom_command(
-        TARGET qtk-main
-        POST_BUILD
-        COMMAND set PATH=%PATH%$<SEMICOLON>${qt6_install_prefix}
-        COMMAND Qt6::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:qtk-main>/$<TARGET_FILE_NAME:qtk-main>"
-    )
-    install(DIRECTORY "${CMAKE_BINARY_DIR}/windeployqt/" DESTINATION bin)
-  endif()
-  if(MSVC AND TARGET Qt6::qmake)
-    set(VSUSER_FILE ${CMAKE_CURRENT_BINARY_DIR}/qtk-main.vcxproj.user)
-    file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/extern/assimp/assimp/bin" assimp_bin)
-    file(WRITE ${VSUSER_FILE} "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
-    file(APPEND ${VSUSER_FILE} "<Project xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n")
-    file(APPEND ${VSUSER_FILE} "  <PropertyGroup>\n")
-    file(APPEND ${VSUSER_FILE} "    <LocalDebuggerEnvironment>Path=$(SolutionDir)\\lib\\$(Configuration);${qt6_install_prefix};${assimp_bin};$(Path)\n")
-    file(APPEND ${VSUSER_FILE} "$(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>\n")
-    file(APPEND ${VSUSER_FILE} "    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>\n")
-    file(APPEND ${VSUSER_FILE} "  </PropertyGroup>\n")
-    file(APPEND ${VSUSER_FILE} "</Project>\n")
-  endif()
+if(QTK_BUILD_EXAMPLE)
+  # Create a namespaced alias for linking with qtk_library in the example.
+  add_library(${PROJECT_NAME}::qtk_library ALIAS qtk_library)
+  add_subdirectory(example-app)
 endif()

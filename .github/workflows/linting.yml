@@ -14,14 +14,15 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: '6.3.1'
+          version: '6.5.0'
 
       - name: Install Assimp Ubuntu
         run: sudo apt install libassimp-dev
 
       - name: Build Qtk
         run: |
-          cmake -B build -DQTK_UPDATE_SUBMODULES=OFF && cmake --build build
+          cmake -B build -DQTK_UPDATE_SUBMODULES=OFF -DQTK_ENABLE_CCACHE=OFF
+          cmake --build build
 
       - uses: cpp-linter/cpp-linter-action@v2
         id: linter

@@ -1,0 +1,130 @@
+<RCC>
+    <qresource prefix="/textures">
+        <file alias="crate.png">images/crate.png</file>
+        <file alias="stone.png">images/stone.png</file>
+        <file alias="wood.png">images/wood.png</file>
+        <file>skybox/back.png</file>
+        <file>skybox/bottom.png</file>
+        <file>skybox/front.png</file>
+        <file>skybox/left.png</file>
+        <file>skybox/right.png</file>
+        <file>skybox/top.png</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file>fontawesome-free-6.2.1-desktop/svgs/solid/cube.svg</file>
+        <file>fontawesome-free-6.2.1-desktop/svgs/regular/trash-can.svg</file>
+        <file>fontawesome-free-6.2.1-desktop/svgs/regular/folder-open.svg</file>
+        <file>fontawesome-free-6.2.1-desktop/svgs/regular/floppy-disk.svg</file>
+        <file>fontawesome-free-6.2.1-desktop/svgs/brands/git-alt.svg</file>
+        <file>icon.png</file>
+    </qresource>
+    <qresource prefix="/shaders">
+        <file alias="model.frag">shaders/fragment/model.frag</file>
+        <file alias="model.vert">shaders/vertex/model.vert</file>
+        <file alias="phong.frag">shaders/fragment/phong.frag</file>
+        <file alias="phong.vert">shaders/vertex/phong.vert</file>
+        <file alias="solid.frag">shaders/fragment/solid.frag</file>
+        <file alias="solid.vert">shaders/vertex/solid.vert</file>
+        <file alias="solid-perspective.frag">shaders/fragment/solid-perspective.frag</file>
+        <file alias="solid-perspective.vert">shaders/vertex/solid-perspective.vert</file>
+        <file alias="multi-color.frag">shaders/fragment/multi-color.frag</file>
+        <file alias="multi-color.vert">shaders/vertex/multi-color.vert</file>
+        <file alias="rgb-normals.frag">shaders/fragment/rgb-normals.frag</file>
+        <file alias="rgb-normals.vert">shaders/vertex/rgb-normals.vert</file>
+        <file alias="texture-cubemap.frag">shaders/fragment/texture-cubemap.frag</file>
+        <file alias="texture-cubemap.vert">shaders/vertex/texture-cubemap.vert</file>
+        <file alias="texture2d.frag">shaders/fragment/texture2d.frag</file>
+        <file alias="texture2d.vert">shaders/vertex/texture2d.vert</file>
+        <file alias="solid-ambient.frag">shaders/fragment/solid-ambient.frag</file>
+        <file alias="solid-ambient.vert">shaders/vertex/solid-ambient.vert</file>
+        <file alias="solid-diffuse.frag">shaders/fragment/solid-diffuse.frag</file>
+        <file alias="solid-diffuse.vert">shaders/vertex/solid-diffuse.vert</file>
+        <file alias="solid-specular.frag">shaders/fragment/solid-specular.frag</file>
+        <file alias="solid-specular.vert">shaders/vertex/solid-specular.vert</file>
+        <file alias="solid-phong.frag">shaders/fragment/solid-phong.frag</file>
+        <file alias="solid-phong.vert">shaders/vertex/solid-phong.vert</file>
+        <file alias="model-basic.frag">shaders/fragment/model-basic.frag</file>
+        <file alias="model-basic.vert">shaders/vertex/model-basic.vert</file>
+        <file alias="model-specular.frag">shaders/fragment/model-specular.frag</file>
+        <file alias="model-specular.vert">shaders/vertex/model-specular.vert</file>
+        <file alias="model-normals.frag">shaders/fragment/model-normals.frag</file>
+        <file alias="model-normals.vert">shaders/vertex/model-normals.vert</file>
+        <file alias="skybox.frag">skybox/skybox.frag</file>
+        <file alias="skybox.vert">skybox/skybox.vert</file>
+    </qresource>
+    <qresource prefix="/models">
+        <file>models/spartan/spartan.obj</file>
+        <file>models/alien-hominid/alien.obj</file>
+        <file>models/spartan/spartan.mtl</file>
+        <file>models/spartan/Spartan_Ears_Mat_BaseColor.png</file>
+        <file>models/spartan/Spartan_Undersuit_Mat_Specular.png</file>
+        <file>models/spartan/Spartan_Undersuit_Mat_Roughness.png</file>
+        <file>models/spartan/Spartan_Undersuit_Mat_Normal.png</file>
+        <file>models/spartan/Spartan_Undersuit_Mat_Metallic.png</file>
+        <file>models/spartan/Spartan_Undersuit_Mat_BaseColor.png</file>
+        <file>models/spartan/Spartan_Undersuit_Mat_AO.png</file>
+        <file>models/spartan/Spartan_Shoulder_Mat_Specular.png</file>
+        <file>models/spartan/Spartan_Shoulder_Mat_Roughness.png</file>
+        <file>models/spartan/Spartan_Shoulder_Mat_Normal.png</file>
+        <file>models/spartan/Spartan_Shoulder_Mat_Metallic.png</file>
+        <file>models/spartan/Spartan_Shoulder_Mat_BaseColor.png</file>
+        <file>models/spartan/Spartan_Shoulder_Mat_AO.png</file>
+        <file>models/spartan/Spartan_Legs_Mat_Specular.png</file>
+        <file>models/spartan/Spartan_Legs_Mat_Roughness.png</file>
+        <file>models/spartan/Spartan_Legs_Mat_Normal.png</file>
+        <file>models/spartan/Spartan_Legs_Mat_Metallic.png</file>
+        <file>models/spartan/Spartan_Legs_Mat_BaseColor.png</file>
+        <file>models/spartan/Spartan_Legs_Mat_AO.png</file>
+        <file>models/spartan/Spartan_Helmet_Mat_Specular.png</file>
+        <file>models/spartan/Spartan_Helmet_Mat_Roughness.png</file>
+        <file>models/spartan/Spartan_Helmet_Mat_Normal.png</file>
+        <file>models/spartan/Spartan_Helmet_Mat_Metallic.png</file>
+        <file>models/spartan/Spartan_Helmet_Mat_BaseColor.png</file>
+        <file>models/spartan/Spartan_Helmet_Mat_AO.png</file>
+        <file>models/spartan/Spartan_Ears_Mat_Specular.png</file>
+        <file>models/spartan/Spartan_Ears_Mat_Roughness.png</file>
+        <file>models/spartan/Spartan_Ears_Mat_Normal.png</file>
+        <file>models/spartan/Spartan_Ears_Mat_Metallic.png</file>
+        <file>models/spartan/Spartan_Ears_Mat_AO.png</file>
+        <file>models/spartan/Spartan_Chest_Mat_Specular.png</file>
+        <file>models/spartan/Spartan_Chest_Mat_Roughness.png</file>
+        <file>models/spartan/Spartan_Chest_Mat_Normal.png</file>
+        <file>models/spartan/Spartan_Chest_Mat_Metallic.png</file>
+        <file>models/spartan/Spartan_Chest_Mat_BaseColor.png</file>
+        <file>models/spartan/Spartan_Chest_Mat_AO.png</file>
+        <file>models/spartan/Spartan_Arms_Mat_Specular.png</file>
+        <file>models/spartan/Spartan_Arms_Mat_Roughness.png</file>
+        <file>models/spartan/Spartan_Arms_Mat_Normal.png</file>
+        <file>models/spartan/Spartan_Arms_Mat_Metallic.png</file>
+        <file>models/spartan/Spartan_Arms_Mat_BaseColor.png</file>
+        <file>models/spartan/Spartan_Arms_Mat_AO.png</file>
+        <file>models/spartan/lambert1_Roughness.png</file>
+        <file>models/spartan/lambert1_Nrm.png</file>
+        <file>models/spartan/lambert1_Colour-Opacity.png</file>
+        <file>models/backpack/specular.jpg</file>
+        <file>models/backpack/roughness.jpg</file>
+        <file>models/backpack/diffuse.jpg</file>
+        <file>models/backpack/normal.png</file>
+        <file>models/backpack/backpack.obj</file>
+        <file>models/backpack/backpack.mtl</file>
+        <file>models/backpack/ao.jpg</file>
+        <file>models/alien-hominid/specular.png</file>
+        <file>models/alien-hominid/roughness.png</file>
+        <file>models/alien-hominid/normal.png</file>
+        <file>models/alien-hominid/diffuse.png</file>
+        <file>models/alien-hominid/blaster_specular.png</file>
+        <file>models/alien-hominid/blaster_roughness.png</file>
+        <file>models/alien-hominid/blaster_normal.png</file>
+        <file>models/alien-hominid/blaster_emissive.png</file>
+        <file>models/alien-hominid/blaster_diffuse.png</file>
+        <file>models/alien-hominid/alien.mtl</file>
+        <file>models/scythe/scythe.obj</file>
+        <file>models/scythe/scythe.mtl</file>
+        <file>models/scythe/diffuse.png</file>
+        <file>models/bird/occlusion.jpg</file>
+        <file>models/bird/normal.jpg</file>
+        <file>models/bird/diffuse.jpg</file>
+        <file>models/bird/bird.obj</file>
+        <file>models/bird/bird.mtl</file>
+    </qresource>
+</RCC>
