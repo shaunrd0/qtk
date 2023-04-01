@@ -8,7 +8,7 @@ on:
 jobs:
   Build-Qtk:
     env:
-      CONFIG: -DQTK_UPDATE_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_ENABLE_CCACHE=OFF -DQTK_BUILD_GUI=ON -DQTK_INSTALL_LIBRARY=ON -DQTK_INSTALL_PLUGINS=OFF
+      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=ON -DQTK_LIBRARY=ON -DQTK_PLUGINS=OFF
     strategy:
       fail-fast: false
       matrix:
@@ -64,13 +64,13 @@ jobs:
       - name: Build Qtk Application (OSX / Linux)
         if: matrix.os != 'windows-latest'
         shell: bash
-        run: cmake --build build/ --config Release --target qtk_app -- -j $(nproc)
+        run: cmake --build build/ --config Release --target qtk_gui -- -j $(nproc)
 
       # Packaging
 
       - name: Install Qtk Application
         shell: bash
-        run: cmake --install build/ --config Release --prefix=$(pwd)/install --component qtk
+        run: cmake --install build/ --config Release --prefix=$(pwd)/install --component qtk_gui
 
       - name: Package Qtk Application
         shell: bash
@@ -144,7 +144,7 @@ jobs:
 
   Build-Qtk-Library:
     env:
-      CONFIG: -DQTK_UPDATE_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_ENABLE_CCACHE=OFF -DQTK_BUILD_GUI=OFF -DQTK_INSTALL_LIBRARY=ON -DQTK_INSTALL_PLUGINS=OFF
+      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=OFF -DQTK_LIBRARY=ON -DQTK_PLUGINS=OFF
     strategy:
       fail-fast: false
       matrix:
@@ -200,7 +200,7 @@ jobs:
 
       - name: Install Qtk Library
         shell: bash
-        run: cmake --install build/ --config Release --prefix=$(pwd)/install --component libqtk
+        run: cmake --install build/ --config Release --prefix=$(pwd)/install --component qtk_library
 
       - name: Package Qtk Library
         shell: bash
@@ -260,7 +260,7 @@ jobs:
 
   Build-Qtk-Plugins:
     env:
-      CONFIG: -DQTK_UPDATE_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_ENABLE_CCACHE=OFF -DQTK_BUILD_GUI=OFF -DQTK_INSTALL_LIBRARY=OFF -DQTK_INSTALL_PLUGINS=ON
+      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=OFF -DQTK_LIBRARY=OFF -DQTK_PLUGINS=ON
     strategy:
       fail-fast: false
       matrix:
@@ -298,7 +298,7 @@ jobs:
       - name: Build Qtk Plugins (Windows)
         if: matrix.os == 'windows-latest'
         shell: bash
-        run: cmake --build build/ --config Release --target qtk_collection
+        run: cmake --build build/ --config Release --target qtk_plugins
 
       # OSX / Linux
 
@@ -310,13 +310,13 @@ jobs:
       - name: Build Qtk Plugins (OSX / Linux)
         if: matrix.os != 'windows-latest'
         shell: bash
-        run: cmake --build build/ --config Release --target qtk_collection -- -j $(nproc)
+        run: cmake --build build/ --config Release --target qtk_plugins -- -j $(nproc)
 
       # Packaging
 
       - name: Install Qtk Plugins
         shell: bash
-        run: cmake --install build/ --config Release --prefix=$(pwd)/install --component collection
+        run: cmake --install build/ --config Release --prefix=$(pwd)/install --component qtk_plugins
 
   Build-Qtk-Assimp-Targets:
     strategy:
@@ -352,7 +352,7 @@ jobs:
 
       - name: Configure Qtk
         shell: bash
-        run: cmake -B build/ ${{ matrix.cmake }} -DQTK_ENABLE_CCACHE=OFF
+        run: cmake -B build/ ${{ matrix.cmake }} -DQTK_CCACHE=OFF
 
       - name: Build Qtk
         shell: bash
