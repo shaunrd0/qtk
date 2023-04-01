@@ -46,14 +46,13 @@ include(GNUInstallDirs)
 # Options
 ################################################################################
 option(QTK_DEBUG "Enable debugger" OFF)
-option(QTK_UPDATE_SUBMODULES "Update external project (assimp) submodule" OFF)
-option(QTK_BUILD_GUI "Build the Qtk desktop application" ON)
-option(QTK_INSTALL_LIBRARY "Install libqtk to CMAKE_INSTALL_PREFIX path." ON)
-option(QTK_INSTALL_PLUGINS "Install Qtk plugin collection to Qt Creator." OFF)
-option(QTK_BUILD_EXAMPLE "Build the Qtk example desktop application" ON)
-option(QTK_ENABLE_CCACHE "Enable ccache" ON)
+option(QTK_SUBMODULES "Update external project (assimp) submodule" OFF)
+option(QTK_GUI "Build the Qtk desktop application" ON)
+option(QTK_PLUGINS "Install Qtk plugins to Qt Creator path." OFF)
+option(QTK_EXAMPLE "Build the Qtk example desktop application" ON)
+option(QTK_CCACHE "Enable ccache" ON)
 
-if (QTK_ENABLE_CCACHE)
+if (QTK_CCACHE)
   set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 endif()
 
@@ -61,7 +60,7 @@ endif()
 option(QTK_PREFIX_QTCREATOR "Install Qtk to Qt Creator. Untested." OFF)
 
 # Option for bringing your own assimp installation; Otherwise not needed
-# + If assimp is available system-wide we can just set QTK_UPDATE_SUBMODULES OFF
+# + If assimp is available system-wide we can just set QTK_SUBMODULES OFF
 option(
     QTK_ASSIMP_NEW_INTERFACE
     "Use the assimp::assimp interface (WIN / OSX)"
@@ -76,6 +75,10 @@ endif()
 
 # This should be set to your Qt6 installation directory.
 set(QT_INSTALL_DIR "$ENV{HOME}/Qt/6.5.0/gcc_64" CACHE PATH "Path to Qt6 install.")
+set(Qt6_DIR "$ENV{HOME}/Qt/6.5.0/gcc_64/lib/")
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX  "${CMAKE_BINARY_DIR}/install")
+endif ()
 # Point CMAKE_PREFIX_PATH to Qt6 install directory
 # If Qtk is built within Qt Creator this is not required.
 list(APPEND CMAKE_PREFIX_PATH "${QT_INSTALL_DIR}")
@@ -134,7 +137,7 @@ if(NOT Qt6_FOUND)
 endif()
 
 # Find Assimp.
-if(QTK_UPDATE_SUBMODULES)
+if(QTK_SUBMODULES)
   # Required to statically link.
   add_compile_options(-fPIC)
   set(BUILD_SHARED_LIBS OFF CACHE STRING "Build static assimp libs" FORCE)
@@ -166,7 +169,7 @@ endif()
 ################################################################################
 add_subdirectory(src)
 
-if(QTK_BUILD_EXAMPLE)
+if(QTK_EXAMPLE)
   # Create a namespaced alias for linking with qtk_library in the example.
   add_library(${PROJECT_NAME}::qtk_library ALIAS qtk_library)
   add_subdirectory(example-app)

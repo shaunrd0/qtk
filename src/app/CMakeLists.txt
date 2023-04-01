@@ -33,32 +33,32 @@ target_sources(
 target_link_libraries(qtk_plugin_library PUBLIC Qt6::UiPlugin qtk_library)
 
 ################################################################################
-# Qtk Widget Collection Plugin
+# Qtk Widget Plugins
 ################################################################################
 # Create a Qt Designer plugin for a collection of widgets from our library.
-qt_add_plugin(qtk_collection SHARED)
+qt_add_plugin(qtk_plugins SHARED)
 target_sources(
-    qtk_collection PRIVATE
+    qtk_plugins PRIVATE
     widgetplugincollection.cpp widgetplugincollection.h
     widgetplugin.cpp widgetplugin.h
 )
-target_link_libraries(qtk_collection PUBLIC qtk_plugin_library)
+target_link_libraries(qtk_plugins PUBLIC qtk_plugin_library)
 
 ################################################################################
 # Final Qtk Application
 ################################################################################
 
 set(
-    QTK_APP_SOURCES
+    QTK_GUI_SOURCES
     qtkscene.cpp qtkscene.h
     main.cpp
 )
 
-qt_add_executable(qtk_app ${QTK_APP_SOURCES})
-target_link_libraries(qtk_app PRIVATE qtk_plugin_library)
+qt_add_executable(qtk_gui ${QTK_GUI_SOURCES})
+target_link_libraries(qtk_gui PRIVATE qtk_plugin_library)
 
 set_target_properties(
-    qtk_app PROPERTIES
+    qtk_gui PROPERTIES
       WIN32_EXECUTABLE TRUE
       MACOSX_BUNDLE TRUE
       MACOSX_BUNDLE_BUNDLE_NAME Qtk

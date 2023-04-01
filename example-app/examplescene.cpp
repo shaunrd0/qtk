@@ -7,10 +7,11 @@
 ##############################################################################*/
 
 #include "examplescene.h"
+#include <resources.h>
 
 using namespace Qtk;
 
-ExampleScene::ExampleScene(Qtk::Scene * scene) : Qtk::SceneInterface(scene) {
+ExampleScene::ExampleScene(Qtk::Scene *scene) : Qtk::SceneInterface(scene) {
   setSceneName("Example Scene");
   getCamera().getTransform().setTranslation(-8.0f, 0.0f, 10.0f);
   getCamera().getTransform().setRotation(-5.0f, 0.0f, 1.0f, 0.0f);
@@ -23,8 +24,10 @@ void ExampleScene::init() {
   setSkybox(skybox);
 
   auto spartan = new Model(
-      "spartan", "/home/kapper/Code/qtk/resources/models/spartan/spartan.obj");
+      "spartan", std::string(QTK_EXAMPLE_SOURCE_DIR) +
+                 "/../resources/models/spartan/spartan.obj");
   addObject(spartan);
+  spartan->getTransform().setTranslation(-4.0f, 0.0f, 0.0f);
 
   auto mesh = addObject(
       new Qtk::MeshRenderer("rightTriangle", Triangle(QTK_DRAW_ARRAYS)));
