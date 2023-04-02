@@ -56,6 +56,7 @@ jobs:
         run: cmake --build build/ --config Release --target qtk_gui ${{ matrix.flags }}
 
       - name: Build Qtk Example
+        if: matrix.os != 'windows-latest'
         shell: bash
         run: cmake --build build/ --config Release --target qtk_example ${{ matrix.flags }}
 
