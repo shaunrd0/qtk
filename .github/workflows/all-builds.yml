@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build-Qtk:
+  Qtk:
     env:
-      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=ON -DQTK_LIBRARY=ON -DQTK_PLUGINS=OFF
+      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=ON -DQTK_LIBRARY=ON -DQTK_PLUGINS=OFF -DQTK_EXAMPLE=ON
     strategy:
       fail-fast: false
       matrix:
@@ -44,24 +44,18 @@ jobs:
           sudo apt update -y
           sudo apt install libxcb-cursor0 -y
 
-      - name: Configure Qtk Application (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Configure Qtk Application
         shell: bash
         run: cmake -B build/ ${{ matrix.cmake }}
 
       - name: Build Qtk Application (Windows)
         if: matrix.os == 'windows-latest'
         shell: bash
-        run: cmake --build build/ --config Release
+        run: cmake --build build/ --config Release --target qtk_gui
 
       # OSX / Linux
 
-      - name: Configure Qtk Application (OSX / Linux)
-        if: matrix.os != 'windows-latest'
-        shell: bash
-        run: cmake -B build/ ${{ matrix.cmake }}
-
-      - name: Build Qtk Application (OSX / Linux)
+      - name: Build Qtk Application
         if: matrix.os != 'windows-latest'
         shell: bash
         run: cmake --build build/ --config Release --target qtk_gui -- -j $(nproc)
@@ -87,7 +81,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
-          name: qtk-app-${{ matrix.os }}
+          name: qtk-gui-${{ matrix.os }}
           path: |
             build/packages/*.deb
 
@@ -102,7 +96,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v3
         with:
-          name: qtk-app-${{ matrix.os }}
+          name: qtk-gui-${{ matrix.os }}
           path: |
             build/packages/*.exe
 
@@ -117,14 +111,14 @@ jobs:
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v3
         with:
-          name: qtk-app-${{ matrix.os }}
+          name: qtk-gui-${{ matrix.os }}
           path: |
             build/packages/*.tar.gz
 
       - name: Upload Qtk install directory
         uses: actions/upload-artifact@v3
         with:
-          name: qtk-app-${{ matrix.os }}-install
+          name: qtk-gui-${{ matrix.os }}-installdir
           path: install/*
 
 # TODO: Enable after trimming resources.
@@ -142,9 +136,9 @@ jobs:
 #            build/packages/*
 #            !build/packages/_CPack_Packages/*
 
-  Build-Qtk-Library:
+  Qtk-Library:
     env:
-      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=OFF -DQTK_LIBRARY=ON -DQTK_PLUGINS=OFF
+      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=OFF -DQTK_LIBRARY=ON -DQTK_PLUGINS=OFF -DQTK_EXAMPLE=OFF
     strategy:
       fail-fast: false
       matrix:
@@ -255,12 +249,12 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: libqtk-${{ matrix.os }}-install
+          name: libqtk-${{ matrix.os }}-installdir
           path: install/*
 
-  Build-Qtk-Plugins:
+  Qtk-Plugins:
     env:
-      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=OFF -DQTK_LIBRARY=OFF -DQTK_PLUGINS=ON
+      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=OFF -DQTK_LIBRARY=OFF -DQTK_PLUGINS=ON -DQTK_EXAMPLE=OFF
     strategy:
       fail-fast: false
       matrix:
@@ -318,7 +312,7 @@ jobs:
         shell: bash
         run: cmake --install build/ --config Release --prefix=$(pwd)/install --component qtk_plugins
 
-  Build-Qtk-Assimp-Targets:
+  Qtk-Assimp-Targets:
     strategy:
       fail-fast: false
       matrix:

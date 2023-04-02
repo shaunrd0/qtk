@@ -22,7 +22,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 endif()
 
 # If you did not install Qtk on a system path, point cmake to installation.
-set(QTK_PATH ../build/install/lib/cmake/Qtk CACHE PATH  "Path to installation of Qtk" FORCE)
+set(
+    QTK_PATH ../build/install/lib/cmake/Qtk
+    CACHE PATH  "Path to installation of Qtk"
+    FORCE
+)
 
 # If you did not install Qt6 on a system path, point cmake to installation.
 set(QT_INSTALL_DIR "$ENV{HOME}/Qt/6.5.0/gcc_64/" CACHE PATH "Path to Qt6")
@@ -71,7 +75,7 @@ configure_file(
     @ONLY
 )
 
-add_executable(qtk_example ${EXAMPLE_SOURCES})
+qt_add_executable(qtk_example ${EXAMPLE_SOURCES})
 target_link_libraries(qtk_example PUBLIC Qt6::Widgets Qt6::OpenGLWidgets Qt6::Core)
 target_link_libraries(qtk_example PUBLIC Qtk::qtk_library)
 target_include_directories(qtk_example PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
@@ -84,3 +88,9 @@ install(
     ARCHIVE DESTINATION lib/static
     RUNTIME DESTINATION bin
 )
+qt_generate_deploy_app_script(
+    TARGET qtk_example
+    OUTPUT_SCRIPT QTK_EXAMPLE_DEPLOY_SCRIPT
+    NO_UNSUPPORTED_PLATFORM_ERROR
+)
+install(SCRIPT ${QTK_EXAMPLE_DEPLOY_SCRIPT} COMPONENT qtk_example)

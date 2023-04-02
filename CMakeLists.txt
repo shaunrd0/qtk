@@ -172,5 +172,5 @@ add_subdirectory(src)
 if(QTK_EXAMPLE)
   # Create a namespaced alias for linking with qtk_library in the example.
   add_library(${PROJECT_NAME}::qtk_library ALIAS qtk_library)
-  add_subdirectory(example-app)
+  add_subdirectory(example-app EXCLUDE_FROM_ALL)
 endif()
