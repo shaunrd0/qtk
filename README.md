@@ -241,7 +241,7 @@ Last we need to run `clang-format`, this can be done with the command directly.
 This will reformat all the code in the repository.
 
 ```bash
-clang-format -i --style=file:.clang-format src/*.cpp src/*.h app/*.cpp app/*.h
+clang-format -i --style=file:.clang-format src/app/*.cpp src/app/*.h src/qtk/*.cpp src/qtk/*.h example-app/*.cpp example-app/*.h
 ```
 
 `clang-format` can be run with git integration (or CLion if you prefer).
