@@ -67,10 +67,12 @@ option(
     OFF
 )
 
-if(NOT QTK_DEBUG)
-  set(CMAKE_BUILD_TYPE Release)
-else()
+if(QTK_DEBUG OR CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
+  set(QTK_DEBUG ON)
   set(CMAKE_BUILD_TYPE Debug)
+else()
+  set(QTK_DEBUG OFF)
+  set(CMAKE_BUILD_TYPE Release)
 endif()
 
 # This should be set to your Qt6 installation directory.
