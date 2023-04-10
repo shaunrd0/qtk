@@ -42,16 +42,8 @@ if(QTK_GUI OR QTK_PLUGINS)
 endif()
 
 if(QTK_PLUGINS)
-  # Optionally install custom Qtk plugins for Qt Designer.
   install(
-      TARGETS qtk_library qtk_plugin_library
-      COMPONENT qtk_plugins
-      LIBRARY DESTINATION "${QTK_PLUGIN_LIBRARY_DIR}"
-      ARCHIVE DESTINATION "${QTK_PLUGIN_LIBRARY_DIR}"
-      RUNTIME DESTINATION "${QTK_PLUGIN_LIBRARY_DIR}"
-  )
-  install(
-      TARGETS qtk_plugins
+      TARGETS qtk_plugins qtk_library qtk_plugin_library
       COMPONENT qtk_plugins
       LIBRARY DESTINATION "${QTK_PLUGIN_INSTALL_DIR}"
       ARCHIVE DESTINATION "${QTK_PLUGIN_INSTALL_DIR}"

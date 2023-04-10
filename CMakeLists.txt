@@ -76,53 +76,26 @@ else()
 endif()
 
 # This should be set to your Qt6 installation directory.
-set(QT_INSTALL_DIR "$ENV{HOME}/Qt/6.5.0/gcc_64" CACHE PATH "Path to Qt6 install.")
-set(Qt6_DIR "$ENV{HOME}/Qt/6.5.0/gcc_64/lib/")
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+set(QT_INSTALL_DIR "$ENV{HOME}/Qt/6.5.0/gcc_64/lib/cmake" CACHE PATH "Path to Qt6 install.")
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX  "${CMAKE_BINARY_DIR}/install")
 endif ()
-# Point CMAKE_PREFIX_PATH to Qt6 install directory
-# If Qtk is built within Qt Creator this is not required.
-list(APPEND CMAKE_PREFIX_PATH "${QT_INSTALL_DIR}")
-if (QTK_PREFIX_QTCREATOR)
-  # TODO: This might be a bit strange and needs more testing.
-  set(CMAKE_INSTALL_PREFIX  "${QT_INSTALL_DIR}")
-endif()
 
-set(
-    QT_CREATOR_DIR
-    "${QT_INSTALL_DIR}/../../Tools/QtCreator"
-    CACHE PATH "Qt Creator path used to install Qtk plugins for Qt Designer."
-)
-# Qt Designer will look in different locations if WIN / Unix.
-# These paths are for using Qt Designer integrated within Qt Creator.
-# Standalone Qt Designer may use different paths.
-if (WIN32)
-  # These paths may be different on windows. I have not tested this.
-  set(QT_PLUGIN_INSTALL_DIR "${QT_CREATOR_DIR}/bin/plugins/designer")
-  set(QT_PLUGIN_LIBRARY_DIR "${QT_CREATOR_DIR}/lib/Qt/lib")
-else()
-  set(QT_PLUGIN_INSTALL_DIR "${QT_CREATOR_DIR}/lib/Qt/plugins/designer")
-  set(QT_PLUGIN_LIBRARY_DIR "${QT_CREATOR_DIR}/lib/Qt/lib")
-endif()
-set(QTK_PLUGIN_LIBRARY_DIR "${QT_PLUGIN_LIBRARY_DIR}")
-set(QTK_PLUGIN_INSTALL_DIR "${QT_PLUGIN_INSTALL_DIR}")
-
-message(STATUS "[Qtk] CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
 set(QTK_RESOURCES "${CMAKE_SOURCE_DIR}/resources")
 set(QTK_OSX_ICONS ${CMAKE_SOURCE_DIR}/resources/icons/osx/kilroy.icns)
 
-# Print all QTK options and their values.
+# Print all QTK options and their values at the end of configuration.
 get_cmake_property(VAR_NAMES VARIABLES)
 list(FILTER VAR_NAMES INCLUDE REGEX "^Q[tT][kK]_.*$")
 list(SORT VAR_NAMES)
-foreach(VAR_NAME ${VAR_NAMES})
-  message(STATUS "[Qtk] ${VAR_NAME}=${${VAR_NAME}}")
-endforeach()
 
 ################################################################################
 # External Dependencies
 ################################################################################
+# Point CMAKE_PREFIX_PATH to Qt6 install directory
+# If Qtk is built within Qt Creator this is not required.
+list(APPEND CMAKE_PREFIX_PATH "${QT_INSTALL_DIR}")
+
 # Find Qt
 find_package(Qt6 COMPONENTS Core UiPlugin OpenGLWidgets)
 qt_standard_project_setup()
@@ -137,6 +110,35 @@ if(NOT Qt6_FOUND)
       "/path/to/qtk/build && cmake --build /path/to/qtk/build -j $(nprocs)`"
   )
 endif()
+
+# TODO: This might be a bit strange and needs more testing.
+if (QTK_PREFIX_QTCREATOR)
+  set(CMAKE_INSTALL_PREFIX  "${QT_INSTALL_DIR}")
+endif()
+
+
+#
+# To use custom plugins, set QT_PLUGIN_PATH environment variable before running designer
+# Or, we can install plugins to the designer for use across all projects.
+# Qt Creator on linux will look here for widget plugins in the integrated designer
+#   /home/shaun/Qt/Tools/QtCreator/lib/Qt/lib
+# Qt Designer will use the following path on linux
+#   /home/shaun/Qt/6.5.0/gcc_64/plugins/designer/
+# We can use this path after find_package(Qt6) to install our plugins on all systems
+#   ${QT6_INSTALL_PREFIX}/${QT6_INSTALL_PLUGINS}/designer
+# And run designer at ${QT6_INSTALL_PREFIX}/bin/designer
+# Use cmake -DQTK_PLUGIN_INSTALL_DIR=/some/path to override this install path
+set(
+    QTK_PLUGIN_INSTALL_DIR
+    "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_PLUGINS}/designer" CACHE PATH
+    "Path to install Qtk plugin collection."
+)
+# See cmake configure output for values of these variables on your system
+set(
+  VAR_PATHS
+   CMAKE_PREFIX_PATH CMAKE_INSTALL_PREFIX QTK_PLUGIN_INSTALL_DIR QT6_INSTALL_PREFIX
+   QT_INSTALL_DIR QT6_INSTALL_PLUGINS
+)
 
 # Find Assimp.
 if(QTK_SUBMODULES)
@@ -176,3 +178,13 @@ if(QTK_EXAMPLE)
   add_library(${PROJECT_NAME}::qtk_library ALIAS qtk_library)
   add_subdirectory(example-app EXCLUDE_FROM_ALL)
 endif()
+
+foreach(VAR_NAME IN LISTS VAR_NAMES VAR_PATHS)
+  if(VAR_NAME IN_LIST VAR_PATHS)
+    # Print absolute if variable is path
+    get_filename_component(VAR_REALPATH "${${VAR_NAME}}" REALPATH)
+    message(STATUS "[Qtk] ${VAR_NAME}=${VAR_REALPATH}")
+  else()
+    message(STATUS "[Qtk] ${VAR_NAME}=${${VAR_NAME}}")
+  endif()
+endforeach()
