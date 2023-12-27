@@ -9,19 +9,18 @@
 #include <QDebug>
 #include <QImageReader>
 
+#include "app/qtkmainwindow.h"
 #include "texture.h"
 
 using namespace Qtk;
 
-QImage * OpenGLTextureFactory::initImage(
+QImage OpenGLTextureFactory::initImage(
     const char * image, bool flipX, bool flipY) {
   // Qt6 limits loaded images to 256MB by default
-  QImageReader::setAllocationLimit(512);
-  auto loadedImage = new QImage(QImage(image).mirrored(flipX, flipY));
-  if(loadedImage->isNull()) {
-    qDebug() << "[Qtk::OpenGLTextureFactory] Error loading image: " << image
-             << "\nSupported types: " << QImageReader::supportedImageFormats();
-    return Q_NULLPTR;
+  QImageReader::setAllocationLimit(1024);
+  auto loadedImage = QImage(image).mirrored(flipX, flipY);
+  if(loadedImage.isNull()) {
+    return defaultTexture();
   }
 
   return loadedImage;
@@ -29,13 +28,12 @@ QImage * OpenGLTextureFactory::initImage(
 
 QOpenGLTexture * OpenGLTextureFactory::initTexture(
     const char * texture, bool flipX, bool flipY) {
-  QImage * image = initImage(texture, flipX, flipY);
+  QImage image = initImage(texture, flipX, flipY);
   auto newTexture = new QOpenGLTexture(QOpenGLTexture::Target2D);
-  newTexture->setData(*image);
+  newTexture->setData(image);
   newTexture->setWrapMode(QOpenGLTexture::Repeat);
   newTexture->setMinMagFilters(
       QOpenGLTexture::LinearMipMapLinear, QOpenGLTexture::Linear);
-  delete image;
   return newTexture;
 }
 
@@ -71,6 +69,7 @@ QOpenGLTexture * OpenGLTextureFactory::initCubeMap(
     QImage faceImage(faceTextures[i]);
     if(faceImage.isNull()) {
       qDebug() << "Error loading cube map image\n";
+      faceImage = defaultTexture();
     }
     faceImage = faceImage.convertToFormat(QImage::Format_RGBA8888);
 

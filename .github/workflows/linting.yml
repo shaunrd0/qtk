@@ -21,8 +21,8 @@ jobs:
 
       - name: Build Qtk
         run: |
-          cmake -B build -DQTK_UPDATE_SUBMODULES=OFF -DQTK_ENABLE_CCACHE=OFF
-          cmake --build build
+          cmake -B build -DQTK_SUBMODULES=OFF -DQTK_CCACHE=OFF -DQTK_PLUGINS=OFF -DQTK_GUI=ON
+          cmake --build build --target qtk_gui -- -j $(nproc)
 
       - uses: cpp-linter/cpp-linter-action@v2
         id: linter

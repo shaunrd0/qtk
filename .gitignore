@@ -1,6 +1,9 @@
 # CLion
 **/.idea/**
 
+# VS Code
+**/.vscode/**
+
 # CMake build files
 **/cmake-build-debug/**
 **/build/**

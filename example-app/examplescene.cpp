@@ -7,6 +7,7 @@
 ##############################################################################*/
 
 #include "examplescene.h"
+#include <resources.h>
 
 using namespace Qtk;
 
@@ -22,9 +23,11 @@ void ExampleScene::init() {
   auto skybox = new Qtk::Skybox("Skybox");
   setSkybox(skybox);
 
-  auto spartan = new Model(
-      "spartan", "/home/kapper/Code/qtk/resources/models/spartan/spartan.obj");
+  std::string spartanPath = QTK_EXAMPLE_SOURCE_DIR;
+  spartanPath += "/resources/models/spartan/spartan.obj";
+  auto spartan = new Model("spartan", spartanPath.c_str());
   addObject(spartan);
+  spartan->getTransform().setTranslation(-4.0f, 0.0f, 0.0f);
 
   auto mesh = addObject(
       new Qtk::MeshRenderer("rightTriangle", Triangle(QTK_DRAW_ARRAYS)));

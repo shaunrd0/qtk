@@ -18,6 +18,9 @@
 #include <assimp/Importer.hpp>
 
 // Qtk
+#include <QFileInfo>
+
+
 #include "modelmesh.h"
 #include "qtkapi.h"
 
@@ -123,6 +126,14 @@ namespace Qtk {
        * @return Transform3D attached to this Model.
        */
       inline Transform3D & getTransform() { return mTransform; }
+
+      inline std::string getVertexShader() const override {
+        return mVertexShader;
+      }
+
+      inline std::string getFragmentShader() const override {
+        return mFragmentShader;
+      }
 
     private:
       /*************************************************************************

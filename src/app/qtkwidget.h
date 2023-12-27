@@ -131,10 +131,18 @@ namespace Qtk {
        */
       void sendLog(const QString & message, DebugContext context = Status);
 
+      // TODO: Use this signal in treeview and toolbox to update object
+      // properties
+      void objectFocusChanged(const QString objectName);
+
     protected:
       /*************************************************************************
        * Protected Methods
        ************************************************************************/
+
+      void dragEnterEvent(QDragEnterEvent * event) override;
+
+      void dropEvent(QDropEvent * event) override;
 
       /**
        * @param event Key press event to update camera input manager.
@@ -166,6 +174,7 @@ namespace Qtk {
       /**
        * Called when the `messageLogged` signal is caught.
        * See definition of initializeGL()
+       * https://doc.qt.io/qt-6/qopengldebuglogger.html#signals
        *
        * @param msg The message logged.
        */

@@ -211,6 +211,14 @@ namespace Qtk {
        */
       inline Transform3D & getTransform() { return mTransform; }
 
+      inline std::string getVertexShader() const override {
+        return mVertexShader;
+      }
+
+      inline std::string getFragmentShader() const override {
+        return mFragmentShader;
+      }
+
     private:
       /*************************************************************************
        * Private Members

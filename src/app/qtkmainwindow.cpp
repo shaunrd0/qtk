@@ -29,17 +29,30 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent) {
   for(auto & qtkWidget : qtkWidgets) {
     qtkWidget->setScene(new Qtk::SceneEmpty);
     views_.emplace(qtkWidget->getScene()->getSceneName(), qtkWidget);
+
+    // Add GUI 'view' toolbar option to show debug console.
     ui_->menuView->addAction(qtkWidget->getActionToggleConsole());
+    // Refresh GUI widgets when scene or objects are updated.
     connect(
         qtkWidget->getScene(), &Qtk::Scene::sceneUpdated, this,
         &MainWindow::refreshScene);
+    connect(
+        qtkWidget, &Qtk::QtkWidget::objectFocusChanged, ui_->qtk__ToolBox,
+        &Qtk::ToolBox::updateFocus);
   }
 
-  auto docks = findChildren<QDockWidget *>();
-  for(auto & dock : docks) {
-    addDockWidget(Qt::RightDockWidgetArea, dock);
-    ui_->menuView->addAction(dock->toggleViewAction());
-  }
+  // TODO: Fix / use MainWindow in Qt Designer to add these dock widgets.
+  // For now we will add them manually, but we should be able to do this in the
+  // designer. At the moment if you edit the UI in designer the dock widget
+  // areas below will override the designer settings.
+
+  // Dock the toolbox widget to the main window.
+  addDockWidget(Qt::LeftDockWidgetArea, ui_->qtk__ToolBox);
+  // Add an option to toggle active widgets in the GUI's toolbar 'view' menu.
+  ui_->menuView->addAction(ui_->qtk__ToolBox->toggleViewAction());
+
+  addDockWidget(Qt::RightDockWidgetArea, ui_->qtk__TreeView);
+  ui_->menuView->addAction(ui_->qtk__TreeView->toggleViewAction());
 
   // Set the window icon used for Qtk.
   setWindowIcon(Qtk::getIcon());
@@ -74,7 +87,7 @@ Qtk::QtkWidget * MainWindow::getQtkWidget(const QString & name) {
   return views_[name];
 }
 
-void MainWindow::refreshScene(QString sceneName) {
-  // TODO: Select TreeView using sceneName>
+void MainWindow::refreshScene(const QString & sceneName) {
+  // TODO: Select TreeView using sceneName
   ui_->qtk__TreeView->updateView(getQtkWidget()->getScene());
 }

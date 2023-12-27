@@ -40,88 +40,59 @@ and [Qt Creator](https://github.com/qt-creator/qt-creator).
 Simply open the root `CMakeLists.txt` with either of these editors and
 configurations will be loaded.
 
-This project has been ported to **Qt 6.5.0**, which is not yet available in
+This project has been ported to **Qt 6.6.0**, which is not yet available in
 Ubuntu apt repositories.
 To run this project, you will *need* to
 install [Qt6 Open Source Binaries](https://www.qt.io/download-qt-installer) for
-your system, **version 6.5.0** or later.
+your system, **version 6.6.0** or later.
 Be sure to take note of the Qt6 installation directory, as we will need it to
 correctly set our `CMAKE_PREFIX_PATH` in the next steps.
+
+If you are building on **Windows / Mac**, consider setting
+the `-DQTK_ASSIMP_NEW_INTERFACE` cmake build option.
 
 If the build is configured with all options enabled, we can subsequently install
 individual components as needed with cmake.
 
 ```bash
-cmake -B build-all/ -DQTK_BUILD_GUI=ON -DQTK_INSTALL_LIBRARY=ON -DQTK_INSTALL_PLUGINS=ON
-```
+sudo apt update -y && sudo apt install libassimp-dev cmake build-essential git ccache libgl1-mesa-dev libglvnd-dev zlib1g-dev -y
+git clone https://github.com/shaunrd0/qtk
+cd qtk
+# Configure the build with all components enabled
+cmake -B build-all -DQTK_GUI=ON -DQTK_PLUGINS=ON -DQTK_EXAMPLE=ON -DCMAKE_PREFIX_PATH=$HOME/Qt/6.6.0/gcc_64
+# Build all targets
+cmake --build build-all/
+````
+
+By default, the build will not initialize Assimp as a git submodule and build
+from source.
+We can turn this on by setting the `-DQTK_SUBMODULES=ON` flag when running
+CMake.
+Building using this option will fetch and build Assimp for us, but builds will
+take longer as a result.
+Using `-DQTK_SUBMODULES=ON` supports providing assimp on cross-platform builds (
+Windows / Mac / Linux) and may be easier
+to configure.
 
 ```bash
-# Install libqtk only
-cmake --install build-all/ --prefix=$(pwd)/install --component libqtk
--- Install configuration: "Release"
--- Up-to-date: /home/shaun/Code/qtk/install/lib/cmake/Qtk/QtkConfig.cmake
--- Up-to-date: /home/shaun/Code/qtk/install/lib/cmake/Qtk/QtkConfigVersion.cmake
--- Up-to-date: /home/shaun/Code/qtk/install/lib/cmake/Qtk/QtkTargets.cmake
--- Up-to-date: /home/shaun/Code/qtk/install/lib/cmake/Qtk/QtkTargets-release.cmake
--- Up-to-date: /home/shaun/Code/qtk/install/lib/static/libqtk_library.a
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/camera3d.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/input.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/meshrenderer.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/model.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/modelmesh.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/object.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/qtkapi.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/qtkiostream.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/qtkiosystem.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/scene.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/shape.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/skybox.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/texture.h
--- Up-to-date: /home/shaun/Code/qtk/install/include/qtk/transform3D.h
-
-# Install Qtk widget collection to use Qt Designer
-cmake --install build-all/ --prefix=$(pwd)/install --component collection
--- Install configuration: "Release"
--- Up-to-date: /home/shaun/Qt/6.5.0/gcc_64/../../Tools/QtCreator/lib/Qt/lib/libqtk_library.a
--- Up-to-date: /home/shaun/Qt/6.5.0/gcc_64/../../Tools/QtCreator/lib/Qt/lib/libqtk_plugin_library.a
--- Up-to-date: /home/shaun/Qt/6.5.0/gcc_64/../../Tools/QtCreator/lib/Qt/plugins/designer/libqtk_collection.so
-
-# Install Qtk desktop application (output removed)
-cmake --install build-all/ --prefix=$(pwd)/install --component qtk
+cmake -B build-all -DQTK_GUI=ON -DQTK_PLUGINS=ON -DQTK_EXAMPLE=ON -DQTK_SUBMODULES=ON -DCMAKE_PREFIX_PATH=$HOME/Qt/6.6.0/gcc_64
 ```
 
 #### Qtk GUI
 
-Once Qt6 is installed, to build and run `qtk` on Ubuntu -
-
 ```bash
-sudo apt update -y && sudo apt install libassimp-dev cmake build-essential git ccache -y
-git clone https://github.com/shaunrd0/qtk
-cmake -S qtk/ -B qtk/build/ -DCMAKE_PREFIX_PATH=$HOME/Qt/6.5.0/gcc_64
-cmake --build qtk/build/ -j $(nproc --ignore=2)
-./qtk/build/bin/qtk-main
-```
-
-By default, the build will not initialize Assimp as a git submodule and build
-from source.
-We can turn this on by setting the `-DQTK_UPDATE_SUBMODULES=ON` flag when
-running CMake.
-Building using this option will fetch and build Assimp for us, but builds will
-take longer as a result.
-Using `-DQTK_UPDATE_SUBMODULES=ON` supports providing assimp on cross-platform
-builds (Windows / Mac / Linux) and may be easier to configure.
-
-```bash
-cmake -S qtk/ -B qtk/build/ -DQTK_UPDATE_SUBMODULES=ON -DCMAKE_PREFIX_PATH=$HOME/Qt/6.5.0/gcc_64
-cmake --build qtk/build/ -j $(nproc --ignore=2)
-./qtk/build/bin/qtk-main
+cmake --build build-all/ --target qtk_gui -- -j $(nproc)
+# Install Qtk desktop application (output removed)
+# Installation prefix path must be absolute, since Qtk uses Qt deploy tools.
+cmake --install build-all/ --component qtk_gui --prefix=$(pwd)/install
+./install/bin/qtk_gui
 ```
 
 If any errors are encountered loading plugins, we can debug plugin loading by
 setting the following environment variable -
 
 ```bash
-QT_DEBUG_PLUGINS=1 ./qtk-main
+QT_DEBUG_PLUGINS=1 ./install/bin/qtk_gui
 ```
 
 #### Qtk Library
@@ -131,12 +102,10 @@ We can install this library on a system path or a custom path and then
 set `CMAKE_PREFIX_PATH` to point to this location when building an application
 using libqtk.
 
-Below is an example of installing on a system path.
-
 ```bash
-cmake -S qtk/ -B qtk/build/ -DCMAKE_PREFIX_PATH=$HOME/Qt/6.5.0/gcc_64 -DQTK_BUILD_GUI=OFF -DQTK_INSTALL_PLUGINS=OFF -DQTK_DEBUG=OFF
-cmake --build qtk/build/ -j $(nproc --ignore=2)
-sudo cmake --install . --prefix=/usr/local
+# Install libqtk only
+cmake --build build-all/ --target qtk_library -- -j $(nproc)
+cmake --install build-all/ --component qtk_library --prefix=/usr/local
 -- Install configuration: "Release"
 -- Installing: /usr/local/lib/cmake/Qtk/QtkConfig.cmake
 -- Installing: /usr/local/lib/cmake/Qtk/QtkConfigVersion.cmake
@@ -175,9 +144,14 @@ interfaces.
 To build and install the Qtk plugin collection -
 
 ```bash
-cmake -S /path/to/qtk -B /path/to/qtk/build -DCMAKE_PREFIX_PATH=$HOME/Qt/6.5.0/gcc_64 -DQTK_INSTALL_PLUGINS=ON -DQTK_BUILD_GUI=OFF -DQTK_INSTALL_LIBRARY=OFF
-cmake --build /path/to/qtk/build
-cmake --install /path/to/qtk/build
+cmake --build build-all/ --target qtk_plugins -- -j $(nproc)
+# Install Qtk widget collection to use Qt Designer
+# The path here should be initialized during build configuration, so no need for --prefix
+cmake --install build-all/ --component qtk_plugins
+-- Install configuration: "Release"
+-- Up-to-date: /home/shaun/Qt/6.6.0/gcc_64/../../Tools/QtCreator/lib/Qt/lib/libqtk_library.a
+-- Up-to-date: /home/shaun/Qt/6.6.0/gcc_64/../../Tools/QtCreator/lib/Qt/lib/libqtk_plugin_library.a
+-- Up-to-date: /home/shaun/Qt/6.6.0/gcc_64/../../Tools/QtCreator/lib/Qt/plugins/designer/libqtk_collection.so
 ```
 
 To uninstall after a previous installation, we can run the following command
@@ -187,15 +161,21 @@ from the root of the repository.
 xargs rm < build/install_manifest.txt
 ```
 
-#### Windows / MacOS
+#### Qtk Example
 
-If you are building on **Windows / Mac**, consider setting
-the `-DASSIMP_NEW_INTERFACE` build flag.
+There is a simple example of using libqtk in the [example-app/](example-app)
+directory. The example can be built standalone using `find_package` or as a
+target within any qtk build.
 
 ```bash
-cmake -S qtk/ -B qtk/build/  -DASSIMP_NEW_INTERFACE=ON -DCMAKE_PREFIX_PATH=$HOME/Qt/6.5.0/gcc_64;/path/to/assimp/
-cmake --build qtk/build/ -j $(nproc --ignore=2)
+# Build the example from a configured qtk build tree
+cmake --build build-all/ --target qtk_example -- -j $(nproc)
+cmake --install build-all/ --component qtk_example --prefix=install
+./install/bin/qtk_example
 ```
+
+See the README in the [example-app/](example-app) subdirectory for instructions
+on standalone builds.
 
 ### Controls
 
@@ -253,7 +233,7 @@ CLion automatically.
 # Move to the root of the repo
 cd qtk
 # Build
-cmake -B build && cmake --build build
+cmake -B build && cmake --build build -- -j $(nproc)
 clang-tidy -p build/ --fix --config-file=.clang-tidy src/*.cpp src/*.h app/*.cpp app/*.h
 ```
 
@@ -261,7 +241,7 @@ Last we need to run `clang-format`, this can be done with the command directly.
 This will reformat all the code in the repository.
 
 ```bash
-clang-format -i --style=file:.clang-format src/*.cpp src/*.h app/*.cpp app/*.h
+clang-format -i --style=file:.clang-format src/app/*.cpp src/app/*.h src/qtk/*.cpp src/qtk/*.h example-app/*.cpp example-app/*.h
 ```
 
 `clang-format` can be run with git integration (or CLion if you prefer).
@@ -320,12 +300,8 @@ Any of the above options can be appended with `--trace-expand` to debug package
 generation issues.
 The contents of all packages will depend on how the build was configured.
 
-If we are generating packages for *only* libqtk, we
-set `-DQTK_INSTALL_LIBRARY=ON`
-during the cmake configuration step.
 To generate packages for Qtk desktop application, we should
-set `-DQTK_BUILD_GUI=ON`, and optionally `-DQTK_INSTALL_LIBRARY=ON` if we would
-like to bundle libqtk with the desktop application.
+set `-DQTK_GUI=ON`. If this option is not set we will only package libqtk.
 
 The NSIS installer will allow component-specific path modification for all of
 these installation components through a GUI install application.

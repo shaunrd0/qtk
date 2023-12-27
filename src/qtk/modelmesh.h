@@ -30,6 +30,21 @@ namespace Qtk {
    * Struct to store model textures. 3D Models may have multiple.
    */
   struct QTKAPI ModelTexture {
+      ModelTexture() = default;
+
+      /**
+       * Construct a ModelTexture.
+       *
+       * @param id Texture ID for this texture.
+       * @param type Type of texture in string format.
+       * @param path Path to the texture on disk.
+       */
+      ModelTexture(const std::string & type, const std::string & path) :
+          mType(type), mPath(path) {
+        mTexture = OpenGLTextureFactory::initTexture(path.c_str());
+        mID = mTexture->textureId();
+      }
+
       /** Texture ID for for this texture. */
       GLuint mID {};
       QOpenGLTexture * mTexture {};

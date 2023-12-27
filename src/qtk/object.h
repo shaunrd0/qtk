@@ -96,9 +96,23 @@ namespace Qtk {
 
       [[nodiscard]] inline const Type & getType() const { return mType; }
 
+      [[nodiscard]] inline virtual const Transform3D & getTransform() const {
+        return mTransform;
+      }
+
+      [[nodiscard]] inline virtual std::string getVertexShader() const {
+        return "Base Object has no vertex shader.";
+      }
+
+      virtual inline std::string getFragmentShader() const {
+        return "Base Object has no fragment shader.";
+      }
+
       /*************************************************************************
        * Setters
        ************************************************************************/
+
+      virtual inline void setName(const std::string & name) { mName = name; }
 
       virtual inline void setColors(const Colors & value) {
         mShape.mColors = value;
@@ -133,6 +147,39 @@ namespace Qtk {
 
       virtual inline void setVertices(const Vertices & value) {
         mShape.mVertices = value;
+      }
+
+      inline void setScaleX(double x) {
+        mTransform.setScale(
+            x, mTransform.getScale().y(), mTransform.getScale().z());
+      }
+
+      inline void setScaleY(double y) {
+        mTransform.setScale(
+            mTransform.getScale().x(), y, mTransform.getScale().z());
+      }
+
+      inline void setScaleZ(double z) {
+        mTransform.setScale(
+            mTransform.getScale().x(), mTransform.getScale().y(), z);
+      }
+
+      inline void setTranslationX(double x) {
+        mTransform.setTranslation(
+            x, mTransform.getTranslation().y(),
+            mTransform.getTranslation().z());
+      }
+
+      inline void setTranslationY(double y) {
+        mTransform.setTranslation(
+            mTransform.getTranslation().x(), y,
+            mTransform.getTranslation().z());
+      }
+
+      inline void setTranslationZ(double z) {
+        mTransform.setTranslation(
+            mTransform.getTranslation().x(), mTransform.getTranslation().y(),
+            z);
       }
 
       /*************************************************************************

@@ -62,11 +62,12 @@ custom installation directory.
 
 ```bash
 cmake -S /path/to/qtk/example-app/ -B /path/to/qtk/example-app/build -DQTK_PATH=/path/to/qtk/install/
-cmake --build /path/to/qtk/example-app/build
+cmake --build /path/to/qtk/example-app/build --target qtk_example -- -j $(nproc)
+cmake --install build/ --component qtk_example
 ```
 
 After this, we can run the example application -
 
 ```bash
-./path/to/qtk/example-app/build/bin/example
+./path/to/qtk/example-app/build/install/bin/example
 ```

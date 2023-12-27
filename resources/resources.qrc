@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/textures">
+        <file alias="plaster.png">images/plaster.png</file>
         <file alias="crate.png">images/crate.png</file>
         <file alias="stone.png">images/stone.png</file>
         <file alias="wood.png">images/wood.png</file>

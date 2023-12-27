@@ -7,6 +7,12 @@
 ##############################################################################*/
 
 #include <QKeyEvent>
+#include <QMimeData>
+#include <QVBoxLayout>
+
+#include <qtk/input.h>
+#include <qtk/scene.h>
+#include <qtk/shape.h>
 #include <QVBoxLayout>
 
 #include <qtk/input.h>
@@ -31,6 +37,7 @@ QtkWidget::QtkWidget(QWidget * parent, const QString & name) :
 QtkWidget::QtkWidget(QWidget * parent, const QString & name, Scene * scene) :
     QOpenGLWidget(parent), mDebugLogger(Q_NULLPTR),
     mConsole(new DebugConsole(this, name)), mScene(Q_NULLPTR) {
+  setAcceptDrops(true);
   setScene(scene);
   setObjectName(name);
   QSurfaceFormat format;
@@ -70,6 +77,7 @@ void QtkWidget::initializeGL() {
   // Connect the frameSwapped signal to call the update() function
   connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
 
+  toggleConsole();
   // Initialize OpenGL debug context
   mDebugLogger = new QOpenGLDebugLogger(this);
   if(mDebugLogger->initialize()) {
@@ -107,11 +115,11 @@ void QtkWidget::paintGL() {
   }
 }
 
-void QtkWidget::setScene(Qtk::Scene * scene) {
+void QtkWidget::setScene(Scene * scene) {
   if(mScene != Q_NULLPTR) {
     delete mScene;
     connect(
-        scene, &Qtk::Scene::sceneUpdated, MainWindow::getMainWindow(),
+        scene, &Scene::sceneUpdated, MainWindow::getMainWindow(),
         &MainWindow::refreshScene);
   }
 
@@ -129,8 +137,7 @@ void QtkWidget::toggleConsole() {
     mConsoleActive = false;
   } else {
     MainWindow::getMainWindow()->addDockWidget(
-        Qt::DockWidgetArea::BottomDockWidgetArea,
-        dynamic_cast<QDockWidget *>(mConsole));
+        Qt::DockWidgetArea::BottomDockWidgetArea, mConsole);
     mConsole->setHidden(false);
     mConsoleActive = true;
   }
@@ -139,6 +146,34 @@ void QtkWidget::toggleConsole() {
 /*******************************************************************************
  * Protected Methods
  ******************************************************************************/
+
+void QtkWidget::dragEnterEvent(QDragEnterEvent * event) {
+  if(event->mimeData()->hasFormat("text/plain")) {
+    event->acceptProposedAction();
+  }
+}
+
+void QtkWidget::dropEvent(QDropEvent * event) {
+  mConsole->sendLog(event->mimeData()->text());
+  auto urls = event->mimeData()->urls();
+  if(!urls.isEmpty()) {
+    if(urls.size() > 1) {
+      qDebug() << "Cannot accept drop of multiple files.";
+      event->ignore();
+      return;
+    }
+
+    // TODO: Support other object types.
+    auto url = urls.front();
+    if(url.fileName().endsWith(".obj")) {
+      mScene->loadModel(url);
+      event->acceptProposedAction();
+    } else {
+      qDebug() << "Unsupported file type: " + url.fileName() + "\n";
+      event->ignore();
+    }
+  }
+}
 
 void QtkWidget::keyPressEvent(QKeyEvent * event) {
   if(event->isAutoRepeat()) {
@@ -253,7 +288,8 @@ void QtkWidget::teardownGL() { /* Nothing to teardown yet... */
 void QtkWidget::updateCameraInput() {
   Input::update();
   // Camera Transformation
-  if(Input::buttonPressed(Qt::RightButton)) {
+  if(Input::buttonPressed(Qt::LeftButton)
+     || Input::buttonPressed(Qt::RightButton)) {
     static const float transSpeed = 0.1f;
     static const float rotSpeed = 0.5f;
 

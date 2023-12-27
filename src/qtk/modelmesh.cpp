@@ -52,6 +52,10 @@ void ModelMesh::draw(QOpenGLShaderProgram & shader) {
     shader.setUniformValue((name + number).c_str(), i);
   }
 
+  // Always reset active texture to GL_TEXTURE0 before we draw.
+  // This is important for models with no textures.
+  glActiveTexture(GL_TEXTURE0);
+
   // Draw the mesh
   glDrawElements(
       GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, mIndices.data());
@@ -62,7 +66,6 @@ void ModelMesh::draw(QOpenGLShaderProgram & shader) {
   }
   shader.release();
   mVAO->release();
-  glActiveTexture(GL_TEXTURE0);
 }
 
 /*******************************************************************************

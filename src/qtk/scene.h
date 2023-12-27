@@ -10,7 +10,10 @@
 #define QTK_SCENE_H
 
 #include <QMatrix4x4>
+#include <QUrl>
 
+#include <queue>
+#include <unordered_map>
 #include <utility>
 
 #include "camera3d.h"
@@ -75,6 +78,18 @@ namespace Qtk {
        */
       virtual void update() {}
 
+      void loadModel(const QUrl & url) {
+        auto fileName = url.fileName().replace(".obj", "").toStdString();
+        auto filePath = url.toLocalFile().toStdString();
+        loadModel(fileName, filePath);
+      }
+
+      void loadModel(const std::string & name, const std::string & path) {
+        // Add the dropped model to the load queue.
+        // This is consumed during rendering of the scene if not empty.
+        mModelLoadQueue.emplace(name, path);
+      }
+
       /*************************************************************************
        * Accessors
        ************************************************************************/
@@ -91,7 +106,16 @@ namespace Qtk {
        * @param name The objectName to look for within this scene.
        * @return The found object or Q_NULLPTR if none found.
        */
-      [[nodiscard]] Object * getObject(const QString & name);
+      [[nodiscard]] Object * getObject(const QString & name) const;
+
+      /**
+       * @return The number of objects within the scene with the given name.
+       */
+      [[nodiscard]] uint64_t getObjectCount(const QString & name) {
+        return mObjectCount.count(name.toStdString())
+                   ? mObjectCount[name.toStdString()]
+                   : 0;
+      }
 
       /**
        * @return Camera attached to this scene.
@@ -166,6 +190,8 @@ namespace Qtk {
        */
       inline void setSceneName(QString name) { mSceneName = std::move(name); }
 
+      inline void setPause(bool pause) { mPause = pause; }
+
     signals:
       /**
        * Signal thrown when the scene is modified by adding or removing objects.
@@ -175,7 +201,26 @@ namespace Qtk {
        */
       void sceneUpdated(QString sceneName);
 
+
+      /*************************************************************************
+       * Public Members
+       ************************************************************************/
+    public:
+      /* Models used for storing 3D models in the scene. */
+      std::vector<Model *> mModels {};
+
+      /* Queue of models requested to load at runtime. */
+      std::queue<std::pair<std::string, std::string>> mModelLoadQueue;
+
     private:
+      /**
+       * Initialize an object name relative to other objects already loaded.
+       * Protects against having two objects with the same name.
+       *
+       * @param object Qtk Object to name within this scene.
+       */
+      void initSceneObjectName(Qtk::Object * object);
+
       /*************************************************************************
        * Private Members
        ************************************************************************/
@@ -183,14 +228,16 @@ namespace Qtk {
       static Camera3D mCamera;
       static QMatrix4x4 mProjection;
       bool mInit = false;
+      /* Pause rendering of the scene. */
+      bool mPause = false;
 
       QString mSceneName;
       /* The skybox for this scene. */
       Skybox * mSkybox {};
       /* MeshRenderers used simple geometry. */
       std::vector<MeshRenderer *> mMeshes {};
-      /* Models used for storing 3D models in the scene. */
-      std::vector<Model *> mModels {};
+      /* Track count of objects with same initial name. */
+      std::unordered_map<std::string, uint64_t> mObjectCount;
   };
 
   class SceneEmpty : public Scene {

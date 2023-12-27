@@ -38,11 +38,12 @@ void QtkScene::init() {
   /* Create a red cube with a mini master chief on top. */
   auto myCube = new MeshRenderer("My cube", Cube(Qtk::QTK_DRAW_ELEMENTS));
   myCube->setColor(RED);
+  myCube->getTransform().setTranslation(5.0f, 0.0f, 0.0f);
   addObject(myCube);
 
   auto mySpartan =
       new Model("My spartan", ":/models/models/spartan/spartan.obj");
-  mySpartan->getTransform().setTranslation(0.0f, 0.5f, 0.0f);
+  mySpartan->getTransform().setTranslation(5.0f, 0.5f, 0.0f);
   mySpartan->getTransform().setScale(0.5f);
   addObject(mySpartan);
 

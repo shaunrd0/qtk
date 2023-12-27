@@ -69,7 +69,7 @@ class MainWindow : public QMainWindow {
      * Trigger a refresh for widgets related to a scene that has been updated.
      * @param sceneName The name of the scene that has been modified.
      */
-    void refreshScene(QString sceneName);
+    void refreshScene(const QString & sceneName);
 
   private:
     /***************************************************************************

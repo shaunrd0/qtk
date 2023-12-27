@@ -68,9 +68,9 @@ target_link_libraries(
     Qt6::Core Qt6::OpenGLWidgets Qt6::Widgets
 )
 
-if(QTK_UPDATE_SUBMODULES OR NOT ASSIMP_NEW_INTERFACE)
+if(QTK_SUBMODULES OR NOT QTK_ASSIMP_NEW_INTERFACE)
   target_link_libraries(qtk_library PUBLIC assimp)
-elseif(ASSIMP_NEW_INTERFACE)
+elseif(QTK_ASSIMP_NEW_INTERFACE)
   target_link_libraries(qtk_library PUBLIC assimp::assimp)
 endif()
 

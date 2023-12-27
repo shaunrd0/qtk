@@ -74,9 +74,9 @@ namespace Qtk {
        *    Can be absolute or Qt resource path.
        * @param flipX If true the image will be flipped on X axis.
        * @param flipY If true the image will be flipped on Y axis.
-       * @return Pointer to an initialized QImage object.
+       * @return QImage object.
        */
-      static QImage * initImage(
+      static QImage initImage(
           const char * image, bool flipX = false, bool flipY = false);
 
       /**
@@ -131,6 +131,14 @@ namespace Qtk {
       static QOpenGLTexture * initCubeMap(
           const char * right, const char * top, const char * front,
           const char * left, const char * bottom, const char * back);
+
+      /// The texture used in place of a missing texture.
+      static QImage defaultTexture() {
+        // Use plaster for default texture if image fails to load.
+        // This prevents segfaults when loading a texture that doesn't exist.
+        // TODO: Replace with a '?' texture to indicate missing texture.
+        return QImage(":/textures/plaster.png");
+      }
 
     private:
       // Private ctor to prevent creating instances of this class

@@ -12,6 +12,11 @@
 
 #include <QDesignerExportWidget>
 #include <QDockWidget>
+#include <QDoubleSpinBox>
+#include <QGroupBox>
+
+
+#include "qtk/scene.h"
 
 namespace Ui {
   class ToolBox;
@@ -29,6 +34,15 @@ namespace Qtk {
       explicit ToolBox(QWidget * parent = nullptr);
 
       ~ToolBox();
+
+      void removePages();
+
+      void createPageProperties(const Object * object);
+
+      void createPageShader(const Object * object);
+
+      void updateFocus(const QString & name);
+
 
     private:
       /*************************************************************************

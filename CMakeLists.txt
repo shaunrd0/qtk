@@ -46,14 +46,13 @@ include(GNUInstallDirs)
 # Options
 ################################################################################
 option(QTK_DEBUG "Enable debugger" OFF)
-option(QTK_UPDATE_SUBMODULES "Update external project (assimp) submodule" OFF)
-option(QTK_BUILD_GUI "Build the Qtk desktop application" ON)
-option(QTK_INSTALL_LIBRARY "Install libqtk to CMAKE_INSTALL_PREFIX path." ON)
-option(QTK_INSTALL_PLUGINS "Install Qtk plugin collection to Qt Creator." OFF)
-option(QTK_BUILD_EXAMPLE "Build the Qtk example desktop application" ON)
-option(QTK_ENABLE_CCACHE "Enable ccache" ON)
+option(QTK_SUBMODULES "Update external project (assimp) submodule" OFF)
+option(QTK_GUI "Build the Qtk desktop application" ON)
+option(QTK_PLUGINS "Install Qtk plugins to Qt Creator path." OFF)
+option(QTK_EXAMPLE "Build the Qtk example desktop application" ON)
+option(QTK_CCACHE "Enable ccache" ON)
 
-if (QTK_ENABLE_CCACHE)
+if (QTK_CCACHE)
   set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 endif()
 
@@ -61,21 +60,30 @@ endif()
 option(QTK_PREFIX_QTCREATOR "Install Qtk to Qt Creator. Untested." OFF)
 
 # Option for bringing your own assimp installation; Otherwise not needed
-# + If assimp is available system-wide we can just set QTK_UPDATE_SUBMODULES OFF
+# + If assimp is available system-wide we can just set QTK_SUBMODULES OFF
 option(
     QTK_ASSIMP_NEW_INTERFACE
     "Use the assimp::assimp interface (WIN / OSX)"
     OFF
 )
 
-if(NOT QTK_DEBUG)
-  set(CMAKE_BUILD_TYPE Release)
-else()
+if(QTK_DEBUG OR CMAKE_BUILD_TYPE MATCHES "^[Dd][Ee][Bb][Uu][Gg]$")
+  set(QTK_DEBUG ON)
   set(CMAKE_BUILD_TYPE Debug)
+else()
+  set(QTK_DEBUG OFF)
+  set(CMAKE_BUILD_TYPE Release)
 endif()
 
 # This should be set to your Qt6 installation directory.
-set(QT_INSTALL_DIR "$ENV{HOME}/Qt/6.5.0/gcc_64" CACHE PATH "Path to Qt6 install.")
+set(QT_INSTALL_DIR "$ENV{HOME}/Qt/6.5.0/gcc_64/lib/cmake" CACHE PATH "Path to Qt6 install.")
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX  "${CMAKE_BINARY_DIR}/install")
+endif ()
+
+set(QTK_RESOURCES "${CMAKE_SOURCE_DIR}/resources")
+set(QTK_OSX_ICONS ${CMAKE_SOURCE_DIR}/resources/icons/osx/kilroy.icns)
+
 # Point CMAKE_PREFIX_PATH to Qt6 install directory
 # If Qtk is built within Qt Creator this is not required.
 list(APPEND CMAKE_PREFIX_PATH "${QT_INSTALL_DIR}")
@@ -89,31 +97,13 @@ set(
     "${QT_INSTALL_DIR}/../../Tools/QtCreator"
     CACHE PATH "Qt Creator path used to install Qtk plugins for Qt Designer."
 )
-# Qt Designer will look in different locations if WIN / Unix.
-# These paths are for using Qt Designer integrated within Qt Creator.
-# Standalone Qt Designer may use different paths.
-if (WIN32)
-  # These paths may be different on windows. I have not tested this.
-  set(QT_PLUGIN_INSTALL_DIR "${QT_CREATOR_DIR}/bin/plugins/designer")
-  set(QT_PLUGIN_LIBRARY_DIR "${QT_CREATOR_DIR}/lib/Qt/lib")
-else()
-  set(QT_PLUGIN_INSTALL_DIR "${QT_CREATOR_DIR}/lib/Qt/plugins/designer")
-  set(QT_PLUGIN_LIBRARY_DIR "${QT_CREATOR_DIR}/lib/Qt/lib")
-endif()
-set(QTK_PLUGIN_LIBRARY_DIR "${QT_PLUGIN_LIBRARY_DIR}")
-set(QTK_PLUGIN_INSTALL_DIR "${QT_PLUGIN_INSTALL_DIR}")
 
-message(STATUS "[Qtk] CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
-set(QTK_RESOURCES "${CMAKE_SOURCE_DIR}/resources")
-set(QTK_OSX_ICONS ${CMAKE_SOURCE_DIR}/resources/icons/osx/kilroy.icns)
-
-# Print all QTK options and their values.
+# Print all QTK options and their values at the end of configuration.
+# We initialize this list here so that we can append to it as needed.
+# All variables in this list will be printed at the end of configuration.
 get_cmake_property(VAR_NAMES VARIABLES)
-list(FILTER VAR_NAMES INCLUDE REGEX "^Q[tT][kK]_.*$")
+list(FILTER VAR_NAMES INCLUDE REGEX "^[qQ][tT][kK]_.*$")
 list(SORT VAR_NAMES)
-foreach(VAR_NAME ${VAR_NAMES})
-  message(STATUS "[Qtk] ${VAR_NAME}=${${VAR_NAME}}")
-endforeach()
 
 ################################################################################
 # External Dependencies
@@ -133,8 +123,33 @@ if(NOT Qt6_FOUND)
   )
 endif()
 
+#
+# To use custom plugins, set QT_PLUGIN_PATH environment variable before running designer
+# Or, we can install plugins to the designer for use across all projects.
+# Qt Creator on linux will look here for widget plugins in the integrated designer
+#   /home/shaun/Qt/Tools/QtCreator/lib/Qt/lib
+# Qt Designer will use the following path on linux
+#   /home/shaun/Qt/6.5.0/gcc_64/plugins/designer/
+# We can use this path after find_package(Qt6) to install our plugins on all systems
+#   ${QT6_INSTALL_PREFIX}/${QT6_INSTALL_PLUGINS}/designer
+# And run designer at ${QT6_INSTALL_PREFIX}/bin/designer
+# Use cmake -DQTK_PLUGIN_INSTALL_DIR=/some/path to override this install path
+set(
+    QTK_PLUGIN_INSTALL_DIR
+    "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_PLUGINS}/designer" CACHE PATH
+    "Path to install Qtk plugin collection."
+)
+# See cmake configure output for values of these variables on your system
+set(
+  VAR_PATHS
+   CMAKE_PREFIX_PATH CMAKE_INSTALL_PREFIX QTK_PLUGIN_INSTALL_DIR QT6_INSTALL_PREFIX
+   QT_INSTALL_DIR
+)
+# Add QT6_INSTALL_PLUGINS to VAR_NAMES so it is printed at end of configuration.
+list(APPEND VAR_NAMES QT6_INSTALL_PLUGINS)
+
 # Find Assimp.
-if(QTK_UPDATE_SUBMODULES)
+if(QTK_SUBMODULES)
   # Required to statically link.
   add_compile_options(-fPIC)
   set(BUILD_SHARED_LIBS OFF CACHE STRING "Build static assimp libs" FORCE)
@@ -166,8 +181,20 @@ endif()
 ################################################################################
 add_subdirectory(src)
 
-if(QTK_BUILD_EXAMPLE)
+if(QTK_EXAMPLE)
   # Create a namespaced alias for linking with qtk_library in the example.
   add_library(${PROJECT_NAME}::qtk_library ALIAS qtk_library)
-  add_subdirectory(example-app)
+  add_subdirectory(example-app EXCLUDE_FROM_ALL)
 endif()
+
+# Print all QTK options and their values at the end of configuration. This also
+# prints any additional variables that we have added to VAR_NAMES and VAR_PATHS.
+foreach(VAR_NAME IN LISTS VAR_NAMES VAR_PATHS)
+  if(VAR_NAME IN_LIST VAR_PATHS)
+    # Print absolute if variable is path
+    get_filename_component(VAR_REALPATH "${${VAR_NAME}}" REALPATH)
+    message(STATUS "[Qtk] ${VAR_NAME}=${VAR_REALPATH}")
+  else()
+    message(STATUS "[Qtk] ${VAR_NAME}=${${VAR_NAME}}")
+  endif()
+endforeach()

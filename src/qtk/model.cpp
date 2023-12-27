@@ -43,7 +43,7 @@ void Model::flipTexture(const std::string & fileName, bool flipX, bool flipY) {
       texture.mTexture->destroy();
       texture.mTexture->create();
       texture.mTexture->setData(
-          *OpenGLTextureFactory::initImage(fullPath.c_str(), flipX, flipY));
+          OpenGLTextureFactory::initImage(fullPath.c_str(), flipX, flipY));
       modified = true;
     }
   }
@@ -238,7 +238,7 @@ ModelMesh::Textures Model::loadMaterialTextures(
       // Add the texture to the textures container
       textures.push_back(texture);
       // Add the texture to the loaded textures to avoid loading it twice
-      mTexturesLoaded.push_back(texture);
+      mTexturesLoaded.push_back(textures.back());
     }
   }
 

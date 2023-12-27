@@ -10,7 +10,7 @@ find_package(Git)
 # _PATH: Path to git submodule location that we want to update
 # + submodule_update(extern/assimp)
 function(submodule_update _PATH)
-  if (NOT QTK_UPDATE_SUBMODULES)
+  if (NOT QTK_SUBMODULES)
     return()
   endif()
 

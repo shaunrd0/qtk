@@ -5,21 +5,27 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  QT_VERSION: 6.6.0
+
 jobs:
-  Build-Qtk:
+  Qtk:
     env:
-      CONFIG: -DQTK_UPDATE_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_ENABLE_CCACHE=OFF -DQTK_BUILD_GUI=ON -DQTK_INSTALL_LIBRARY=ON -DQTK_INSTALL_PLUGINS=OFF
+      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=ON -DQTK_PLUGINS=OFF -DQTK_EXAMPLE=ON
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
-            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/6.5.0/gcc_64/ $CONFIG
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/ $CONFIG
+            flags: -j $(nproc)
           - os: windows-latest
-            cmake: -DCMAKE_PREFIX_PATH=D:/a/qtk/qtk/Qt/6.5.0/mingw81_64/ $CONFIG
+            cmake: -DCMAKE_PREFIX_PATH=D:/a/qtk/qtk/Qt/$QT_VERSION/mingw81_64/ $CONFIG
+            flags: ''
           - os: macos-latest
-            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/6.5.0/gcc_64/ $CONFIG
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/ $CONFIG
+            flags: -j $(nproc)
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -28,7 +34,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: '6.5.0'
+          version: ${{ env.QT_VERSION }}
 
       # Windows
 
@@ -44,33 +50,24 @@ jobs:
           sudo apt update -y
           sudo apt install libxcb-cursor0 -y
 
-      - name: Configure Qtk Application (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Configure Qtk Application
         shell: bash
         run: cmake -B build/ ${{ matrix.cmake }}
 
-      - name: Build Qtk Application (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Build Qtk Application
         shell: bash
-        run: cmake --build build/ --config Release
+        run: cmake --build build/ --config Release --target qtk_gui ${{ matrix.flags }}
 
-      # OSX / Linux
-
-      - name: Configure Qtk Application (OSX / Linux)
+      - name: Build Qtk Example
         if: matrix.os != 'windows-latest'
         shell: bash
-        run: cmake -B build/ ${{ matrix.cmake }}
-
-      - name: Build Qtk Application (OSX / Linux)
-        if: matrix.os != 'windows-latest'
-        shell: bash
-        run: cmake --build build/ --config Release --target qtk_app -- -j $(nproc)
+        run: cmake --build build/ --config Release --target qtk_example ${{ matrix.flags }}
 
       # Packaging
 
       - name: Install Qtk Application
         shell: bash
-        run: cmake --install build/ --config Release --prefix=$(pwd)/install --component qtk
+        run: cmake --install build/ --config Release --component qtk_gui
 
       - name: Package Qtk Application
         shell: bash
@@ -87,7 +84,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
-          name: qtk-app-${{ matrix.os }}
+          name: qtk-gui-${{ matrix.os }}
           path: |
             build/packages/*.deb
 
@@ -102,7 +99,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v3
         with:
-          name: qtk-app-${{ matrix.os }}
+          name: qtk-gui-${{ matrix.os }}
           path: |
             build/packages/*.exe
 
@@ -117,14 +114,14 @@ jobs:
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v3
         with:
-          name: qtk-app-${{ matrix.os }}
+          name: qtk-gui-${{ matrix.os }}
           path: |
             build/packages/*.tar.gz
 
       - name: Upload Qtk install directory
         uses: actions/upload-artifact@v3
         with:
-          name: qtk-app-${{ matrix.os }}-install
+          name: qtk-gui-${{ matrix.os }}-install
           path: install/*
 
 # TODO: Enable after trimming resources.
@@ -142,20 +139,23 @@ jobs:
 #            build/packages/*
 #            !build/packages/_CPack_Packages/*
 
-  Build-Qtk-Library:
+  Qtk-Library:
     env:
-      CONFIG: -DQTK_UPDATE_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_ENABLE_CCACHE=OFF -DQTK_BUILD_GUI=OFF -DQTK_INSTALL_LIBRARY=ON -DQTK_INSTALL_PLUGINS=OFF
+      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=OFF -DQTK_PLUGINS=OFF -DQTK_EXAMPLE=OFF
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
-            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/6.5.0/gcc_64/ $CONFIG
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/ $CONFIG
+            flags: -j $(nproc)
           - os: windows-latest
-            cmake: -DCMAKE_PREFIX_PATH=D:/a/qtk/qtk/Qt/6.5.0/mingw81_64/ $CONFIG
+            cmake: -DCMAKE_PREFIX_PATH=D:/a/qtk/qtk/Qt/$QT_VERSION/mingw81_64/ $CONFIG
+            flags: ''
           - os: macos-latest
-            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/6.5.0/gcc_64/ $CONFIG
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/ $CONFIG
+            flags: -j $(nproc)
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -164,7 +164,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: '6.5.0'
+          version: ${{ env.QT_VERSION }}
 
       # Windows
 
@@ -174,33 +174,19 @@ jobs:
         with:
           args: install pkgconfiglite --checksum e87b5ea3c9142256af60f2d5b917aa63b571e6a0 --checksum-type sha1
 
-      - name: Configure Qtk Library (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Configure Qtk Library
         shell: bash
         run: cmake -B build/ ${{ matrix.cmake }}
 
-      - name: Build Qtk Library (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Build Qtk Library
         shell: bash
-        run: cmake --build build/ --config Release
-
-      # OSX / Linux
-
-      - name: Configure Qtk Library (OSX / Linux)
-        if: matrix.os != 'windows-latest'
-        shell: bash
-        run: cmake -B build/ ${{ matrix.cmake }}
-
-      - name: Build Qtk Library (OSX / Linux)
-        if: matrix.os != 'windows-latest'
-        shell: bash
-        run: cmake --build build/ --config Release --target qtk_library -- -j $(nproc)
+        run: cmake --build build/ --config Release --target qtk_library -- ${{ matrix.flags }}
 
       # Packaging
 
       - name: Install Qtk Library
         shell: bash
-        run: cmake --install build/ --config Release --prefix=$(pwd)/install --component libqtk
+        run: cmake --install build/ --config Release --prefix=$(pwd)/install --component qtk_library
 
       - name: Package Qtk Library
         shell: bash
@@ -258,20 +244,23 @@ jobs:
           name: libqtk-${{ matrix.os }}-install
           path: install/*
 
-  Build-Qtk-Plugins:
+  Qtk-Plugins:
     env:
-      CONFIG: -DQTK_UPDATE_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_ENABLE_CCACHE=OFF -DQTK_BUILD_GUI=OFF -DQTK_INSTALL_LIBRARY=OFF -DQTK_INSTALL_PLUGINS=ON
+      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=OFF -DQTK_PLUGINS=ON -DQTK_EXAMPLE=OFF
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
-            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/6.5.0/gcc_64/ $CONFIG
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/ $CONFIG
+            flags: -j $(nproc)
           - os: windows-latest
-            cmake: -DCMAKE_PREFIX_PATH=D:/a/qtk/qtk/Qt/6.5.0/mingw81_64/ $CONFIG
+            cmake: -DCMAKE_PREFIX_PATH=D:/a/qtk/qtk/Qt/$QT_VERSION/mingw81_64/ $CONFIG
+            flags: ''
           - os: macos-latest
-            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/6.5.0/gcc_64/ $CONFIG
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/ $CONFIG
+            flags: -j $(nproc)
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -280,9 +269,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: '6.5.0'
-
-      # Windows
+          version: ${{ env.QT_VERSION }}
 
       - name: Chocolatey Action
         if: matrix.os == 'windows-latest'
@@ -290,44 +277,30 @@ jobs:
         with:
           args: install pkgconfiglite --checksum e87b5ea3c9142256af60f2d5b917aa63b571e6a0 --checksum-type sha1
 
-      - name: Configure Qtk Plugins (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Configure Qtk Plugins
         shell: bash
         run: cmake -B build/ ${{ matrix.cmake }}
 
-      - name: Build Qtk Plugins (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Build Qtk Plugins
         shell: bash
-        run: cmake --build build/ --config Release --target qtk_collection
-
-      # OSX / Linux
-
-      - name: Configure Qtk Plugins (OSX / Linux)
-        if: matrix.os != 'windows-latest'
-        shell: bash
-        run: cmake -B build/ ${{ matrix.cmake }}
-
-      - name: Build Qtk Plugins (OSX / Linux)
-        if: matrix.os != 'windows-latest'
-        shell: bash
-        run: cmake --build build/ --config Release --target qtk_collection -- -j $(nproc)
+        run: cmake --build build/ --config Release --target qtk_plugins -- ${{ matrix.flags }}
 
       # Packaging
 
       - name: Install Qtk Plugins
         shell: bash
-        run: cmake --install build/ --config Release --prefix=$(pwd)/install --component collection
+        run: cmake --install build/ --config Release --component qtk_plugins
 
-  Build-Qtk-Assimp-Targets:
+  Qtk-Assimp-Targets:
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
         include:
           - os: ubuntu-latest
-            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/6.5.0/gcc_64/
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/
           - os: macos-latest
-            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/6.5.0/gcc_64/ -DASSIMP_NEW_INTERFACE=ON
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -336,7 +309,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: '6.5.0'
+          version: ${{ env.QT_VERSION }}
 
       - name: Install Assimp MacOS
         if: matrix.os == 'macos-latest'
@@ -352,7 +325,7 @@ jobs:
 
       - name: Configure Qtk
         shell: bash
-        run: cmake -B build/ ${{ matrix.cmake }} -DQTK_ENABLE_CCACHE=OFF
+        run: cmake -B build/ ${{ matrix.cmake }} -DQTK_CCACHE=OFF -DQTK_ASSIMP_NEW_INTERFACE=ON
 
       - name: Build Qtk
         shell: bash
