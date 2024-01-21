@@ -7,6 +7,7 @@
 ##############################################################################*/
 
 #include "qtkiosystem.h"
+#include <QDir>
 
 using namespace Qtk;
 
@@ -19,15 +20,11 @@ bool QtkIOSystem::Exists(const char * pFile) const {
 }
 
 char QtkIOSystem::getOsSeparator() const {
-#ifndef _WIN32
-  return '/';
-#else
-  return '\\';
-#endif
+  return QDir::separator().toLatin1();
 }
 
 Assimp::IOStream * QtkIOSystem::Open(const char * pFile, const char * pMode) {
-  if(!QFileInfo::exists(pFile)) {
+  if(!Exists(pFile)) {
     qDebug() << "[Qtk::QtkIOSystem] failed to open file: " << pFile << "\n";
     return nullptr;
   }
