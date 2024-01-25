@@ -18,20 +18,21 @@ QtkIOStream::QtkIOStream(const char * pFile, const char * pMode) :
     mFile(pFile) {
   QString mode(pMode);
   bool open = false;
-  if (mode == "w" || mode == "wb") {
+  if(mode == "w" || mode == "wb") {
     open = mFile.open(QIODeviceBase::WriteOnly);
-  } else if (mode == "r" || mode == "rb") {
+  } else if(mode == "r" || mode == "rb") {
     open = mFile.open(QIODeviceBase::ReadOnly);
-  } else if (mode == "wt") {
+  } else if(mode == "wt") {
     open = mFile.open(QIODeviceBase::WriteOnly | QIODeviceBase::Text);
-  } else if (mode == "rt") {
+  } else if(mode == "rt") {
     open = mFile.open(QIODeviceBase::ReadOnly | QIODeviceBase::Text);
   } else {
     open = false;
     qDebug() << "[Qtk::QtkIOStream] Invalid file open mode: " << mode << "\n";
   }
   if(!open) {
-    qDebug() << "[Qtk::QtkIOStream] Could not open file: " << QString(pFile) << "\n";
+    qDebug() << "[Qtk::QtkIOStream] Could not open file: " << QString(pFile)
+             << "\n";
   }
 }
 
@@ -40,7 +41,7 @@ QtkIOStream::QtkIOStream(const char * pFile, const char * pMode) :
  ******************************************************************************/
 
 size_t QtkIOStream::Read(void * pvBuffer, size_t pSize, size_t pCount) {
-  qint64 readSize = mFile.read((char*)pvBuffer, pSize * pCount);
+  qint64 readSize = mFile.read((char *)pvBuffer, pSize * pCount);
   if(readSize < 0) {
     qDebug() << "[Qtk::QtkIOStream] Failed to read (" << pSize
              << ") bytes from file at: " << mFile.filesystemFileName().c_str()
@@ -51,12 +52,10 @@ size_t QtkIOStream::Read(void * pvBuffer, size_t pSize, size_t pCount) {
 }
 
 size_t QtkIOStream::Write(const void * pvBuffer, size_t pSize, size_t pCount) {
-  qint64 writeSize = mFile.write((char*)pvBuffer, pSize * pCount);
+  qint64 writeSize = mFile.write((char *)pvBuffer, pSize * pCount);
   if(writeSize < 0) {
-    qDebug() << "[Qtk::QtkIOStream] Failed to write buffer with size ("
-             << pSize
-             << ") to file at: " << mFile.filesystemFileName().c_str()
-             << "\n";
+    qDebug() << "[Qtk::QtkIOStream] Failed to write buffer with size (" << pSize
+             << ") to file at: " << mFile.filesystemFileName().c_str() << "\n";
     return -1;
   }
   return writeSize;
