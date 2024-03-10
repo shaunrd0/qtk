@@ -46,7 +46,6 @@ void Qtk::TreeView::updateView(const Qtk::Scene * scene) {
 void Qtk::TreeView::itemFocus(QTreeWidgetItem * item, int column) {
   QString name = item->text(column);
   auto scene = MainWindow::getMainWindow()->getQtkWidget()->getScene();
-  auto & transform = scene->getCamera().getTransform();
   auto object = scene->getObject(name);
   Transform3D * objectTransform;
   // If the object is a mesh or model, focus the camera on it.
@@ -59,13 +58,11 @@ void Qtk::TreeView::itemFocus(QTreeWidgetItem * item, int column) {
     objectTransform = &dynamic_cast<Model *>(object)->getTransform();
   }
   auto focusScale = objectTransform->getScale();
-  float width = focusScale.x() / 2.0f;
   float height = focusScale.y() / 2.0f;
   QVector3D pos = objectTransform->getTranslation();
-  // pos.setX(pos.x() + width);
   pos.setY(pos.y() + height);
-  transform.setTranslation(pos);
-  transform.translate(0.0f, 0.0f, 3.0f);
+  Qtk::Scene::getCamera().setTranslation(pos);
+  Qtk::Scene::getCamera().translate({0.0f, 0.0f, 3.0f});
 
   // Emit signal from qtk widget for new object focus. Triggers GUI updates.
   emit MainWindow::getMainWindow()->getQtkWidget()->objectFocusChanged(name);

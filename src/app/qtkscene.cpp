@@ -16,8 +16,9 @@ using namespace Qtk;
 
 QtkScene::QtkScene(Qtk::Scene * scene) : Qtk::SceneInterface(scene) {
   setSceneName("Qtk Scene");
-  getCamera().getTransform().setTranslation(0.0f, 0.0f, 20.0f);
-  getCamera().getTransform().setRotation(-5.0f, 0.0f, 1.0f, 0.0f);
+  getCamera().setTranslation({0.0f, 0.0f, 20.0f});
+  getCamera().setRotation(
+      QQuaternion::fromAxisAndAngle(0.0f, 1.0f, 0.0f, -5.0f));
 }
 
 QtkScene::~QtkScene() {
@@ -89,7 +90,7 @@ void QtkScene::init() {
   model->getTransform().setTranslation(2.0f, 2.0f, -10.0f);
   // Sometimes the models are very large
   model->getTransform().scale(0.0025f);
-  model->getTransform().rotate(-110.0f, 0.0f, 1.0f, 0.0f);
+  model->getTransform().rotate(0.0f, 1.0f, 0.0f, -110.0f);
 
   model = addObject(
       new Qtk::Model("alien", ":/models/models/alien-hominid/alien.obj"));
@@ -99,8 +100,8 @@ void QtkScene::init() {
   model = addObject(
       new Qtk::Model("My scythe", ":/models/models/scythe/scythe.obj"));
   model->getTransform().setTranslation(-6.0f, 0.0f, -10.0f);
-  model->getTransform().rotate(-90.0f, 1.0f, 0.0f, 0.0f);
-  model->getTransform().rotate(90.0f, 0.0f, 1.0f, 0.0f);
+  model->getTransform().rotate(1.0f, 0.0f, 0.0f, -90.0f);
+  model->getTransform().rotate(0.0f, 1.0f, 0.0f, 90.0f);
 
   model = addObject(
       new Qtk::Model("masterChief", ":/models/models/spartan/spartan.obj"));
@@ -331,14 +332,14 @@ void QtkScene::init() {
   mesh->reallocateNormals(mesh->getNormals());
   mesh->reallocateTexCoords(mesh->getTexCoords(), 3);
   mesh->releaseShaders();
-  mesh->getTransform().rotate(45.0f, 0.0f, 1.0f, 0.0f);
+  mesh->getTransform().rotate(0.0f, 1.0f, 0.0f, 45.0f);
 
   // Texturing a cube using a cube map
   // + Cube map texturing works with both QTK_DRAW_ARRAYS and QTK_DRAW_ELEMENTS
   mesh =
       addObject(new Qtk::MeshRenderer("testCubeMap", Cube(QTK_DRAW_ELEMENTS)));
   mesh->getTransform().setTranslation(-3.0f, 1.0f, -2.0f);
-  mesh->getTransform().setRotation(45.0f, 0.0f, 1.0f, 0.0f);
+  mesh->getTransform().setRotation(0.0f, 1.0f, 0.0f, 45.0f);
   mesh->setShaders(
       ":/shaders/texture-cubemap.vert", ":/shaders/texture-cubemap.frag");
   mesh->setCubeMap(":/textures/crate.png");
@@ -439,10 +440,10 @@ void QtkScene::draw() {
 
 void QtkScene::update() {
   auto mySpartan = Model::getInstance("My spartan");
-  mySpartan->getTransform().rotate(0.75f, 0.0f, 1.0f, 0.0f);
+  mySpartan->getTransform().rotate(0.0f, 1.0f, 0.0f, 0.75f);
 
   auto myCube = MeshRenderer::getInstance("My cube");
-  myCube->getTransform().rotate(-0.75f, 0.0f, 1.0f, 0.0f);
+  myCube->getTransform().rotate(-0.0f, 1.0f, 0.0f, 0.75f);
 
   auto position = MeshRenderer::getInstance("alienTestLight")
                       ->getTransform()
@@ -456,7 +457,7 @@ void QtkScene::update() {
   alien->setUniform("uMVP.model", posMatrix);
   alien->setUniform("uMVP.view", QtkScene::getCamera().toMatrix());
   alien->setUniform("uMVP.projection", QtkScene::getProjectionMatrix());
-  alien->getTransform().rotate(0.75f, 0.0f, 1.0f, 0.0f);
+  alien->getTransform().rotate(0.0f, 1.0f, 0.0f, 0.75f);
 
   position = MeshRenderer::getInstance("spartanTestLight")
                  ->getTransform()
@@ -470,10 +471,10 @@ void QtkScene::update() {
   spartan->setUniform("uMVP.model", posMatrix);
   spartan->setUniform("uMVP.view", QtkScene::getCamera().toMatrix());
   spartan->setUniform("uMVP.projection", QtkScene::getProjectionMatrix());
-  spartan->getTransform().rotate(0.75f, 0.0f, 1.0f, 0.0f);
+  spartan->getTransform().rotate(0.0f, 1.0f, 0.0f, 0.75f);
 
   auto phong = MeshRenderer::getInstance("testPhong");
-  phong->getTransform().rotate(0.75f, 1.0f, 0.5f, 0.0f);
+  phong->getTransform().rotate(1.0f, 0.5f, 0.0f, 0.75f);
   phong->bindShaders();
   position =
       MeshRenderer::getInstance("testLight")->getTransform().getTranslation();
@@ -488,27 +489,27 @@ void QtkScene::update() {
   phong->releaseShaders();
 
   // Rotate lighting example cubes
-  mTestPhong->getTransform().rotate(0.75f, 0.5f, 0.3f, 0.2f);
+  mTestPhong->getTransform().rotate(0.5f, 0.3f, 0.2f, 0.75f);
   MeshRenderer::getInstance("noLight")->getTransform().rotate(
-      0.75f, 0.5f, 0.3f, 0.2f);
-  mTestAmbient->getTransform().rotate(0.75f, 0.5f, 0.3f, 0.2f);
-  mTestDiffuse->getTransform().rotate(0.75f, 0.5f, 0.3f, 0.2f);
-  mTestSpecular->getTransform().rotate(0.75f, 0.5f, 0.3f, 0.2f);
+      0.5f, 0.3f, 0.2f, 0.75f);
+  mTestAmbient->getTransform().rotate(0.5f, 0.3f, 0.2f, 0.75f);
+  mTestDiffuse->getTransform().rotate(0.5f, 0.3f, 0.2f, 0.75f);
+  mTestSpecular->getTransform().rotate(0.5f, 0.3f, 0.2f, 0.75f);
 
   // Examples of various translations and rotations
 
   // Rotate in multiple directions simultaneously
   MeshRenderer::getInstance("rgbNormalsCube")
       ->getTransform()
-      .rotate(0.75f, 0.2f, 0.4f, 0.6f);
+      .rotate(0.2f, 0.4f, 0.6f, 0.75f);
 
   // Pitch forward and roll sideways
   MeshRenderer::getInstance("leftTriangle")
       ->getTransform()
-      .rotate(0.75f, 1.0f, 0.0f, 0.0f);
+      .rotate(1.0f, 0.0f, 0.0f, 0.75f);
   MeshRenderer::getInstance("rightTriangle")
       ->getTransform()
-      .rotate(0.75f, 0.0f, 0.0f, 1.0f);
+      .rotate(0.0f, 0.0f, 1.0f, 0.75f);
 
   // Move between two positions over time
   static float translateX = 0.025f;
@@ -529,15 +530,15 @@ void QtkScene::update() {
   // And lets rotate the triangles in two directions at once
   MeshRenderer::getInstance("topTriangle")
       ->getTransform()
-      .rotate(0.75f, 0.2f, 0.0f, 0.4f);
+      .rotate(0.2f, 0.0f, 0.4f, 0.75f);
   MeshRenderer::getInstance("bottomTriangle")
       ->getTransform()
-      .rotate(0.75f, 0.0f, 0.2f, 0.4f);
+      .rotate(0.0f, 0.2f, 0.4f, 0.75f);
   // And make the bottom triangle green, instead of RGB
 
   // Rotate center cube in several directions simultaneously
   // + Not subject to gimbal lock since we are using quaternions :)
   MeshRenderer::getInstance("centerCube")
       ->getTransform()
-      .rotate(0.75f, 0.2f, 0.4f, 0.6f);
+      .rotate(0.2f, 0.4f, 0.6f, 0.75f);
 }

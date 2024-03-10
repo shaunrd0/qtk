@@ -116,12 +116,12 @@ namespace Qtk {
       /**
        * Apply rotation upon an axis represented by the 3D vector (x, y, z)
        *
-       * @param angle Angle to rotate.
        * @param ax X axis to apply the rotation on.
        * @param ay Y axis to apply the rotation on.
        * @param az Z axis to apply the rotation on.
+       * @param angle Angle to rotate.
        */
-      inline void rotate(float angle, float ax, float ay, float az) {
+      inline void rotate(float ax, float ay, float az, float angle) {
         rotate(QQuaternion::fromAxisAndAngle(ax, ay, az, angle));
       }
 
@@ -178,12 +178,12 @@ namespace Qtk {
       /**
        * Sets a rotation upon an axis represented by the 3D vector (x, y, z)
        *
-       * @param angle Angle to set rotation.
        * @param ax X axis to set angle for.
        * @param ay Y axis to set angle for.
        * @param az Z axis to set angle for.
+       * @param angle Angle to set rotation.
        */
-      inline void setRotation(float angle, float ax, float ay, float az) {
+      inline void setRotation(float ax, float ay, float az, float angle) {
         setRotation(QQuaternion::fromAxisAndAngle(ax, ay, az, angle));
       }
 

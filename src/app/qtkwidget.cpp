@@ -13,11 +13,6 @@
 #include <qtk/input.h>
 #include <qtk/scene.h>
 #include <qtk/shape.h>
-#include <QVBoxLayout>
-
-#include <qtk/input.h>
-#include <qtk/scene.h>
-#include <qtk/shape.h>
 
 #include "debugconsole.h"
 #include "qtkmainwindow.h"
@@ -294,10 +289,10 @@ void QtkWidget::updateCameraInput() {
     static const float rotSpeed = 0.5f;
 
     // Handle rotations
-    Scene::getCamera().getTransform().rotate(
-        -rotSpeed * Input::mouseDelta().x(), Camera3D::LocalUp);
-    Scene::getCamera().getTransform().rotate(
-        -rotSpeed * Input::mouseDelta().y(), Scene::getCamera().getRight());
+    Scene::getCamera().rotate(QQuaternion::fromAxisAndAngle(
+        Camera3D::LocalUp, -rotSpeed * Input::mouseDelta().x()));
+    Scene::getCamera().rotate(QQuaternion::fromAxisAndAngle(
+        Scene::getCamera().getRight(), -rotSpeed * Input::mouseDelta().y()));
 
     // Handle translations
     QVector3D translation;
@@ -319,7 +314,7 @@ void QtkWidget::updateCameraInput() {
     if(Input::keyPressed(Qt::Key_E)) {
       translation += Scene::getCamera().getUp() / 2.0f;
     }
-    Scene::getCamera().getTransform().translate(transSpeed * translation);
+    Scene::getCamera().translate(transSpeed * translation);
   }
 }
 

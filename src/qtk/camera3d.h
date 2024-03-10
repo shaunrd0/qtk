@@ -32,7 +32,9 @@ namespace Qtk {
       /**
        * @return Transform3D associated with this camera.
        */
-      inline Transform3D & getTransform() { return mTransform; }
+      [[nodiscard]] inline const Transform3D & getTransform() const {
+        return mTransform;
+      }
 
       /**
        * @return Current translation of the camera as a QVector3D.
@@ -77,6 +79,67 @@ namespace Qtk {
        * @return World To View matrix for this camera.
        */
       const QMatrix4x4 & toMatrix();
+
+      /**
+       * Set the translation for this camera.
+       * TODO: Replace these methods by inheriting from a base class.
+       *
+       * @param translation QVector3D for the new translation.
+       */
+      inline void setTranslation(const QVector3D & translation) {
+        mTransform.setTranslation(translation);
+      }
+
+      /**
+       * Set the rotation for this camera.
+       *
+       * @param rotation QQuaternion for the new rotation.
+       */
+      inline void setRotation(const QQuaternion & rotation) {
+        mTransform.setRotation(rotation);
+      }
+
+      /**
+       * Sets a rotation upon an axis represented by the 3D vector (x, y, z)
+       *
+       * @param ax X axis to set angle for.
+       * @param ay Y axis to set angle for.
+       * @param az Z axis to set angle for.
+       * @param angle Angle to set rotation.
+       */
+      inline void setRotation(float ax, float ay, float az, float angle) {
+        mTransform.setRotation(ax, ay, az, angle);
+      }
+
+      /**
+       * Translate the camera by the given position.
+       *
+       * @param position QVector3D for the position to translate by.
+       */
+      inline void translate(const QVector3D & position) {
+        mTransform.translate(position);
+      }
+
+      /**
+       * Rotate the camera by the given rotation.
+       *
+       * @param rotation QQaternion for the rotation to apply.
+       */
+      inline void rotate(const QQuaternion & rotation) {
+        mTransform.rotate(rotation);
+      }
+
+      /**
+       * Sets a rotation upon an axis represented by the 3D vector (x, y, z)
+       *
+       * @param ax X axis to set angle for.
+       * @param ay Y axis to set angle for.
+       * @param az Z axis to set angle for.
+       * @param angle Angle to set rotation.
+       */
+      inline void rotate(float ax, float ay, float az, float angle) {
+        mTransform.rotate(ax, ay, az, angle);
+      }
 
     private:
       /*************************************************************************

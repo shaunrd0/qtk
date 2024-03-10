@@ -13,8 +13,8 @@ using namespace Qtk;
 
 ExampleScene::ExampleScene(Qtk::Scene * scene) : Qtk::SceneInterface(scene) {
   setSceneName("Example Scene");
-  getCamera().getTransform().setTranslation(-8.0f, 0.0f, 10.0f);
-  getCamera().getTransform().setRotation(-5.0f, 0.0f, 1.0f, 0.0f);
+  getCamera().setTranslation({-8.0f, 0.0f, 10.0f});
+  getCamera().setRotation(0.0f, 1.0f, 0.0f, -5.0f);
 }
 
 ExampleScene::~ExampleScene() {}
@@ -64,10 +64,10 @@ void ExampleScene::update() {
   // Pitch forward and roll sideways
   MeshRenderer::getInstance("leftTriangle")
       ->getTransform()
-      .rotate(0.75f, 1.0f, 0.0f, 0.0f);
+      .rotate(1.0f, 0.0f, 0.0f, 0.75f);
   MeshRenderer::getInstance("rightTriangle")
       ->getTransform()
-      .rotate(0.75f, 0.0f, 0.0f, 1.0f);
+      .rotate(0.0f, 0.0f, 1.0f, 0.75f);
 
   static float translateX = 0.025f;
   float limit = -9.0f;  // Origin position.x - 2.0f
@@ -86,12 +86,12 @@ void ExampleScene::update() {
       .translate(-translateX, 0.0f, 0.0f);
   MeshRenderer::getInstance("topTriangle")
       ->getTransform()
-      .rotate(0.75f, 0.2f, 0.0f, 0.4f);
+      .rotate(0.2f, 0.0f, 0.4f, 0.75f);
   MeshRenderer::getInstance("bottomTriangle")
       ->getTransform()
-      .rotate(0.75f, 0.0f, 0.2f, 0.4f);
+      .rotate(0.0f, 0.2f, 0.4f, 0.75f);
 
   MeshRenderer::getInstance("centerCube")
       ->getTransform()
-      .rotate(0.75f, 0.2f, 0.4f, 0.6f);
+      .rotate(0.2f, 0.4f, 0.6f, 0.75f);
 }

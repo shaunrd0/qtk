@@ -19,8 +19,8 @@ QMatrix4x4 Scene::mProjection;
  ******************************************************************************/
 
 Scene::Scene() : mSceneName("Default Scene") {
-  mCamera.getTransform().setTranslation(0.0f, 0.0f, 20.0f);
-  mCamera.getTransform().setRotation(-5.0f, 0.0f, 1.0f, 0.0f);
+  mCamera.setTranslation({0.0f, 0.0f, 20.0f});
+  mCamera.setRotation({-5.0f, 0.0f, 1.0f, 0.0f});
 }
 
 Scene::~Scene() {
