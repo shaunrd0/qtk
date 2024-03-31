@@ -1,0 +1,84 @@
+name: Linting
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  Tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Assimp Ubuntu
+        run: |
+          python3 --version
+          python --version
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+          architecture: "x64"
+        env:
+          AGENT_TOOLSDIRECTORY: /opt/hostedtoolcache
+
+      - name: Install Assimp Ubuntu
+        run: |
+          apt update -y
+          apt install libassimp-dev -y
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '6.5.0'
+
+      - name: Build Qtk
+        run: |
+          cmake -B build -DQTK_SUBMODULES=OFF -DQTK_CCACHE=OFF -DQTK_PLUGINS=OFF -DQTK_GUI=ON
+          cmake --build build --target qtk_gui -- -j $(nproc)
+
+      - uses: cpp-linter/cpp-linter-action@v2
+        id: linter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Use clang-tools 14
+          version: '14'
+          # Don't use clang-format with this action
+          # + Set to `file` to use .clang-format (Qtk formats with clang 15)
+          style: ''
+          # Use .clang-tidy file
+          tidy-checks: ''
+          # Check the entire repo for source files to tidy
+          files-changed-only: false
+          # Ignore qtk build and external assimp directories
+          ignore: '.github|build|extern/assimp/assimp'
+          # Point to compile_commands.json produced by build
+          database: 'build'
+          # Use thread comments as feedback
+          thread-comments: true
+          # Show file annotations on GH
+          file-annotations: true
+
+      - name: Fail CI if checks don't pass
+        if: steps.linter.outputs.checks-failed != 0
+        run: exit 1
+
+  Format:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path:
+          - 'src'
+          - 'app'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup docker
+        uses: crazy-max/ghaction-setup-docker@v3
+
+      - name: clang-format Check
+        uses: jidicula/clang-format-action@v4.9.0
+        with:
+          clang-format-version: '15'
+          check-path: ${{ matrix.path }}
