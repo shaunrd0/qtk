@@ -13,14 +13,6 @@ jobs:
       - name: Install Assimp Ubuntu
         run: |
           python3 --version
-          python --version
-
-      - uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-          architecture: "x64"
-        env:
-          AGENT_TOOLSDIRECTORY: /opt/hostedtoolcache
 
       - name: Install Assimp Ubuntu
         run: |
@@ -28,7 +20,7 @@ jobs:
           apt install libassimp-dev -y
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
           version: '6.5.0'
 
