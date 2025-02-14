@@ -19,6 +19,7 @@
 
 #include <qtk/qtkapi.h>
 #include <qtk/scene.h>
+#include "logger.h"
 
 namespace Qtk {
   class DebugConsole;
@@ -107,6 +108,8 @@ namespace Qtk {
         return mDebugLogger;
       }
 
+      inline Logger * getLogger() { return mLogger; }
+
       /*************************************************************************
        * Setters
        ************************************************************************/
@@ -129,7 +132,7 @@ namespace Qtk {
        * @param message The message to log.
        * @param context The context of the log message.
        */
-      void sendLog(const QString & message, DebugContext context = Status);
+      void sendLog(const QString & message, Qtk::DebugContext context = Status);
 
       // TODO: Use this signal in treeview and toolbox to update object
       // properties
@@ -178,7 +181,7 @@ namespace Qtk {
        *
        * @param msg The message logged.
        */
-      void messageLogged(const QOpenGLDebugMessage & msg);
+//      void messageLogged(const QOpenGLDebugMessage & msg);
 
     private:
       /*************************************************************************
@@ -204,6 +207,7 @@ namespace Qtk {
        * Private Members
        ************************************************************************/
 
+      Qtk::Logger * mLogger;
       QOpenGLDebugLogger * mDebugLogger;
       Qtk::Scene * mScene;
       Qtk::DebugConsole * mConsole;

@@ -42,6 +42,7 @@ void Transform3D::rotate(const QQuaternion & dr) {
 
 void Transform3D::setTranslation(const QVector3D & t) {
   m_dirty = true;
+  qtkDebug() << "Setting translation to " << t;
   mTranslation = t;
 }
 
@@ -77,45 +78,3 @@ QVector3D Transform3D::getUp() const {
 QVector3D Transform3D::getRight() const {
   return mRotation.rotatedVector(LocalRight);
 }
-
-/*******************************************************************************
- * Private Methods
- ******************************************************************************/
-
-namespace Qtk {
-#ifndef QT_NO_DEBUG_STREAM
-
-  QDebug operator<<(QDebug dbg, const Transform3D & transform) {
-    dbg << "Transform3D\n{\n";
-    dbg << "Position: <" << transform.getTranslation().x() << ", "
-        << transform.getTranslation().y() << ", "
-        << transform.getTranslation().z() << ">\n";
-    dbg << "Scale: <" << transform.getScale().x() << ", "
-        << transform.getScale().y() << ", " << transform.getScale().z()
-        << ">\n";
-    dbg << "Rotation: <" << transform.getRotation().x() << ", "
-        << transform.getRotation().y() << ", " << transform.getRotation().z()
-        << " | " << transform.getRotation().scalar() << ">\n}";
-    return dbg;
-  }
-
-#endif
-
-#ifndef QT_NO_DATASTREAM
-  QDataStream & operator<<(QDataStream & out, const Transform3D & transform) {
-    out << transform.mTranslation;
-    out << transform.mScale;
-    out << transform.mRotation;
-    return out;
-  }
-
-  QDataStream & operator>>(QDataStream & in, Transform3D & transform) {
-    in >> transform.mTranslation;
-    in >> transform.mScale;
-    in >> transform.mRotation;
-    transform.m_dirty = true;
-    return in;
-  }
-
-#endif
-}  // namespace Qtk

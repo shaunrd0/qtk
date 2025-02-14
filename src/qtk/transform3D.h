@@ -249,6 +249,10 @@ namespace Qtk {
 
       bool m_dirty;
 
+      /*************************************************************************
+       * Qt Streams
+       ************************************************************************/
+
 #ifndef QT_NO_DATASTREAM
       friend QDataStream & operator<<(
           QDataStream & out, const Transform3D & transform);
@@ -256,15 +260,6 @@ namespace Qtk {
           QDataStream & in, Transform3D & transform);
 #endif
   };
-
-#ifndef QT_NO_DEBUG_STREAM
-  QDebug operator<<(QDebug dbg, const Transform3D & transform);
-#endif
-
-#ifndef QT_NO_DATASTREAM
-  QDataStream & operator<<(QDataStream & out, const Transform3D & transform);
-  QDataStream & operator>>(QDataStream & in, Transform3D & transform);
-#endif
 }  // namespace Qtk
 
 Q_DECLARE_TYPEINFO(Qtk::Transform3D, Q_MOVABLE_TYPE);

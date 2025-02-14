@@ -143,31 +143,22 @@ namespace Qtk {
 
     private:
       /*************************************************************************
-       * Private Methods
-       ************************************************************************/
-
-#ifndef QT_NO_DATASTREAM
-      friend QDataStream & operator<<(QDataStream & out, Camera3D & transform);
-      friend QDataStream & operator>>(QDataStream & in, Camera3D & transform);
-#endif
-
-      /*************************************************************************
        * Private Members
        ************************************************************************/
 
       Transform3D mTransform;
       QMatrix4x4 mWorld;
-  };
 
-// Qt Streams
+      /*************************************************************************
+       * Qt Streams
+       ************************************************************************/
+
 #ifndef QT_NO_DATASTREAM
-  QDataStream & operator<<(QDataStream & out, const Camera3D & transform);
-  QDataStream & operator>>(QDataStream & in, Camera3D & transform);
+      friend QDataStream & operator<<(
+          QDataStream & out, const Camera3D & camera);
+      friend QDataStream & operator>>(QDataStream & in, Camera3D & camera);
 #endif
-
-#ifndef QT_NO_DEBUG_STREAM
-  QDebug operator<<(QDebug dbg, const Camera3D & transform);
-#endif
+  };
 }  // namespace Qtk
 
 Q_DECLARE_TYPEINFO(Qtk::Camera3D, Q_MOVABLE_TYPE);

@@ -28,6 +28,7 @@ DebugConsole::DebugConsole(
 
   auto qtkWidget = dynamic_cast<QtkWidget *>(owner);
   if(qtkWidget) {
-    connect(qtkWidget, &QtkWidget::sendLog, this, &DebugConsole::sendLog);
+    connect(
+        qtkWidget->getLogger(), &Logger::sendLog, this, &DebugConsole::sendLog);
   }
 }

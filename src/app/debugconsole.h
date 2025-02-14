@@ -61,7 +61,8 @@ namespace Qtk {
        * @param context The DebugContext to use for the message.
        *    Default value is Status.
        */
-      inline void sendLog(QString message, DebugContext context = Status) {
+      inline void sendLog(QString message, Qtk::DebugContext context = Status) {
+//        qDebug() << "[LOGGER]: " << qPrintable(message) << "; LOGGER";
         mConsole->setTextColor(logColor(context));
         mConsole->append(logPrefix(message, context));
       }

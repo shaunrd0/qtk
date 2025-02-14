@@ -47,13 +47,13 @@ target_link_libraries(qtk_plugins PUBLIC qtk_plugin_library)
 ################################################################################
 # Final Qtk Application
 ################################################################################
-
+# Source files for the main window and core application
 set(
     QTK_GUI_SOURCES
     qtkscene.cpp qtkscene.h
+#    logger.cpp logger.h
     main.cpp
 )
-
 qt_add_executable(qtk_gui ${QTK_GUI_SOURCES})
 target_link_libraries(qtk_gui PRIVATE qtk_plugin_library)
 

@@ -15,6 +15,7 @@
 #include <qtk/shape.h>
 
 #include "debugconsole.h"
+#include "qtk/qtkmessagelogger.h"
 #include "qtkmainwindow.h"
 #include "qtkwidget.h"
 
@@ -30,8 +31,9 @@ QtkWidget::QtkWidget(QWidget * parent, const QString & name) :
     QtkWidget(parent, name, Q_NULLPTR) {}
 
 QtkWidget::QtkWidget(QWidget * parent, const QString & name, Scene * scene) :
-    QOpenGLWidget(parent), mDebugLogger(Q_NULLPTR),
-    mConsole(new DebugConsole(this, name)), mScene(Q_NULLPTR) {
+    QOpenGLWidget(parent), mDebugLogger(new QOpenGLDebugLogger(this)),
+    mConsole(new DebugConsole(this, name)), mScene(Q_NULLPTR),
+    mLogger(new Qtk::Logger(this)) {
   setAcceptDrops(true);
   setScene(scene);
   setObjectName(name);
@@ -74,13 +76,20 @@ void QtkWidget::initializeGL() {
 
   toggleConsole();
   // Initialize OpenGL debug context
-  mDebugLogger = new QOpenGLDebugLogger(this);
   if(mDebugLogger->initialize()) {
-    qDebug() << "GL_DEBUG Debug Logger" << mDebugLogger << "\n";
     connect(
-        mDebugLogger, SIGNAL(messageLogged(QOpenGLDebugMessage)), this,
-        SLOT(messageLogged(QOpenGLDebugMessage)));
+        mDebugLogger, SIGNAL(messageLogged(QOpenGLDebugMessage)), mLogger,
+        SLOT(log(QOpenGLDebugMessage)));
+    //        connect(
+    //            Qtk::QtkMessageLogger::get(),
+    //            &Qtk::QtkMessageLogger::messageLogged, mLogger,
+    //            &Qtk::Logger::parseError);
     mDebugLogger->startLogging();
+    QString msg;
+    QTextStream stream(&msg);
+    stream << "Logging started on GL_DEBUG Debug Logger: " << mDebugLogger;
+    mDebugLogger->logMessage(QOpenGLDebugMessage::createApplicationMessage(
+        stream.string()->toStdString().c_str()));
   }
 
   printContextInformation();
@@ -205,74 +214,6 @@ void QtkWidget::update() {
   QWidget::update();
 }
 
-void QtkWidget::messageLogged(const QOpenGLDebugMessage & msg) {
-  QString error;
-
-  DebugContext context;
-  // Format based on severity
-  switch(msg.severity()) {
-    case QOpenGLDebugMessage::NotificationSeverity:
-      error += "--";
-      context = Status;
-      break;
-    case QOpenGLDebugMessage::HighSeverity:
-      error += "!!";
-      context = Fatal;
-      break;
-    case QOpenGLDebugMessage::MediumSeverity:
-      error += "!~";
-      context = Error;
-      break;
-    case QOpenGLDebugMessage::LowSeverity:
-      error += "~~";
-      context = Warn;
-      break;
-  }
-
-  error += " (";
-
-  // Format based on source
-#define CASE(c)                \
-  case QOpenGLDebugMessage::c: \
-    error += #c;               \
-    break
-  switch(msg.source()) {
-    CASE(APISource);
-    CASE(WindowSystemSource);
-    CASE(ShaderCompilerSource);
-    CASE(ThirdPartySource);
-    CASE(ApplicationSource);
-    CASE(OtherSource);
-    CASE(InvalidSource);
-  }
-#undef CASE
-
-  error += " : ";
-
-// Format based on type
-#define CASE(c)                \
-  case QOpenGLDebugMessage::c: \
-    error += #c;               \
-    break
-  switch(msg.type()) {
-    CASE(InvalidType);
-    CASE(ErrorType);
-    CASE(DeprecatedBehaviorType);
-    CASE(UndefinedBehaviorType);
-    CASE(PortabilityType);
-    CASE(PerformanceType);
-    CASE(OtherType);
-    CASE(MarkerType);
-    CASE(GroupPushType);
-    CASE(GroupPopType);
-  }
-#undef CASE
-
-  error += ")\n" + msg.message() + "\n";
-  qDebug() << qPrintable(error);
-  sendLog("(OpenGL) " + error.replace("\n", "\n(OpenGL) "), context);
-}
-
 /*******************************************************************************
  * Private Methods
  ******************************************************************************/
@@ -347,6 +288,5 @@ void QtkWidget::printContextInformation() {
   auto message = QString(glType) + glVersion + "(" + glProfile + ")"
                  + "\nOpenGL Vendor: " + glVendor
                  + "\nRendering Device: " + glRenderer;
-  qDebug() << qPrintable(message);
-  sendLog("(OpenGL) " + message.replace("\n", "\n(OpenGL) "), Status);
+  emit sendLog("(OpenGL) " + message.replace("\n", "\n(OpenGL) "), Status);
 }

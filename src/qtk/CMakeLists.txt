@@ -24,6 +24,8 @@ set(
     skybox.h
     texture.h
     transform3D.h
+    qtkmessagelogger.h
+    ../app/logger.h
 )
 
 set(
@@ -41,6 +43,8 @@ set(
     skybox.cpp
     texture.cpp
     transform3D.cpp
+    qtkmessagelogger.cpp
+    ../app/logger.cpp
 )
 
 qt6_add_big_resources(QTK_LIBRARY_SOURCES "${QTK_RESOURCES}/resources.qrc")

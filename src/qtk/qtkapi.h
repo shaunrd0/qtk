@@ -22,6 +22,8 @@
 #define QTKAPI
 #endif
 
+#include "qtk/qtkmessagelogger.h"
+
 /**
  * Initialize Qt resources required by the Qtk library.
  * This cannot be defined within any namespace, but can be called by ctors.
@@ -35,7 +37,7 @@ namespace Qtk {
   /**
    * Flag to set context for debug messages.
    */
-  enum DebugContext { Status, Debug, Warn, Error, Fatal };
+  enum DebugContext { Status, Debug, Warn, Error, Fatal, Invalid, Any };
 
   /**
    * Find top level parent for a widget.
