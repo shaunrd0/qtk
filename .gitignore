@@ -5,7 +5,7 @@
 **/.vscode/**
 
 # CMake build files
-**/cmake-build-debug/**
+**/cmake-build-*/**
 **/build/**
 install
 

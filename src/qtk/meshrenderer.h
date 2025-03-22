@@ -14,8 +14,10 @@
 #include "qtkapi.h"
 #include "shape.h"
 
-namespace Qtk {
-  class QTKAPI MeshRenderer : public Object {
+namespace Qtk
+{
+  class QTKAPI MeshRenderer : public Object
+  {
     public:
       /*************************************************************************
        * Typedefs
@@ -38,9 +40,10 @@ namespace Qtk {
        * @param indices Indicess to use for initializes geometry shape.
        * @param mode OpenGL draw mode. Supported modes are prefixed with QTK_*
        */
-      MeshRenderer(
-          const char * name, Vertices vertices, Indices indices,
-          DrawMode mode = QTK_DRAW_ARRAYS);
+      MeshRenderer(const char * name,
+                   Vertices vertices,
+                   Indices indices,
+                   DrawMode mode = QTK_DRAW_ARRAYS);
 
       /**
        * Delegate constructor.
@@ -112,14 +115,16 @@ namespace Qtk {
       /**
        * @param vert Path to vertex shader to use for this MeshRenderer.
        */
-      inline void setShaderVertex(const std::string & vert) {
+      inline void setShaderVertex(const std::string & vert)
+      {
         mVertexShader = vert;
       }
 
       /**
        * @param frag Path to fragment shader to use for this MeshRenderer.
        */
-      inline void setShaderFragment(const std::string & frag) {
+      inline void setShaderFragment(const std::string & frag)
+      {
         mFragmentShader = frag;
       }
 
@@ -134,7 +139,8 @@ namespace Qtk {
        * @param location Index location of the uniform value we are setting.
        * @param value The value to use for the uniform.
        */
-      template <typename T> inline void setUniform(int location, T value) {
+      template <typename T> inline void setUniform(int location, T value)
+      {
         ShaderBindScope lock(&mProgram, mBound);
         mProgram.setUniformValue(location, value);
       }
@@ -145,7 +151,8 @@ namespace Qtk {
        * @param value The value to use for the uniform.
        */
       template <typename T>
-      inline void setUniform(const char * location, T value) {
+      inline void setUniform(const char * location, T value)
+      {
         ShaderBindScope lock(&mProgram, mBound);
         mProgram.setUniformValue(location, value);
       }
@@ -159,9 +166,9 @@ namespace Qtk {
        * @param view Name of the uniform to store the View matrix.
        * @param projection Name of the uniform to store the Projection matrix.
        */
-      void setUniformMVP(
-          const char * model = "uModel", const char * view = "uView",
-          const char * projection = "uProjection");
+      void setUniformMVP(const char * model = "uModel",
+                         const char * view = "uView",
+                         const char * projection = "uProjection");
 
       /**
        * Sets the shape of the MeshRenderer using the Object base class method.
@@ -209,13 +216,15 @@ namespace Qtk {
       /**
        * @return Transform3D attached to this MeshRenderer.
        */
-      inline Transform3D & getTransform() { return mTransform; }
+      inline Transform3D & getTransform() override { return mTransform; }
 
-      inline std::string getVertexShader() const override {
+      [[nodiscard]] inline std::string getVertexShader() const override
+      {
         return mVertexShader;
       }
 
-      inline std::string getFragmentShader() const override {
+      [[nodiscard]] inline std::string getFragmentShader() const override
+      {
         return mFragmentShader;
       }
 

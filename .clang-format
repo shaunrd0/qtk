@@ -1,6 +1,6 @@
 ---
 BasedOnStyle: Google
-AlignAfterOpenBracket: AlwaysBreak
+AlignAfterOpenBracket: Align
 AlignArrayOfStructures: Left
 AlignConsecutiveAssignments: None
 AlignConsecutiveDeclarations: None
@@ -9,7 +9,6 @@ AlignEscapedNewlines: Left
 AlignOperands: Align
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
-AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Inline
@@ -21,8 +20,11 @@ InsertBraces: true
 IndentAccessModifiers: true
 EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: LogicalBlock
-BinPackArguments: true
-BinPackParameters: true
+BinPackArguments: false
+BinPackParameters: false
+AllowAllParametersOfDeclarationOnNextLine: true
+ExperimentalAutoDetectBinPacking: false
+BreakBeforeBraces: Linux
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: AfterColon
@@ -58,7 +60,7 @@ SpaceAfterTemplateKeyword: true
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeCpp11BracedList: true
 SpaceBeforeCtorInitializerColon: true
-SpaceBeforeParens: Never
+SpaceBeforeParens: ControlStatementsExceptControlMacros
 SpaceBeforeRangeBasedForLoopColon: true
 SpacesBeforeTrailingComments: 2
 SpaceInEmptyParentheses: false

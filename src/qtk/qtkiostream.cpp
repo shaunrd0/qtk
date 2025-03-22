@@ -14,23 +14,23 @@ using namespace Qtk;
  * Constructors, Destructors
  ******************************************************************************/
 
-QtkIOStream::QtkIOStream(const char * pFile, const char * pMode) :
-    mFile(pFile) {
+QtkIOStream::QtkIOStream(const char * pFile, const char * pMode) : mFile(pFile)
+{
   QString mode(pMode);
   bool open = false;
-  if(mode == "w" || mode == "wb") {
+  if (mode == "w" || mode == "wb") {
     open = mFile.open(QIODeviceBase::WriteOnly);
-  } else if(mode == "r" || mode == "rb") {
+  } else if (mode == "r" || mode == "rb") {
     open = mFile.open(QIODeviceBase::ReadOnly);
-  } else if(mode == "wt") {
+  } else if (mode == "wt") {
     open = mFile.open(QIODeviceBase::WriteOnly | QIODeviceBase::Text);
-  } else if(mode == "rt") {
+  } else if (mode == "rt") {
     open = mFile.open(QIODeviceBase::ReadOnly | QIODeviceBase::Text);
   } else {
     open = false;
     qDebug() << "[Qtk::QtkIOStream] Invalid file open mode: " << mode << "\n";
   }
-  if(!open) {
+  if (!open) {
     qDebug() << "[Qtk::QtkIOStream] Could not open file: " << QString(pFile)
              << "\n";
   }
@@ -40,9 +40,10 @@ QtkIOStream::QtkIOStream(const char * pFile, const char * pMode) :
  * Public Member Functions
  ******************************************************************************/
 
-size_t QtkIOStream::Read(void * pvBuffer, size_t pSize, size_t pCount) {
+size_t QtkIOStream::Read(void * pvBuffer, size_t pSize, size_t pCount)
+{
   qint64 readSize = mFile.read((char *)pvBuffer, pSize * pCount);
-  if(readSize < 0) {
+  if (readSize < 0) {
     qDebug() << "[Qtk::QtkIOStream] Failed to read (" << pSize
              << ") bytes from file at: " << mFile.filesystemFileName().c_str()
              << "\n";
@@ -51,9 +52,10 @@ size_t QtkIOStream::Read(void * pvBuffer, size_t pSize, size_t pCount) {
   return readSize;
 }
 
-size_t QtkIOStream::Write(const void * pvBuffer, size_t pSize, size_t pCount) {
+size_t QtkIOStream::Write(const void * pvBuffer, size_t pSize, size_t pCount)
+{
   qint64 writeSize = mFile.write((char *)pvBuffer, pSize * pCount);
-  if(writeSize < 0) {
+  if (writeSize < 0) {
     qDebug() << "[Qtk::QtkIOStream] Failed to write buffer with size (" << pSize
              << ") to file at: " << mFile.filesystemFileName().c_str() << "\n";
     return -1;
@@ -61,18 +63,22 @@ size_t QtkIOStream::Write(const void * pvBuffer, size_t pSize, size_t pCount) {
   return writeSize;
 }
 
-aiReturn QtkIOStream::Seek(size_t pOffset, aiOrigin pOrigin) {
+aiReturn QtkIOStream::Seek(size_t pOffset, aiOrigin pOrigin)
+{
   return mFile.seek(pOffset) ? aiReturn_SUCCESS : aiReturn_FAILURE;
 }
 
-size_t QtkIOStream::Tell() const {
+size_t QtkIOStream::Tell() const
+{
   return mFile.pos();
 }
 
-size_t QtkIOStream::FileSize() const {
+size_t QtkIOStream::FileSize() const
+{
   return mFile.size();
 }
 
-void QtkIOStream::Flush() {
+void QtkIOStream::Flush()
+{
   mFile.flush();
 }

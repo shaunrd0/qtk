@@ -14,18 +14,81 @@
 #include <QMainWindow>
 #include <QPlainTextEdit>
 
-#include "debugconsole.h"
-#include "qtkwidget.h"
+#include "designer-plugins/debugconsole.h"
 
-namespace Ui {
+namespace Ui
+{
   class MainWindow;
 }
+
+/**
+ * An empty scene used for initializing all QtkWidgets within the MainWindow.
+ * This serves as a temporary placeholder for QtkScene (for example), which is
+ * defined in the separate qtk_gui target. The reason for this separation is to
+ * support the use of QtkWidgets (the qtk_plugins target) within the Qt Designer
+ * application without implementations provided in the Qtk Desktop Application.
+ *
+ * For the Qtk application, this should be replaced by loading the previous
+ * scene or creating a new _unsaved_ scene when the application is opened.
+ * Currently we have essentially hard-coded QtkScene to use as examples for
+ * testing the application. This means that the only way to create or modify a
+ * scene is to write code. Any modifications made in the application, such as
+ * moving or resizing objects, will not persist and cannot be saved.
+ *
+ * For users of Qtk Designer Plugins, this means that installing
+ * the `qtk_plugins` target to Qt Designer allows use all of the designer's
+ * features to build an interface and position or resize a QtkWidget as needed.
+ * The QtkWidget also appears as widget in the IDE's toolbars and can be added
+ * to any new application easily, once the plugins are installed.
+ *
+ * Once the application is designed, you can define a custom scene and use the
+ * Qtk API or Qt OpenGL funtions directly to render to it.
+ *
+ * Any application using a QtkWidget can set a custom scene in their main
+ * function. See the MainWindow::MainWindow constructor as an example.
+ */
+class EmptyScene : public Qtk::Scene
+{
+    void init() override
+    {
+      setSkybox(new Qtk::Skybox(":/textures/skybox/right.png",
+                                ":/textures/skybox/top.png",
+                                ":/textures/skybox/front.png",
+                                ":/textures/skybox/left.png",
+                                ":/textures/skybox/bottom.png",
+                                ":/textures/skybox/back.png",
+                                "Skybox"));
+      setSceneName("Empty Scene");
+    }
+};
+
+/*
+ * Conditionally include the QtkScene header if the example is enabled.
+ * Set AppScene type to use in main() for creating the scene.
+ * Define helper function to initialize Qt resources for the application.
+ *    These resources are different based on if the example is enabled.
+ */
+#ifdef QTK_GUI_SCENE
+#include "qtkscene.h"
+using AppScene = QtkScene;
+inline void initResources()
+{
+  Q_INIT_RESOURCE(resources);
+}
+#else
+using AppScene = EmptyScene;
+inline void initResources()
+{
+  Q_INIT_RESOURCE(minimal_resources);
+}
+#endif
 
 /**
  * MainWindow class to provide an example of using a QtkWidget within a Qt
  * window application.
  */
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 
   public:
@@ -64,6 +127,16 @@ class MainWindow : public QMainWindow {
      */
     Qtk::QtkWidget * getQtkWidget(const QString & name);
 
+    /**
+     * @param scene The new scene to view.
+     */
+    void setScene(Qtk::Scene * scene);
+
+    /**
+     * @return Default icon to use for Qtk desktop application.
+     */
+    static QIcon getIcon() { return QIcon(":/icons/icon.png"); }
+
   public slots:
     /**
      * Trigger a refresh for widgets related to a scene that has been updated.
@@ -80,7 +153,6 @@ class MainWindow : public QMainWindow {
     MainWindow(const MainWindow &) {};
 
     Ui::MainWindow * ui_ {};
-    static MainWindow * mainWindow_;
 
     /**
      * Maps a scene name to the QtkWidget viewing it.

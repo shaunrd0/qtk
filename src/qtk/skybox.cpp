@@ -8,6 +8,7 @@
 
 #include "skybox.h"
 #include "scene.h"
+#include "shaders.h"
 #include "texture.h"
 
 using namespace Qtk;
@@ -17,42 +18,62 @@ using namespace Qtk;
  ******************************************************************************/
 
 Skybox::Skybox(const std::string & name) :
-    Skybox(
-        ":/textures/skybox/right.png", ":/textures/skybox/top.png",
-        ":/textures/skybox/front.png", ":/textures/skybox/left.png",
-        ":/textures/skybox/bottom.png", ":/textures/skybox/back.png", name) {}
-
-Skybox::Skybox(QOpenGLTexture * cubeMap, const std::string & name) {
-  mTexture.setTexture(cubeMap);
+    mVBO(QOpenGLBuffer::VertexBuffer),
+    mVertices(Cube(QTK_DRAW_ELEMENTS).getVertices()),
+    mIndices(Cube(QTK_DRAW_ELEMENTS).getIndexData())
+{
+  QImage image({1024, 1024}, QImage::Format_RGBA8888);
+  image.fill(Qt::darkGray);
+  mTexture.setCubeMap(image, image, image, image, image, image);
   init();
 }
 
-Skybox::Skybox(
-    const std::string & right, const std::string & top,
-    const std::string & front, const std::string & left,
-    const std::string & bottom, const std::string & back,
-    const std::string & name) :
+Skybox::Skybox(QOpenGLTexture * cubeMap, const std::string & name) :
     mVBO(QOpenGLBuffer::VertexBuffer),
     mVertices(Cube(QTK_DRAW_ELEMENTS).getVertices()),
-    mIndices(Cube(QTK_DRAW_ELEMENTS).getIndexData()) {
+    mIndices(Cube(QTK_DRAW_ELEMENTS).getIndexData())
+{
+  if (cubeMap == Q_NULLPTR) {
+    qDebug()
+        << "[Qtk] Failed to set cubemap for skybox with null QOpenGLTexture.";
+  } else {
+    mTexture.setTexture(cubeMap);
+  }
   init();
-  mTexture.setCubeMap(
-      QImage(right.c_str()).mirrored(), QImage(top.c_str()),
-      QImage(front.c_str()), QImage(left.c_str()), QImage(bottom.c_str()),
-      QImage(back.c_str()));
+}
+
+Skybox::Skybox(const std::string & right,
+               const std::string & top,
+               const std::string & front,
+               const std::string & left,
+               const std::string & bottom,
+               const std::string & back,
+               const std::string & name) :
+    mVBO(QOpenGLBuffer::VertexBuffer),
+    mVertices(Cube(QTK_DRAW_ELEMENTS).getVertices()),
+    mIndices(Cube(QTK_DRAW_ELEMENTS).getIndexData())
+{
+  mTexture.setCubeMap(QImage(right.c_str()).mirrored(),
+                      QImage(top.c_str()),
+                      QImage(front.c_str()),
+                      QImage(left.c_str()),
+                      QImage(bottom.c_str()),
+                      QImage(back.c_str()));
+  init();
 }
 
 /*******************************************************************************
  * Public Member Functions
  ******************************************************************************/
 
-void Skybox::draw() {
+void Skybox::draw()
+{
   glDepthFunc(GL_LEQUAL);
   glDepthMask(GL_FALSE);
 
   mVAO.bind();
   mProgram.bind();
-  mTexture.getOpenGLTexture().bind();
+  mTexture.bind();
 
   mProgram.setUniformValue("uProjectionMatrix", Scene::getProjectionMatrix());
   mProgram.setUniformValue("uViewMatrix", Scene::getCamera().toMatrix());
@@ -60,7 +81,7 @@ void Skybox::draw() {
   glDrawElements(
       GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, mIndices.data());
 
-  mTexture.getOpenGLTexture().bind();
+  mTexture.bind();
   mProgram.release();
   mVAO.release();
 
@@ -73,15 +94,16 @@ void Skybox::draw() {
  * Private Member Functions
  ******************************************************************************/
 
-void Skybox::init() {
+void Skybox::init()
+{
   initializeOpenGLFunctions();
 
   // Set up shader program
   mProgram.create();
-  mProgram.addShaderFromSourceFile(
-      QOpenGLShader::Vertex, ":/shaders/skybox.vert");
-  mProgram.addShaderFromSourceFile(
-      QOpenGLShader::Fragment, ":/shaders/skybox.frag");
+  mProgram.addShaderFromSourceCode(QOpenGLShader::Fragment,
+                                   QTK_SHADER_FRAGMENT_SKYBOX);
+  mProgram.addShaderFromSourceCode(QOpenGLShader::Vertex,
+                                   QTK_SHADER_VERTEX_SKYBOX);
   mProgram.link();
   mProgram.bind();
 

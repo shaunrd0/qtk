@@ -9,20 +9,22 @@
 #include <QApplication>
 
 #include "qtkmainwindow.h"
-#include "qtkscene.h"
 
-int main(int argc, char * argv[]) {
-  Q_INIT_RESOURCE(resources);
-
+int main(int argc, char * argv[])
+{
+  initResources();
   QApplication a(argc, argv);
 
   auto window = MainWindow::getMainWindow();
 
   // Qtk currently uses the decorator pattern to save / load scenes.
   // This is a temporary solution and will be improved in the future.
-  auto emptyScene = new Qtk::SceneEmpty;
-  window->getQtkWidget()->setScene(new QtkScene(emptyScene));
+  // NOTE: We set the scene here and not in QtkMainWindow to detach the scene
+  // from the QtkWidget plugin (qtk_plugin_library build target).
+  // Once we can save / load scenes, this call, and QtkScene, can be removed.
+  window->setScene(new AppScene);
 
   window->show();
+
   return QApplication::exec();
 }

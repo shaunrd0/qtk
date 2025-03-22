@@ -6,6 +6,10 @@
 ## Contact: shaunrd0@gmail.com  | URL: www.shaunreed.com | GitHub: shaunrd0   ##
 ##############################################################################*/
 
+#include <QCoreApplication>
+#include <QDir>
+#include <QProcess>
+
 #include "qtkscene.h"
 
 using namespace Qtk;
@@ -14,13 +18,15 @@ using namespace Qtk;
  * Constructors, Destructors
  ******************************************************************************/
 
-QtkScene::QtkScene(Qtk::Scene * scene) : Qtk::SceneInterface(scene) {
+QtkScene::QtkScene()
+{
   setSceneName("Qtk Scene");
   getCamera().getTransform().setTranslation(0.0f, 0.0f, 20.0f);
   getCamera().getTransform().setRotation(-5.0f, 0.0f, 1.0f, 0.0f);
 }
 
-QtkScene::~QtkScene() {
+QtkScene::~QtkScene()
+{
   delete mTestPhong;
   delete mTestSpecular;
   delete mTestDiffuse;
@@ -31,9 +37,40 @@ QtkScene::~QtkScene() {
  * Public Member Functions
  ******************************************************************************/
 
-void QtkScene::init() {
+void QtkScene::init()
+{
+  // Clone qtk-resources if it doesn't already exist.
+  QDir repoDir("resources/");
+  if (!repoDir.exists()) {
+    qDebug() << "Cloning qtk-resources repository to " << repoDir.absolutePath()
+             << "...";
+
+    // Run git clone
+    QProcess gitProcess;
+    gitProcess.setWorkingDirectory(QCoreApplication::applicationDirPath());
+    gitProcess.start("git",
+                     {"clone",
+                      "https://git.shaunreed.com/shaunrd0/qtk-resources.git",
+                      repoDir.absolutePath()});
+
+    // Wait indefinitely for the process to complete
+    gitProcess.waitForFinished(-1);
+    // Check the result
+    if (gitProcess.exitCode() == 0) {
+      qDebug() << "Repository cloned successfully.";
+    } else {
+      qDebug() << "Git clone failed:" << gitProcess.readAllStandardError();
+    }
+  }
+
   // Add a skybox to the scene using default cube map images and settings.
-  setSkybox(new Qtk::Skybox("Skybox"));
+  setSkybox(new Qtk::Skybox(":/textures/skybox/right.png",
+                            ":/textures/skybox/top.png",
+                            ":/textures/skybox/front.png",
+                            ":/textures/skybox/left.png",
+                            ":/textures/skybox/bottom.png",
+                            ":/textures/skybox/back.png",
+                            "Skybox"));
 
   /* Create a red cube with a mini master chief on top. */
   auto myCube = new MeshRenderer("My cube", Cube(Qtk::QTK_DRAW_ELEMENTS));
@@ -41,8 +78,7 @@ void QtkScene::init() {
   myCube->getTransform().setTranslation(5.0f, 0.0f, 0.0f);
   addObject(myCube);
 
-  auto mySpartan =
-      new Model("My spartan", ":/models/models/spartan/spartan.obj");
+  auto mySpartan = new Model("My spartan", QTK_SPARTAN);
   mySpartan->getTransform().setTranslation(5.0f, 0.5f, 0.0f);
   mySpartan->getTransform().setScale(0.5f);
   addObject(mySpartan);
@@ -79,31 +115,27 @@ void QtkScene::init() {
   //
   // 3D Model loading
 
-  auto model = addObject(
-      new Qtk::Model("backpack", ":/models/models/backpack/backpack.obj"));
+  auto model = addObject(new Qtk::Model("backpack", QTK_BACKPACK));
   // Sometimes model textures need flipped in certain directions
   model->flipTexture("diffuse.jpg", false, true);
   model->getTransform().setTranslation(0.0f, 0.0f, -10.0f);
 
-  model = addObject(new Qtk::Model("bird", ":/models/models/bird/bird.obj"));
+  model = addObject(new Qtk::Model("bird", QTK_BIRD));
   model->getTransform().setTranslation(2.0f, 2.0f, -10.0f);
   // Sometimes the models are very large
   model->getTransform().scale(0.0025f);
   model->getTransform().rotate(-110.0f, 0.0f, 1.0f, 0.0f);
 
-  model = addObject(
-      new Qtk::Model("alien", ":/models/models/alien-hominid/alien.obj"));
+  model = addObject(new Qtk::Model("alien", QTK_ALIEN));
   model->getTransform().setTranslation(2.0f, -1.0f, -5.0f);
   model->getTransform().scale(0.15f);
 
-  model = addObject(
-      new Qtk::Model("My scythe", ":/models/models/scythe/scythe.obj"));
+  model = addObject(new Qtk::Model("My scythe", QTK_SCYTHE));
   model->getTransform().setTranslation(-6.0f, 0.0f, -10.0f);
   model->getTransform().rotate(-90.0f, 1.0f, 0.0f, 0.0f);
   model->getTransform().rotate(90.0f, 0.0f, 1.0f, 0.0f);
 
-  model = addObject(
-      new Qtk::Model("masterChief", ":/models/models/spartan/spartan.obj"));
+  model = addObject(new Qtk::Model("masterChief", QTK_SPARTAN));
   model->getTransform().setTranslation(-1.5f, 0.5f, -2.0f);
 
 
@@ -111,13 +143,13 @@ void QtkScene::init() {
   // Simple cube lighting examples.
 
   /* Phong lighting example on a basic cube. */
-  mTestPhong = new Qtk::MeshRenderer("phong", Qtk::Cube());
+  mTestPhong = addObject(new Qtk::MeshRenderer("phongCube", Qtk::Cube()));
   mTestPhong->getTransform().setTranslation(3.0f, 0.0f, -2.0f);
   // NOTE: You no longer need to manually bind shader program to set uniforms.
   // + You can still bind it if you want to for performance reasons.
   // + Qtk will only bind / release if the shader program is not already bound.
-  mTestPhong->setShaders(
-      ":/shaders/solid-phong.vert", ":/shaders/solid-phong.frag");
+  mTestPhong->setShaders(":/shaders/solid-phong.vert",
+                         ":/shaders/solid-phong.frag");
 
   // For example this would technically not be efficient, because each one of
   // these calls will bind, set, release. We could instead bind, set N uniforms,
@@ -143,16 +175,16 @@ void QtkScene::init() {
   /* Example of a cube with no lighting applied */
   mesh = addObject(new Qtk::MeshRenderer("noLight", Cube(QTK_DRAW_ELEMENTS)));
   mesh->getTransform().setTranslation(5.0f, 0.0f, -2.0f);
-  mesh->setShaders(
-      ":/shaders/solid-perspective.vert", ":/shaders/solid-perspective.frag");
+  mesh->setShaders(":/shaders/solid-perspective.vert",
+                   ":/shaders/solid-perspective.frag");
   mesh->setUniform("uColor", QVector3D(0.0f, 0.25f, 0.0f));
   // No light source needed for this lighting technique
 
   /* Initialize Ambient example cube */
-  mTestAmbient = new Qtk::MeshRenderer("ambient", Cube());
+  mTestAmbient = addObject(new Qtk::MeshRenderer("ambientCube", Cube()));
   mTestAmbient->getTransform().setTranslation(7.0f, 0.0f, -2.0f);
-  mTestAmbient->setShaders(
-      ":/shaders/solid-ambient.vert", ":/shaders/solid-ambient.frag");
+  mTestAmbient->setShaders(":/shaders/solid-ambient.vert",
+                           ":/shaders/solid-ambient.frag");
   // Changing these uniform values will alter lighting effects.
   mTestAmbient->setUniform("uColor", QVector3D(0.0f, 0.25f, 0.0f));
   mTestAmbient->setUniform("uLightColor", QVector3D(1.0f, 1.0f, 1.0f));
@@ -161,10 +193,10 @@ void QtkScene::init() {
   // No light source needed for this lighting technique
 
   /* Initialize Diffuse example cube */
-  mTestDiffuse = new Qtk::MeshRenderer("diffuse", Cube());
+  mTestDiffuse = addObject(new Qtk::MeshRenderer("diffuseCube", Cube()));
   mTestDiffuse->getTransform().setTranslation(9.0f, 0.0f, -2.0f);
-  mTestDiffuse->setShaders(
-      ":/shaders/solid-diffuse.vert", ":/shaders/solid-diffuse.frag");
+  mTestDiffuse->setShaders(":/shaders/solid-diffuse.vert",
+                           ":/shaders/solid-diffuse.frag");
   mTestDiffuse->setUniform("uColor", QVector3D(0.0f, 0.25f, 0.0f));
   mTestDiffuse->setUniform("uLightColor", QVector3D(1.0f, 1.0f, 1.0f));
   mTestDiffuse->setUniform("uAmbientStrength", 0.2f);
@@ -177,10 +209,10 @@ void QtkScene::init() {
   mesh->getTransform().scale(0.25f);
 
   /* Initialize Specular example cube */
-  mTestSpecular = new Qtk::MeshRenderer("specular", Cube());
+  mTestSpecular = addObject(new Qtk::MeshRenderer("specularCube", Cube()));
   mTestSpecular->getTransform().setTranslation(11.0f, 0.0f, -2.0f);
-  mTestSpecular->setShaders(
-      ":/shaders/solid-specular.vert", ":/shaders/solid-specular.frag");
+  mTestSpecular->setShaders(":/shaders/solid-specular.vert",
+                            ":/shaders/solid-specular.frag");
   mTestSpecular->setUniform("uColor", QVector3D(0.0f, 0.25f, 0.0f));
   mTestSpecular->setUniform("uLightColor", QVector3D(1.0f, 1.0f, 1.0f));
   mTestSpecular->setUniform("uAmbientStrength", 0.2f);
@@ -228,9 +260,10 @@ void QtkScene::init() {
   // Building more complex objects for showing examples of lighting techniques
 
   /* Test alien Model with phong lighting and specular mapping. */
-  model = addObject(new Qtk::Model(
-      "alienTest", ":/models/models/alien-hominid/alien.obj",
-      ":/shaders/model-specular.vert", ":/shaders/model-specular.frag"));
+  model = addObject(new Qtk::Model("alienTest",
+                                   QTK_ALIEN,
+                                   ":/shaders/model-phong.vert",
+                                   ":/shaders/model-phong.frag"));
   model->getTransform().setTranslation(3.0f, -1.0f, 10.0f);
   model->getTransform().scale(0.15f);
   model->setUniform("uMaterial.ambient", QVector3D(1.0f, 1.0f, 1.0f));
@@ -238,7 +271,7 @@ void QtkScene::init() {
   model->setUniform("uMaterial.specular", QVector3D(1.0f, 1.0f, 1.0f));
   model->setUniform("uMaterial.ambientStrength", 0.8f);
   model->setUniform("uMaterial.diffuseStrength", 0.8f);
-  model->setUniform("uMaterial.specularStrength", 1.0f);
+  model->setUniform("uMaterial.specularStrength", 0.5f);
   model->setUniform("uMaterial.shine", 32.0f);
 
   model->setUniform("uLight.ambient", QVector3D(1.0f, 1.0f, 1.0f));
@@ -246,17 +279,18 @@ void QtkScene::init() {
   model->setUniform("uLight.specular", QVector3D(1.0f, 1.0f, 1.0f));
 
   // Light source for alienTest object.
-  mesh = addObject(new Qtk::MeshRenderer(
-      "alienTestLight", Triangle(Qtk::QTK_DRAW_ELEMENTS)));
+  mesh = addObject(new Qtk::MeshRenderer("alienTestLight",
+                                         Triangle(Qtk::QTK_DRAW_ELEMENTS)));
   mesh->getTransform().setTranslation(4.0f, 1.5f, 10.0f);
   mesh->getTransform().scale(0.25f);
   // This function changes values we have allocated in a buffer, so init() after
   mesh->setColor(GREEN);
 
   /* Test spartan Model with phong lighting, specular and normal mapping. */
-  model = addObject(new Qtk::Model(
-      "spartanTest", ":/models/models/spartan/spartan.obj",
-      ":/shaders/model-normals.vert", ":/shaders/model-normals.frag"));
+  model = addObject(new Qtk::Model("spartanTest",
+                                   QTK_SPARTAN,
+                                   ":/shaders/model-phong.vert",
+                                   ":/shaders/model-phong.frag"));
   model->getTransform().setTranslation(0.0f, -1.0f, 10.0f);
   model->getTransform().scale(2.0f);
   model->setUniform("uMaterial.ambient", QVector3D(1.0f, 1.0f, 1.0f));
@@ -290,8 +324,8 @@ void QtkScene::init() {
   mesh->reallocateNormals(mesh->getNormals());
 
   // RGB Normals cube to show normals are correct with QTK_DRAW_ELEMENTS_NORMALS
-  mesh = addObject(new Qtk::MeshRenderer(
-      "rgbNormalsCubeElementsTest", Cube(QTK_DRAW_ELEMENTS_NORMALS)));
+  mesh = addObject(new Qtk::MeshRenderer("rgbNormalsCubeElementsTest",
+                                         Cube(QTK_DRAW_ELEMENTS_NORMALS)));
   mesh->getTransform().setTranslation(5.0f, 0.0f, 2.0f);
   mesh->setShaders(":/shaders/rgb-normals.vert", ":/shaders/rgb-normals.frag");
   mesh->reallocateNormals(mesh->getNormals());
@@ -321,8 +355,8 @@ void QtkScene::init() {
   mesh->reallocateTexCoords(mesh->getTexCoords());
 
   // Test drawing a cube with texture coordinates using glDrawElements
-  mesh = addObject(new Qtk::MeshRenderer(
-      "uvCubeElementsTest", Cube(QTK_DRAW_ELEMENTS_NORMALS)));
+  mesh = addObject(new Qtk::MeshRenderer("uvCubeElementsTest",
+                                         Cube(QTK_DRAW_ELEMENTS_NORMALS)));
   mesh->getTransform().setTranslation(-1.7f, 0.0f, -2.0f);
   mesh->setTexture(":/textures/crate.png");
   mesh->setShaders(":/shaders/texture2d.vert", ":/shaders/texture2d.frag");
@@ -339,8 +373,8 @@ void QtkScene::init() {
       addObject(new Qtk::MeshRenderer("testCubeMap", Cube(QTK_DRAW_ELEMENTS)));
   mesh->getTransform().setTranslation(-3.0f, 1.0f, -2.0f);
   mesh->getTransform().setRotation(45.0f, 0.0f, 1.0f, 0.0f);
-  mesh->setShaders(
-      ":/shaders/texture-cubemap.vert", ":/shaders/texture-cubemap.frag");
+  mesh->setShaders(":/shaders/texture-cubemap.vert",
+                   ":/shaders/texture-cubemap.frag");
   mesh->setCubeMap(":/textures/crate.png");
   mesh->setUniform("uTexture", 0);
   mesh->reallocateTexCoords(mesh->getTexCoords());
@@ -354,15 +388,15 @@ void QtkScene::init() {
   mesh->reallocateNormals(mesh->getNormals());
 
   // RGB Normals triangle to show normals are correct with QTK_DRAW_ARRAYS
-  mesh = addObject(new Qtk::MeshRenderer(
-      "rgbTriangleArraysTest", Triangle(QTK_DRAW_ARRAYS)));
+  mesh = addObject(new Qtk::MeshRenderer("rgbTriangleArraysTest",
+                                         Triangle(QTK_DRAW_ARRAYS)));
   mesh->getTransform().setTranslation(7.0f, 0.0f, 2.0f);
   mesh->setShaders(":/shaders/rgb-normals.vert", ":/shaders/rgb-normals.frag");
   mesh->reallocateNormals(mesh->getNormals());
 
   // RGB Normals triangle to show normals are correct with QTK_DRAW_ELEMENTS
-  mesh = addObject(new Qtk::MeshRenderer(
-      "rgbTriangleElementsTest", Triangle(QTK_DRAW_ELEMENTS_NORMALS)));
+  mesh = addObject(new Qtk::MeshRenderer("rgbTriangleElementsTest",
+                                         Triangle(QTK_DRAW_ELEMENTS_NORMALS)));
   mesh->getTransform().setTranslation(7.0f, 0.0f, 4.0f);
   mesh->setShaders(":/shaders/rgb-normals.vert", ":/shaders/rgb-normals.frag");
   mesh->reallocateNormals(mesh->getNormals());
@@ -378,8 +412,8 @@ void QtkScene::init() {
   mesh->reallocateTexCoords(mesh->getTexCoords());
 
   // Test drawing triangle with glDrawElements with texture coordinates
-  mesh = addObject(new Qtk::MeshRenderer(
-      "testTriangleElementsUV", Triangle(QTK_DRAW_ELEMENTS_NORMALS)));
+  mesh = addObject(new Qtk::MeshRenderer("testTriangleElementsUV",
+                                         Triangle(QTK_DRAW_ELEMENTS_NORMALS)));
   mesh->getTransform().setTranslation(-2.5f, 0.0f, -1.0f);
   mesh->setShaders(":/shaders/texture2d.vert", ":/shaders/texture2d.frag");
   mesh->setTexture(":/textures/crate.png");
@@ -387,26 +421,25 @@ void QtkScene::init() {
   mesh->reallocateTexCoords(mesh->getTexCoords());
 }
 
-void QtkScene::draw() {
+void QtkScene::draw()
+{
   // WARNING: We must call the base class draw() function first.
   // + This will handle rendering core scene components like the Skybox.
   Scene::draw();
+  const QVector3D cameraPosition = getCamera().getTransform().getTranslation();
 
   mTestPhong->bindShaders();
-  mTestPhong->setUniform(
-      "uModelInverseTransposed",
-      mTestPhong->getTransform().toMatrix().normalMatrix());
+  mTestPhong->setUniform("uModelInverseTransposed",
+                         mTestPhong->getTransform().toMatrix().normalMatrix());
   mTestPhong->setUniform(
       "uLightPosition",
       MeshRenderer::getInstance("phongLight")->getTransform().getTranslation());
-  mTestPhong->setUniform(
-      "uCameraPosition", QtkScene::getCamera().getTransform().getTranslation());
+  mTestPhong->setUniform("uCameraPosition", cameraPosition);
   mTestPhong->releaseShaders();
   mTestPhong->draw();
 
   mTestAmbient->bindShaders();
-  mTestAmbient->setUniform(
-      "uCameraPosition", QtkScene::getCamera().getTransform().getTranslation());
+  mTestAmbient->setUniform("uCameraPosition", cameraPosition);
   mTestAmbient->releaseShaders();
   mTestAmbient->draw();
 
@@ -414,12 +447,11 @@ void QtkScene::draw() {
   mTestDiffuse->setUniform(
       "uModelInverseTransposed",
       mTestDiffuse->getTransform().toMatrix().normalMatrix());
-  mTestDiffuse->setUniform(
-      "uLightPosition", MeshRenderer::getInstance("diffuseLight")
-                            ->getTransform()
-                            .getTranslation());
-  mTestDiffuse->setUniform(
-      "uCameraPosition", QtkScene::getCamera().getTransform().getTranslation());
+  mTestDiffuse->setUniform("uLightPosition",
+                           MeshRenderer::getInstance("diffuseLight")
+                               ->getTransform()
+                               .getTranslation());
+  mTestDiffuse->setUniform("uCameraPosition", cameraPosition);
   mTestDiffuse->releaseShaders();
   mTestDiffuse->draw();
 
@@ -427,70 +459,86 @@ void QtkScene::draw() {
   mTestSpecular->setUniform(
       "uModelInverseTransposed",
       mTestSpecular->getTransform().toMatrix().normalMatrix());
-  mTestSpecular->setUniform(
-      "uLightPosition", MeshRenderer::getInstance("specularLight")
-                            ->getTransform()
-                            .getTranslation());
-  mTestSpecular->setUniform(
-      "uCameraPosition", QtkScene::getCamera().getTransform().getTranslation());
+  mTestSpecular->setUniform("uLightPosition",
+                            MeshRenderer::getInstance("specularLight")
+                                ->getTransform()
+                                .getTranslation());
+  mTestSpecular->setUniform("uCameraPosition", cameraPosition);
   mTestSpecular->releaseShaders();
   mTestSpecular->draw();
 }
 
-void QtkScene::update() {
-  auto mySpartan = Model::getInstance("My spartan");
-  mySpartan->getTransform().rotate(0.75f, 0.0f, 1.0f, 0.0f);
+void QtkScene::update()
+{
+  auto getModel = Model::getInstance;
+  const QVector3D cameraPosition = getCamera().getTransform().getTranslation();
 
-  auto myCube = MeshRenderer::getInstance("My cube");
-  myCube->getTransform().rotate(-0.75f, 0.0f, 1.0f, 0.0f);
+  // Models may have failed to load, so we should check before accessing.
+  if (auto mySpartan = getModel("My spartan"); mySpartan) {
+    mySpartan->getTransform().rotate(0.75f, 0.0f, 1.0f, 0.0f);
+  }
 
-  auto position = MeshRenderer::getInstance("alienTestLight")
-                      ->getTransform()
-                      .getTranslation();
-  auto alien = Model::getInstance("alienTest");
-  alien->setUniform("uLight.position", position);
-  alien->setUniform(
-      "uCameraPosition", QtkScene::getCamera().getTransform().getTranslation());
-  auto posMatrix = alien->getTransform().toMatrix();
-  alien->setUniform("uMVP.normalMatrix", posMatrix.normalMatrix());
-  alien->setUniform("uMVP.model", posMatrix);
-  alien->setUniform("uMVP.view", QtkScene::getCamera().toMatrix());
-  alien->setUniform("uMVP.projection", QtkScene::getProjectionMatrix());
-  alien->getTransform().rotate(0.75f, 0.0f, 1.0f, 0.0f);
+  if (auto myCube = getModel("My cube"); myCube) {
+    myCube->getTransform().rotate(-0.75f, 0.0f, 1.0f, 0.0f);
+  }
 
-  position = MeshRenderer::getInstance("spartanTestLight")
-                 ->getTransform()
-                 .getTranslation();
-  auto spartan = Model::getInstance("spartanTest");
-  spartan->setUniform("uLight.position", position);
-  spartan->setUniform(
-      "uCameraPosition", QtkScene::getCamera().getTransform().getTranslation());
-  posMatrix = spartan->getTransform().toMatrix();
-  spartan->setUniform("uMVP.normalMatrix", posMatrix.normalMatrix());
-  spartan->setUniform("uMVP.model", posMatrix);
-  spartan->setUniform("uMVP.view", QtkScene::getCamera().toMatrix());
-  spartan->setUniform("uMVP.projection", QtkScene::getProjectionMatrix());
-  spartan->getTransform().rotate(0.75f, 0.0f, 1.0f, 0.0f);
+  // Helper lambda to set the light position used by GLSL shaders on the model.
+  // TODO: This could be a helper function on the Model class.
+  auto setLightPosition = [](const std::string & lightName, Model * model) {
+    if (auto light = Model::getInstance(lightName.c_str()); light) {
+      QVector3D position = light->getTransform().getTranslation();
+      model->setUniform("uLight.position", position);
+    } else {
+      qDebug() << "[QtkScene] Failed to set light position: "
+               << lightName.c_str();
+    }
+  };
 
-  auto phong = MeshRenderer::getInstance("testPhong");
-  phong->getTransform().rotate(0.75f, 1.0f, 0.5f, 0.0f);
-  phong->bindShaders();
-  position =
-      MeshRenderer::getInstance("testLight")->getTransform().getTranslation();
-  phong->setUniform("uLight.position", position);
-  phong->setUniform(
-      "uCameraPosition", QtkScene::getCamera().getTransform().getTranslation());
-  posMatrix = phong->getTransform().toMatrix();
-  phong->setUniform("uMVP.normalMatrix", posMatrix.normalMatrix());
-  phong->setUniform("uMVP.model", posMatrix);
-  phong->setUniform("uMVP.view", QtkScene::getCamera().toMatrix());
-  phong->setUniform("uMVP.projection", QtkScene::getProjectionMatrix());
-  phong->releaseShaders();
+  QMatrix4x4 posMatrix;
+  if (auto alien = getModel("alienTest"); alien) {
+    setLightPosition("alienTestLight", alien);
+
+    alien->setUniform("uCameraPosition", cameraPosition);
+    posMatrix = alien->getTransform().toMatrix();
+    alien->setUniform("uMVP.normalMatrix", posMatrix.normalMatrix());
+    alien->setUniform("uMVP.model", posMatrix);
+    alien->setUniform("uMVP.view", QtkScene::getCamera().toMatrix());
+    alien->setUniform("uMVP.projection", QtkScene::getProjectionMatrix());
+    alien->getTransform().rotate(0.75f, 0.0f, 1.0f, 0.0f);
+  }
+
+  if (auto spartan = getModel("spartanTest"); spartan) {
+    setLightPosition("spartanTestLight", spartan);
+
+    spartan->setUniform("uCameraPosition", cameraPosition);
+    posMatrix = spartan->getTransform().toMatrix();
+    spartan->setUniform("uMVP.normalMatrix", posMatrix.normalMatrix());
+    spartan->setUniform("uMVP.model", posMatrix);
+    spartan->setUniform("uMVP.view", QtkScene::getCamera().toMatrix());
+    spartan->setUniform("uMVP.projection", QtkScene::getProjectionMatrix());
+    spartan->getTransform().rotate(0.75f, 0.0f, 1.0f, 0.0f);
+  }
+
+  if (auto phong = getModel("testPhong"); phong) {
+    setLightPosition("testLight", phong);
+
+    phong->getTransform().rotate(0.75f, 1.0f, 0.5f, 0.0f);
+    phong->bindShaders();
+    phong->setUniform("uCameraPosition", cameraPosition);
+    posMatrix = phong->getTransform().toMatrix();
+    phong->setUniform("uMVP.normalMatrix", posMatrix.normalMatrix());
+    phong->setUniform("uMVP.model", posMatrix);
+    phong->setUniform("uMVP.view", QtkScene::getCamera().toMatrix());
+    phong->setUniform("uMVP.projection", QtkScene::getProjectionMatrix());
+    phong->releaseShaders();
+  }
+
+  // MeshRenderers are lower level opengl objects baked into the source code.
+  auto getMesh = MeshRenderer::getInstance;
 
   // Rotate lighting example cubes
   mTestPhong->getTransform().rotate(0.75f, 0.5f, 0.3f, 0.2f);
-  MeshRenderer::getInstance("noLight")->getTransform().rotate(
-      0.75f, 0.5f, 0.3f, 0.2f);
+  getMesh("noLight")->getTransform().rotate(0.75f, 0.5f, 0.3f, 0.2f);
   mTestAmbient->getTransform().rotate(0.75f, 0.5f, 0.3f, 0.2f);
   mTestDiffuse->getTransform().rotate(0.75f, 0.5f, 0.3f, 0.2f);
   mTestSpecular->getTransform().rotate(0.75f, 0.5f, 0.3f, 0.2f);
@@ -498,46 +546,27 @@ void QtkScene::update() {
   // Examples of various translations and rotations
 
   // Rotate in multiple directions simultaneously
-  MeshRenderer::getInstance("rgbNormalsCube")
-      ->getTransform()
-      .rotate(0.75f, 0.2f, 0.4f, 0.6f);
+  getMesh("rgbNormalsCube")->getTransform().rotate(0.75f, 0.2f, 0.4f, 0.6f);
 
   // Pitch forward and roll sideways
-  MeshRenderer::getInstance("leftTriangle")
-      ->getTransform()
-      .rotate(0.75f, 1.0f, 0.0f, 0.0f);
-  MeshRenderer::getInstance("rightTriangle")
-      ->getTransform()
-      .rotate(0.75f, 0.0f, 0.0f, 1.0f);
+  getMesh("leftTriangle")->getTransform().rotate(0.75f, 1.0f, 0.0f, 0.0f);
+  getMesh("rightTriangle")->getTransform().rotate(0.75f, 0.0f, 0.0f, 1.0f);
 
   // Move between two positions over time
   static float translateX = 0.025f;
   float limit = -9.0f;  // Origin position.x - 2.0f
-  float posX = MeshRenderer::getInstance("topTriangle")
-                   ->getTransform()
-                   .getTranslation()
-                   .x();
-  if(posX < limit || posX > limit + 4.0f) {
+  float posX = getMesh("topTriangle")->getTransform().getTranslation().x();
+  if (posX < limit || posX > limit + 4.0f) {
     translateX = -translateX;
   }
-  MeshRenderer::getInstance("topTriangle")
-      ->getTransform()
-      .translate(translateX, 0.0f, 0.0f);
-  MeshRenderer::getInstance("bottomTriangle")
-      ->getTransform()
-      .translate(-translateX, 0.0f, 0.0f);
+  getMesh("topTriangle")->getTransform().translate(translateX, 0.0f, 0.0f);
+  getMesh("bottomTriangle")->getTransform().translate(-translateX, 0.0f, 0.0f);
   // And lets rotate the triangles in two directions at once
-  MeshRenderer::getInstance("topTriangle")
-      ->getTransform()
-      .rotate(0.75f, 0.2f, 0.0f, 0.4f);
-  MeshRenderer::getInstance("bottomTriangle")
-      ->getTransform()
-      .rotate(0.75f, 0.0f, 0.2f, 0.4f);
+  getMesh("topTriangle")->getTransform().rotate(0.75f, 0.2f, 0.0f, 0.4f);
+  getMesh("bottomTriangle")->getTransform().rotate(0.75f, 0.0f, 0.2f, 0.4f);
   // And make the bottom triangle green, instead of RGB
 
   // Rotate center cube in several directions simultaneously
   // + Not subject to gimbal lock since we are using quaternions :)
-  MeshRenderer::getInstance("centerCube")
-      ->getTransform()
-      .rotate(0.75f, 0.2f, 0.4f, 0.6f);
+  getMesh("centerCube")->getTransform().rotate(0.75f, 0.2f, 0.4f, 0.6f);
 }

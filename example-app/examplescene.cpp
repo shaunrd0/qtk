@@ -11,26 +11,21 @@
 
 using namespace Qtk;
 
-ExampleScene::ExampleScene(Qtk::Scene * scene) : Qtk::SceneInterface(scene) {
+ExampleScene::ExampleScene()
+{
   setSceneName("Example Scene");
   getCamera().getTransform().setTranslation(-8.0f, 0.0f, 10.0f);
   getCamera().getTransform().setRotation(-5.0f, 0.0f, 1.0f, 0.0f);
 }
 
-ExampleScene::~ExampleScene() {}
+ExampleScene::~ExampleScene() = default;
 
-void ExampleScene::init() {
-  auto skybox = new Qtk::Skybox("Skybox");
-  setSkybox(skybox);
-
-  std::string spartanPath = QTK_EXAMPLE_SOURCE_DIR;
-  spartanPath += "/resources/models/spartan/spartan.obj";
-  auto spartan = new Model("spartan", spartanPath.c_str());
-  addObject(spartan);
-  spartan->getTransform().setTranslation(-4.0f, 0.0f, 0.0f);
+void ExampleScene::init()
+{
+  setSkybox(new Qtk::Skybox);
 
   auto mesh = addObject(
-      new Qtk::MeshRenderer("rightTriangle", Triangle(QTK_DRAW_ARRAYS)));
+      new Qtk::MeshRenderer("rightTriangle", Triangle(QTK_DRAW_ELEMENTS)));
   mesh->getTransform().setTranslation(-5.0f, 0.0f, -2.0f);
 
   // QTK_DRAW_ARRAYS is the default for generic shapes in qtk/shape.h
@@ -56,11 +51,20 @@ void ExampleScene::init() {
   mesh->setColor(GREEN);
 }
 
-void ExampleScene::draw() {
+void ExampleScene::draw()
+{
+  // The base class method _must_ be called first, before additional logic.
   Scene::draw();
+
+  // No additional custom draw logic for this example.
+  // QtkScene in Qtk desktop application is an example using custom draw logic.
 }
 
-void ExampleScene::update() {
+void ExampleScene::update()
+{
+  auto top_triangle = MeshRenderer::getInstance("topTriangle");
+  auto bottom_triangle = MeshRenderer::getInstance("bottomTriangle");
+
   // Pitch forward and roll sideways
   MeshRenderer::getInstance("leftTriangle")
       ->getTransform()
@@ -69,27 +73,20 @@ void ExampleScene::update() {
       ->getTransform()
       .rotate(0.75f, 0.0f, 0.0f, 1.0f);
 
+  // Make the top and bottom triangles slide left-to-right.
   static float translateX = 0.025f;
   float limit = -9.0f;  // Origin position.x - 2.0f
-  float posX = MeshRenderer::getInstance("topTriangle")
-                   ->getTransform()
-                   .getTranslation()
-                   .x();
-  if(posX < limit || posX > limit + 4.0f) {
+  float posX = top_triangle->getTransform().getTranslation().x();
+  if (posX < limit || posX > limit + 4.0f) {
     translateX = -translateX;
   }
-  MeshRenderer::getInstance("topTriangle")
-      ->getTransform()
-      .translate(translateX, 0.0f, 0.0f);
-  MeshRenderer::getInstance("bottomTriangle")
-      ->getTransform()
-      .translate(-translateX, 0.0f, 0.0f);
-  MeshRenderer::getInstance("topTriangle")
-      ->getTransform()
-      .rotate(0.75f, 0.2f, 0.0f, 0.4f);
-  MeshRenderer::getInstance("bottomTriangle")
-      ->getTransform()
-      .rotate(0.75f, 0.0f, 0.2f, 0.4f);
+
+  top_triangle->getTransform().translate(translateX, 0.0f, 0.0f);
+  bottom_triangle->getTransform().translate(-translateX, 0.0f, 0.0f);
+
+  // Apply some rotation to the triangles as they move left-to-right.
+  top_triangle->getTransform().rotate(0.75f, 0.2f, 0.0f, 0.4f);
+  bottom_triangle->getTransform().rotate(0.75f, 0.0f, 0.2f, 0.4f);
 
   MeshRenderer::getInstance("centerCube")
       ->getTransform()

@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/textures">
+        <file alias="crate.png">images/crate.png</file>
+        <file alias="stone.png">images/stone.png</file>
+        <file alias="wood.png">images/wood.png</file>
+        <file>skybox/back.png</file>
+        <file>skybox/bottom.png</file>
+        <file>skybox/front.png</file>
+        <file>skybox/left.png</file>
+        <file>skybox/right.png</file>
+        <file>skybox/top.png</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file>fontawesome-free-6.2.1-desktop/svgs/solid/cube.svg</file>
+        <file>fontawesome-free-6.2.1-desktop/svgs/regular/trash-can.svg</file>
+        <file>fontawesome-free-6.2.1-desktop/svgs/regular/folder-open.svg</file>
+        <file>fontawesome-free-6.2.1-desktop/svgs/regular/floppy-disk.svg</file>
+        <file>fontawesome-free-6.2.1-desktop/svgs/brands/git-alt.svg</file>
+        <file alias="icon.png">icons/icon.png</file>
+    </qresource>
+</RCC>

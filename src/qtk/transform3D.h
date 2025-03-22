@@ -20,11 +20,13 @@
 
 #include "qtkapi.h"
 
-namespace Qtk {
+namespace Qtk
+{
   /**
    * Transform3D class to represent and modify object position in 3D space.
    */
-  class QTKAPI Transform3D {
+  class QTKAPI Transform3D
+  {
     public:
       /*************************************************************************
        * Constructors, Destructors
@@ -32,7 +34,9 @@ namespace Qtk {
 
       inline Transform3D() :
           m_dirty(true), mScale(1.0f, 1.0f, 1.0f),
-          mTranslation(0.0f, 0.0f, 0.0f) {}
+          mTranslation(0.0f, 0.0f, 0.0f)
+      {
+      }
 
       /*************************************************************************
        * Public Methods
@@ -48,7 +52,8 @@ namespace Qtk {
        * @param dy Y translation from last to current position.
        * @param dz Z translation from last to current position.
        */
-      inline void translate(float dx, float dy, float dz) {
+      inline void translate(float dx, float dy, float dz)
+      {
         translate(QVector3D(dx, dy, dz));
       }
 
@@ -66,7 +71,8 @@ namespace Qtk {
        * @param dy Amount to scale on the Y axis.
        * @param dz Amount to scale on the Z axis.
        */
-      inline void scale(float dx, float dy, float dz) {
+      inline void scale(float dx, float dy, float dz)
+      {
         scale(QVector3D(dx, dy, dz));
       }
 
@@ -75,7 +81,8 @@ namespace Qtk {
        *
        * @param factor Scalar to apply to all axis of the object.
        */
-      inline void scale(float factor) {
+      inline void scale(float factor)
+      {
         scale(QVector3D(factor, factor, factor));
       }
 
@@ -89,14 +96,16 @@ namespace Qtk {
        * @param dy Amount to grow Y axis.
        * @param dz Amount to grow Z axis.
        */
-      inline void grow(float dx, float dy, float dz) {
+      inline void grow(float dx, float dy, float dz)
+      {
         grow(QVector3D(dx, dy, dz));
       }
 
       /**
        * @param factor Amount to grow all axis equally.
        */
-      inline void grow(float factor) {
+      inline void grow(float factor)
+      {
         grow(QVector3D(factor, factor, factor));
       }
 
@@ -109,7 +118,8 @@ namespace Qtk {
        * @param angle Angle to rotate.
        * @param axis Axis to rotate apply the rotation on.
        */
-      inline void rotate(float angle, const QVector3D & axis) {
+      inline void rotate(float angle, const QVector3D & axis)
+      {
         rotate(QQuaternion::fromAxisAndAngle(axis, angle));
       }
 
@@ -121,7 +131,8 @@ namespace Qtk {
        * @param ay Y axis to apply the rotation on.
        * @param az Z axis to apply the rotation on.
        */
-      inline void rotate(float angle, float ax, float ay, float az) {
+      inline void rotate(float angle, float ax, float ay, float az)
+      {
         rotate(QQuaternion::fromAxisAndAngle(ax, ay, az, angle));
       }
 
@@ -139,7 +150,8 @@ namespace Qtk {
        * @param y Y position to set transform.
        * @param z Z position to set transform.
        */
-      inline void setTranslation(float x, float y, float z) {
+      inline void setTranslation(float x, float y, float z)
+      {
         setTranslation(QVector3D(x, y, z));
       }
 
@@ -153,7 +165,8 @@ namespace Qtk {
        * @param y Y axis scale to set for this transform.
        * @param z Z axis scale to set for this transform.
        */
-      inline void setScale(float x, float y, float z) {
+      inline void setScale(float x, float y, float z)
+      {
         setScale(QVector3D(x, y, z));
       }
 
@@ -171,7 +184,8 @@ namespace Qtk {
        * @param angle Angle to set for rotation.
        * @param axis Axis to set rotation for.
        */
-      inline void setRotation(float angle, const QVector3D & axis) {
+      inline void setRotation(float angle, const QVector3D & axis)
+      {
         setRotation(QQuaternion::fromAxisAndAngle(axis, angle));
       }
 
@@ -183,7 +197,8 @@ namespace Qtk {
        * @param ay Y axis to set angle for.
        * @param az Z axis to set angle for.
        */
-      inline void setRotation(float angle, float ax, float ay, float az) {
+      inline void setRotation(float angle, float ax, float ay, float az)
+      {
         setRotation(QQuaternion::fromAxisAndAngle(ax, ay, az, angle));
       }
 
@@ -194,7 +209,8 @@ namespace Qtk {
       /**
        * @return Translation for this transform.
        */
-      [[nodiscard]] inline const QVector3D & getTranslation() const {
+      [[nodiscard]] inline const QVector3D & getTranslation() const
+      {
         return mTranslation;
       }
 
@@ -206,7 +222,8 @@ namespace Qtk {
       /**
        * @return Rotation for this transform.
        */
-      [[nodiscard]] inline const QQuaternion & getRotation() const {
+      [[nodiscard]] inline const QQuaternion & getRotation() const
+      {
         return mRotation;
       }
 
@@ -250,10 +267,10 @@ namespace Qtk {
       bool m_dirty;
 
 #ifndef QT_NO_DATASTREAM
-      friend QDataStream & operator<<(
-          QDataStream & out, const Transform3D & transform);
-      friend QDataStream & operator>>(
-          QDataStream & in, Transform3D & transform);
+      friend QDataStream & operator<<(QDataStream & out,
+                                      const Transform3D & transform);
+      friend QDataStream & operator>>(QDataStream & in,
+                                      Transform3D & transform);
 #endif
   };
 

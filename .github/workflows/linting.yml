@@ -9,10 +9,10 @@ jobs:
   Tidy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v4
         with:
           version: '6.5.0'
 
@@ -22,7 +22,7 @@ jobs:
       - name: Build Qtk
         run: |
           cmake -B build -DQTK_SUBMODULES=OFF -DQTK_CCACHE=OFF -DQTK_PLUGINS=OFF -DQTK_GUI=ON
-          cmake --build build --target qtk_gui -- -j $(nproc)
+          cmake --build build --target qtk_gui qtk_example -- -j $(nproc)
 
       - uses: cpp-linter/cpp-linter-action@v2
         id: linter
@@ -30,7 +30,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           # Use clang-tools 14
-          version: '14'
+          version: '18'
           # Don't use clang-format with this action
           # + Set to `file` to use .clang-format (Qtk formats with clang 15)
           style: ''
@@ -57,12 +57,12 @@ jobs:
       matrix:
         path:
           - 'src'
-          - 'app'
+          - 'example-app'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: clang-format Check
         uses: jidicula/clang-format-action@v4.9.0
         with:
-          clang-format-version: '15'
+          clang-format-version: '18'
           check-path: ${{ matrix.path }}

@@ -2,7 +2,7 @@
 ## Project for working with OpenGL and Qt6 widgets                            ##
 ##                                                                            ##
 ## Author: Shaun Reed | Contact: shaunrd0@gmail.com | URL: www.shaunreed.com  ##
-## All Content (c) 2023 Shaun Reed, all rights reserved                       ##
+## All Content (c) 2025 Shaun Reed, all rights reserved                       ##
 ################################################################################
 
 ################################################################################
@@ -24,6 +24,7 @@ set(
     skybox.h
     texture.h
     transform3D.h
+    shaders.h
 )
 
 set(
@@ -43,11 +44,10 @@ set(
     transform3D.cpp
 )
 
-qt6_add_big_resources(QTK_LIBRARY_SOURCES "${QTK_RESOURCES}/resources.qrc")
-qt_add_library(qtk_library STATIC EXCLUDE_FROM_ALL)
-target_sources(qtk_library PRIVATE ${QTK_LIBRARY_SOURCES})
+qt_add_library(qtk STATIC EXCLUDE_FROM_ALL)
+target_sources(qtk PRIVATE ${QTK_LIBRARY_SOURCES})
 target_sources(
-    qtk_library PUBLIC
+    qtk PUBLIC
     FILE_SET HEADERS
       BASE_DIRS $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
       BASE_DIRS $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>
@@ -55,25 +55,25 @@ target_sources(
 )
 
 if(QTK_DEBUG)
-  target_compile_definitions(qtk_library PUBLIC QTK_DEBUG)
+  target_compile_definitions(qtk PUBLIC -DQTK_DEBUG)
 endif()
 
 set_target_properties(
-    qtk_library PROPERTIES
+    qtk PROPERTIES
       VERSION ${PROJECT_VERSION}
 )
 
 target_link_libraries(
-    qtk_library PUBLIC
+    qtk PUBLIC
     Qt6::Core Qt6::OpenGLWidgets Qt6::Widgets
 )
 
 if(QTK_SUBMODULES OR NOT QTK_ASSIMP_NEW_INTERFACE)
-  target_link_libraries(qtk_library PUBLIC assimp)
+  target_link_libraries(qtk PUBLIC assimp)
 elseif(QTK_ASSIMP_NEW_INTERFACE)
-  target_link_libraries(qtk_library PUBLIC assimp::assimp)
+  target_link_libraries(qtk PUBLIC assimp::assimp)
 endif()
 
 if(WIN32)
-  target_link_libraries(qtk_library PUBLIC OpenGL::GL)
+  target_link_libraries(qtk PUBLIC OpenGL::GL)
 endif()

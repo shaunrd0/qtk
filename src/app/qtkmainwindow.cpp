@@ -7,16 +7,14 @@
 ##############################################################################*/
 
 #include "qtkmainwindow.h"
-#include "qtkscene.h"
 #include "ui_qtkmainwindow.h"
-
-MainWindow * MainWindow::mainWindow_ = Q_NULLPTR;
 
 /*******************************************************************************
  * Constructors / Destructors
  ******************************************************************************/
 
-MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent) {
+MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent)
+{
   ui_ = new Ui::MainWindow;
   setObjectName("MainWindow");
   // For use in design mode using Qt Creator
@@ -26,19 +24,28 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent) {
 
   // Initialize static container for all active QtkWidgets
   auto qtkWidgets = findChildren<Qtk::QtkWidget *>();
-  for(auto & qtkWidget : qtkWidgets) {
-    qtkWidget->setScene(new Qtk::SceneEmpty);
+  for (auto & qtkWidget : qtkWidgets) {
+    qtkWidget->setMainWindow(this);
+    // NOTE: Set a temporary scene for the widget to use for initialization.
+    // This should be replaced by loading a scene, or creating a new (unsaved)
+    // scene when Qtk is opened.
+    qtkWidget->setScene(new EmptyScene);
     views_.emplace(qtkWidget->getScene()->getSceneName(), qtkWidget);
 
     // Add GUI 'view' toolbar option to show debug console.
     ui_->menuView->addAction(qtkWidget->getActionToggleConsole());
+
     // Refresh GUI widgets when scene or objects are updated.
-    connect(
-        qtkWidget->getScene(), &Qtk::Scene::sceneUpdated, this,
-        &MainWindow::refreshScene);
-    connect(
-        qtkWidget, &Qtk::QtkWidget::objectFocusChanged, ui_->qtk__ToolBox,
-        &Qtk::ToolBox::updateFocus);
+    connect(qtkWidget->getScene(),
+            &Qtk::Scene::sceneUpdated,
+            this,
+            &MainWindow::refreshScene);
+
+    // Update the ToolBox details panel when an item is double-clicked.
+    connect(qtkWidget,
+            &Qtk::QtkWidget::objectFocusChanged,
+            ui_->qtk__ToolBox,
+            &Qtk::ToolBox::updateFocus);
   }
 
   // TODO: Fix / use MainWindow in Qt Designer to add these dock widgets.
@@ -55,10 +62,11 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent) {
   ui_->menuView->addAction(ui_->qtk__TreeView->toggleViewAction());
 
   // Set the window icon used for Qtk.
-  setWindowIcon(Qtk::getIcon());
+  setWindowIcon(getIcon());
 }
 
-MainWindow::~MainWindow() {
+MainWindow::~MainWindow()
+{
   delete ui_;
 }
 
@@ -66,28 +74,41 @@ MainWindow::~MainWindow() {
  * Public Methods
  ******************************************************************************/
 
-MainWindow * MainWindow::getMainWindow() {
-  if(mainWindow_ == Q_NULLPTR) {
-    mainWindow_ = new MainWindow;
-  }
-  return mainWindow_;
+MainWindow * MainWindow::getMainWindow()
+{
+  static auto * window = new MainWindow;
+  return window;
 }
 
-Qtk::QtkWidget * MainWindow::getQtkWidget(int64_t index) {
-  if(views_.size() <= index) {
+Qtk::QtkWidget * MainWindow::getQtkWidget(int64_t index)
+{
+  if (views_.size() <= index) {
     return Q_NULLPTR;
   }
-  return views_.begin(index)->second;
+  auto it = views_.begin();
+  std::advance(it, index);
+  return it->second;
 }
 
-Qtk::QtkWidget * MainWindow::getQtkWidget(const QString & name) {
-  if(!views_.count(name)) {
+Qtk::QtkWidget * MainWindow::getQtkWidget(const QString & name)
+{
+  if (!views_.count(name)) {
     return Q_NULLPTR;
   }
   return views_[name];
 }
 
-void MainWindow::refreshScene(const QString & sceneName) {
+void MainWindow::refreshScene(const QString & sceneName)
+{
   // TODO: Select TreeView using sceneName
   ui_->qtk__TreeView->updateView(getQtkWidget()->getScene());
+}
+
+void MainWindow::setScene(Qtk::Scene * scene)
+{
+  connect(scene,
+          &Qtk::Scene::sceneUpdated,
+          MainWindow::getMainWindow(),
+          &MainWindow::refreshScene);
+  ui_->qtk__QtkWidget->setScene(scene);
 }

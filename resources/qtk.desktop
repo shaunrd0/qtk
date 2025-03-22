@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Qtk
+Exec=/usr/bin/qtk_gui
+Icon=qtk
+Type=Application
+Categories=Utility;

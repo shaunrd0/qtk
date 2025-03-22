@@ -10,9 +10,10 @@
 
 using namespace Qtk;
 
-Cube::Cube(DrawMode mode) {
+Cube::Cube(DrawMode mode)
+{
   mDrawMode = mode;
-  switch(mode) {
+  switch (mode) {
     // The order of the following assignment values helps to visualize.
     // clang-format off
 
@@ -203,10 +204,11 @@ Cube::Cube(DrawMode mode) {
   }
 }
 
-Triangle::Triangle(DrawMode mode) {
+Triangle::Triangle(DrawMode mode)
+{
   mDrawMode = mode;
   const QVector3D triangleTop = QVector3D(0.0f, 0.5f, 0.0f);
-  switch(mode) {
+  switch (mode) {
       // clang-format off
 
     case QTK_DRAW_ARRAYS:

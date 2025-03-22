@@ -73,7 +73,8 @@
 #define UV_RIGHT  QVector2D(0.0f, 1.0f)
 #define UV_CORNER QVector2D(1.0f, 1.0f)
 
-namespace Qtk {
+namespace Qtk
+{
   class MeshRenderer;
 
   class Object;
@@ -114,13 +115,17 @@ namespace Qtk {
        * @param t Texture coordinates for this shape.
        * @param n Normals for this shape.
        */
-      explicit ShapeBase(
-          DrawMode mode = QTK_DRAW_ARRAYS, Vertices v = {}, Indices i = {},
-          Colors c = {}, TexCoords t = {}, Normals n = {}) :
-          mDrawMode(mode),
-          mVertices(std::move(v)), mColors(std::move(c)),
+      explicit ShapeBase(DrawMode mode = QTK_DRAW_ARRAYS,
+                         Vertices v = {},
+                         Indices i = {},
+                         Colors c = {},
+                         TexCoords t = {},
+                         Normals n = {}) :
+          mDrawMode(mode), mVertices(std::move(v)), mColors(std::move(c)),
           mIndices(std::move(i)), mTexCoords(std::move(t)),
-          mNormals(std::move(n)) {}
+          mNormals(std::move(n))
+      {
+      }
 
       /*************************************************************************
        * Accessors
@@ -129,14 +134,16 @@ namespace Qtk {
       /**
        * @return Vertex data for this shape.
        */
-      [[nodiscard]] inline const Vertices & getVertices() const {
+      [[nodiscard]] inline const Vertices & getVertices() const
+      {
         return mVertices;
       }
 
       /**
        * @return Index data for this shape.
        */
-      [[nodiscard]] inline const Indices & getIndexData() const {
+      [[nodiscard]] inline const Indices & getIndexData() const
+      {
         return mIndices;
       }
 
@@ -148,21 +155,24 @@ namespace Qtk {
       /**
        * @return Texture coordinates for this shape.
        */
-      [[nodiscard]] inline const TexCoords & getTexCoords() const {
+      [[nodiscard]] inline const TexCoords & getTexCoords() const
+      {
         return mTexCoords;
       }
 
       /**
        * @return Normals for this shape.
        */
-      [[nodiscard]] inline const Normals & getNormals() const {
+      [[nodiscard]] inline const Normals & getNormals() const
+      {
         return mNormals;
       }
 
       /**
        * @return Stride for texture coordinates on this shape.
        */
-      [[nodiscard]] inline size_t getTexCoordsStride() const {
+      [[nodiscard]] inline size_t getTexCoordsStride() const
+      {
         return mTexCoords.size() * sizeof(mTexCoords[0]);
       }
 
@@ -204,14 +214,16 @@ namespace Qtk {
       /**
        * @param value Vertex data to use for this shape.
        */
-      virtual inline void setVertices(const Vertices & value) {
+      virtual inline void setVertices(const Vertices & value)
+      {
         mVertices = value;
       }
 
       /**
        * @param value Index data to use for this shape.
        */
-      virtual inline void setIndices(const Indices & value) {
+      virtual inline void setIndices(const Indices & value)
+      {
         mIndices = value;
       }
 
@@ -223,14 +235,16 @@ namespace Qtk {
       /**
        * @param value Texture coordinates to use for this shape.
        */
-      virtual inline void setTexCoords(const TexCoords & value) {
+      virtual inline void setTexCoords(const TexCoords & value)
+      {
         mTexCoords = value;
       }
 
       /**
        * @param value Normals to use for this shape.
        */
-      virtual inline void setNormals(const Normals & value) {
+      virtual inline void setNormals(const Normals & value)
+      {
         mNormals = value;
       }
 

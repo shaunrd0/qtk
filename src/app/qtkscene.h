@@ -11,6 +11,12 @@
 
 #include <qtk/scene.h>
 
+#define QTK_SPARTAN  "resources/models/spartan/spartan.obj"
+#define QTK_BACKPACK "resources/models/backpack/backpack.obj"
+#define QTK_BIRD     "resources/models/bird/bird.obj"
+#define QTK_ALIEN    "resources/models/alien-hominid/alien.obj"
+#define QTK_SCYTHE   "resources/models/scythe/scythe.obj"
+
 /**
  * Example scene using QtkWidget to render 3D models and simple geometry within
  * QtOpenGLWidgets. This scene also shows some examples of using GLSL shaders to
@@ -29,13 +35,14 @@
  *
  * To create your own Scene from scratch see Qtk::Scene.
  */
-class QtkScene : public Qtk::SceneInterface {
+class QtkScene : public Qtk::Scene
+{
   public:
     /***************************************************************************
      * Contructors / Destructors
      **************************************************************************/
 
-    QtkScene(Qtk::Scene * scene);
+    QtkScene();
 
     ~QtkScene();
 

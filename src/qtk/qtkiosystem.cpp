@@ -15,22 +15,26 @@ using namespace Qtk;
  * Public Member Functions
  ******************************************************************************/
 
-bool QtkIOSystem::Exists(const char * pFile) const {
+bool QtkIOSystem::Exists(const char * pFile) const
+{
   return QFileInfo::exists(pFile);
 }
 
-char QtkIOSystem::getOsSeparator() const {
+char QtkIOSystem::getOsSeparator() const
+{
   return QDir::separator().toLatin1();
 }
 
-Assimp::IOStream * QtkIOSystem::Open(const char * pFile, const char * pMode) {
-  if(!Exists(pFile)) {
+Assimp::IOStream * QtkIOSystem::Open(const char * pFile, const char * pMode)
+{
+  if (!Exists(pFile)) {
     qDebug() << "[Qtk::QtkIOSystem] failed to open file: " << pFile << "\n";
     return nullptr;
   }
   return new QtkIOStream(pFile, pMode);
 }
 
-void QtkIOSystem::Close(Assimp::IOStream * pFile) {
+void QtkIOSystem::Close(Assimp::IOStream * pFile)
+{
   delete pFile;
 }

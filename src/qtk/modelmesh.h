@@ -9,12 +9,15 @@
 #ifndef QTK_MODELMESH_H
 #define QTK_MODELMESH_H
 
+#include <utility>
+
 #include <QOpenGLFunctions>
 
 #include "object.h"
 #include "transform3D.h"
 
-namespace Qtk {
+namespace Qtk
+{
   /**
    * 3D models will store this data for each vertex in geometry.
    */
@@ -39,8 +42,9 @@ namespace Qtk {
        * @param type Type of texture in string format.
        * @param path Path to the texture on disk.
        */
-      ModelTexture(const std::string & type, const std::string & path) :
-          mType(type), mPath(path) {
+      ModelTexture(std::string type, const std::string & path) :
+          mType(std::move(type)), mPath(path)
+      {
         mTexture = OpenGLTextureFactory::initTexture(path.c_str());
         mID = mTexture->textureId();
       }
@@ -64,7 +68,8 @@ namespace Qtk {
    * Mesh class specialized for storing 3D model data.
    * Eventually this can be consolidated into a more generic class.
    */
-  class QTKAPI ModelMesh : protected QOpenGLFunctions {
+  class QTKAPI ModelMesh : protected QOpenGLFunctions
+  {
     public:
       /*************************************************************************
        * Typedefs
@@ -89,16 +94,18 @@ namespace Qtk {
        * @param vertexShader Path to vertex shader for this ModelMesh.
        * @param fragmentShader Path to fragment shader for this ModelMesh.
        */
-      ModelMesh(
-          Vertices vertices, Indices indices, Textures textures,
-          const char * vertexShader = ":/model-basic.vert",
-          const char * fragmentShader = ":/model-basic.frag") :
+      ModelMesh(Vertices vertices,
+                Indices indices,
+                Textures textures,
+                const char * vertexShader = "",
+                const char * fragmentShader = "") :
           mProgram(new QOpenGLShaderProgram),
           mVAO(new QOpenGLVertexArrayObject),
           mVBO(new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer)),
           mEBO(new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer)),
           mVertices(std::move(vertices)), mIndices(std::move(indices)),
-          mTextures(std::move(textures)) {
+          mTextures(std::move(textures))
+      {
         initMesh(vertexShader, fragmentShader);
       }
 
@@ -139,7 +146,7 @@ namespace Qtk {
        * @param vert Path to vertex shader to use for this model.
        * @param frag Path to fragment shader to use for this model.
        */
-      void initMesh(const char * vert, const char * frag);
+      void initMesh(const std::string & vert, const std::string & frag);
 
       /*************************************************************************
        * Private Members

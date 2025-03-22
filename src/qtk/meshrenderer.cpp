@@ -10,6 +10,7 @@
 
 #include "meshrenderer.h"
 #include "scene.h"
+#include "shaders.h"
 #include "texture.h"
 
 using namespace Qtk;
@@ -21,23 +22,29 @@ Qtk::MeshRenderer::MeshManager Qtk::MeshRenderer::sInstances;
  * Constructors / Destructors
  ******************************************************************************/
 
-MeshRenderer::MeshRenderer(
-    const char * name, Vertices vertices, Indices indices, DrawMode mode) :
-    MeshRenderer(
-        name, ShapeBase(mode, std::move(vertices), std::move(indices))) {}
+MeshRenderer::MeshRenderer(const char * name,
+                           Vertices vertices,
+                           Indices indices,
+                           DrawMode mode) :
+    MeshRenderer(name, ShapeBase(mode, std::move(vertices), std::move(indices)))
+{
+}
 
 MeshRenderer::MeshRenderer(const char * name) :
-    MeshRenderer(name, Cube(QTK_DRAW_ELEMENTS)) {}
+    MeshRenderer(name, Cube(QTK_DRAW_ELEMENTS))
+{
+}
 
 MeshRenderer::MeshRenderer(const char * name, const ShapeBase & shape) :
-    Object(name, shape, QTK_MESH), mVertexShader(":/shaders/multi-color.vert"),
-    mFragmentShader(":/shaders/multi-color.frag"), mDrawType(GL_TRIANGLES) {
+    Object(name, shape, QTK_MESH), mDrawType(GL_TRIANGLES)
+{
   mShape = Shape(shape);
   init();
   sInstances.insert(name, this);
 }
 
-MeshRenderer::~MeshRenderer() {
+MeshRenderer::~MeshRenderer()
+{
   sInstances.remove(mName.c_str());
 }
 
@@ -45,14 +52,15 @@ MeshRenderer::~MeshRenderer() {
  * Public Methods
  ******************************************************************************/
 
-void MeshRenderer::init() {
-  if(mVAO.isCreated()) {
+void MeshRenderer::init()
+{
+  if (mVAO.isCreated()) {
     mVAO.destroy();
   }
-  if(mProgram.isLinked()) {
+  if (mProgram.isLinked()) {
     mProgram.removeAllShaders();
   }
-  if(mVBO.isCreated()) {
+  if (mVBO.isCreated()) {
     mVBO.destroy();
   }
 
@@ -60,10 +68,22 @@ void MeshRenderer::init() {
   mVAO.bind();
 
   mProgram.create();
-  mProgram.addShaderFromSourceFile(
-      QOpenGLShader::Vertex, mVertexShader.c_str());
-  mProgram.addShaderFromSourceFile(
-      QOpenGLShader::Fragment, mFragmentShader.c_str());
+  // If no shader is provided, use a default one.
+  if (mVertexShader.empty()) {
+    mProgram.addShaderFromSourceCode(QOpenGLShader::Vertex,
+                                     QTK_SHADER_VERTEX_MESH);
+  } else {
+    mProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,
+                                     mVertexShader.c_str());
+  }
+
+  if (mFragmentShader.empty()) {
+    mProgram.addShaderFromSourceCode(QOpenGLShader::Fragment,
+                                     QTK_SHADER_FRAGMENT_MESH);
+  } else {
+    mProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,
+                                     mFragmentShader.c_str());
+  }
   mProgram.link();
   mProgram.bind();
 
@@ -84,9 +104,11 @@ void MeshRenderer::init() {
   mProgram.setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(QVector3D));
   // Enable color attribute, setting offset to total size of vertices()
   mProgram.enableAttributeArray(1);
-  mProgram.setAttributeBuffer(
-      1, GL_FLOAT, getVertices().size() * sizeof(getVertices()[0]), 3,
-      sizeof(QVector3D));
+  mProgram.setAttributeBuffer(1,
+                              GL_FLOAT,
+                              getVertices().size() * sizeof(getVertices()[0]),
+                              3,
+                              sizeof(QVector3D));
 
   mVBO.release();
 
@@ -94,59 +116,59 @@ void MeshRenderer::init() {
   mVAO.release();
 }
 
-void MeshRenderer::draw() {
+void MeshRenderer::draw()
+{
   bindShaders();
   mVAO.bind();
 
-  if(mTexture.hasTexture()) {
-    mTexture.getOpenGLTexture().bind();
-  }
+  mTexture.bind();
 
   // TODO: Automate uniforms some other way
   setUniformMVP();
 
-  if(mShape.mDrawMode == QTK_DRAW_ARRAYS) {
+  if (mShape.mDrawMode == QTK_DRAW_ARRAYS) {
     glDrawArrays(mDrawType, 0, getVertices().size());
-  } else if(
-      mShape.mDrawMode == QTK_DRAW_ELEMENTS
-      || mShape.mDrawMode == QTK_DRAW_ELEMENTS_NORMALS) {
-    glDrawElements(
-        mDrawType, mShape.mIndices.size(), GL_UNSIGNED_INT,
-        mShape.mIndices.data());
+  } else if (mShape.mDrawMode == QTK_DRAW_ELEMENTS
+             || mShape.mDrawMode == QTK_DRAW_ELEMENTS_NORMALS) {
+    glDrawElements(mDrawType,
+                   mShape.mIndices.size(),
+                   GL_UNSIGNED_INT,
+                   mShape.mIndices.data());
   }
 
-  if(mTexture.hasTexture()) {
-    mTexture.getOpenGLTexture().release();
-  }
+  mTexture.bind();
 
   mVAO.release();
   releaseShaders();
 }
 
-void MeshRenderer::enableAttributeArray(int location) {
+void MeshRenderer::enableAttributeArray(int location)
+{
   ShaderBindScope lock(&mProgram, mBound);
   mVAO.bind();
   mProgram.enableAttributeArray(location);
   mVAO.release();
 }
 
-void MeshRenderer::reallocateTexCoords(const TexCoords & t, unsigned dims) {
+void MeshRenderer::reallocateTexCoords(const TexCoords & t, unsigned dims)
+{
   mVAO.bind();
   mNBO.destroy();
   mNBO.create();
   mNBO.bind();
   mNBO.allocate(t.data(), t.size() * sizeof(t[0]));
   enableAttributeArray(1);
-  if(dims == 2) {
+  if (dims == 2) {
     setAttributeBuffer(1, GL_FLOAT, 0, 2, sizeof(QVector2D));
-  } else if(dims == 3) {
+  } else if (dims == 3) {
     setAttributeBuffer(1, GL_FLOAT, 0, 3, sizeof(QVector3D));
   }
   mNBO.release();
   mVAO.release();
 }
 
-void MeshRenderer::reallocateNormals(const Normals & n, unsigned dims) {
+void MeshRenderer::reallocateNormals(const Normals & n, unsigned dims)
+{
   // TODO: Store state to track if buffer objects are bound
   mVAO.bind();
   mNBO.destroy();
@@ -154,42 +176,47 @@ void MeshRenderer::reallocateNormals(const Normals & n, unsigned dims) {
   mNBO.bind();
   mNBO.allocate(n.data(), n.size() * sizeof(n[0]));
   enableAttributeArray(1);
-  if(dims == 2) {
+  if (dims == 2) {
     setAttributeBuffer(1, GL_FLOAT, 0, 2, sizeof(QVector2D));
-  } else if(dims == 3) {
+  } else if (dims == 3) {
     setAttributeBuffer(1, GL_FLOAT, 0, 3, sizeof(QVector3D));
   }
   mNBO.release();
   mVAO.release();
 }
 
-void MeshRenderer::setShaders(
-    const std::string & vert, const std::string & frag) {
+void MeshRenderer::setShaders(const std::string & vert,
+                              const std::string & frag)
+{
   mVertexShader = vert;
   mFragmentShader = frag;
   init();
 }
 
-void MeshRenderer::setUniformMVP(
-    const char * model, const char * view, const char * projection) {
+void MeshRenderer::setUniformMVP(const char * model,
+                                 const char * view,
+                                 const char * projection)
+{
   ShaderBindScope lock(&mProgram, mBound);
   mProgram.setUniformValue(projection, Scene::getProjectionMatrix());
   mProgram.setUniformValue(view, Scene::getViewMatrix());
   mProgram.setUniformValue(model, mTransform.toMatrix());
 }
 
-void MeshRenderer::setShape(const Shape & value) {
+void MeshRenderer::setShape(const Shape & value)
+{
   Object::setShape(value);
   init();
 }
 
-void MeshRenderer::setColor(const QVector3D & color) {
-  if(mShape.mColors.empty()) {
-    for(const auto & vertex : mShape.getVertices()) {
+void MeshRenderer::setColor(const QVector3D & color)
+{
+  if (mShape.mColors.empty()) {
+    for (const auto & vertex : mShape.getVertices()) {
       mShape.mColors.push_back(color);
     }
   } else {
-    for(int i = 0; i < mShape.getColors().size(); i++) {
+    for (int i = 0; i < mShape.getColors().size(); i++) {
       mShape.mColors[i] = color;
     }
   }
@@ -198,7 +225,8 @@ void MeshRenderer::setColor(const QVector3D & color) {
 }
 
 void MeshRenderer::setAttributeBuffer(
-    int location, GLenum type, int offset, int tupleSize, int stride) {
+    int location, GLenum type, int offset, int tupleSize, int stride)
+{
   ShaderBindScope lock(&mProgram, mBound);
   mVAO.bind();
   mProgram.setAttributeBuffer(location, type, offset, tupleSize, stride);
@@ -210,8 +238,9 @@ void MeshRenderer::setAttributeBuffer(
  ******************************************************************************/
 
 // Static member function to retrieve instances of MeshRenderers
-MeshRenderer * MeshRenderer::getInstance(const QString & name) {
-  if(!sInstances.contains(name)) {
+MeshRenderer * MeshRenderer::getInstance(const QString & name)
+{
+  if (!sInstances.contains(name)) {
 #if QTK_DEBUG
     qDebug() << "Attempt to access MeshRenderer instance that does not exist! ("
              << qPrintable(name) << ")\n";

@@ -20,22 +20,22 @@
 #include "shape.h"
 #include "texture.h"
 
-namespace Qtk {
+namespace Qtk
+{
   /**
    * Skybox object for rendering a skybox within a Scene.
    * A skybox is typically implemented using a cube map texture centered around
    * the camera and projected outwards in all directions.
    */
-  class QTKAPI Skybox : protected QOpenGLFunctions {
+  class QTKAPI Skybox : protected QOpenGLFunctions
+  {
     public:
       /*************************************************************************
        * Constructors / Destructors
        ************************************************************************/
 
-      // Delegate this constructor to use default skybox images
-
       /**
-       * Construct Skybox using default images.
+       * Construct a skybox with a default texture.
        *
        * @param name The objectName to use for the Skybox.
        */
@@ -48,8 +48,8 @@ namespace Qtk {
        * @param cubeMap QOpenGLTexture to use for the new Skybox.
        * @param name The objectName to use for the Skybox.
        */
-      explicit Skybox(
-          QOpenGLTexture * cubeMap, const std::string & name = "Skybox");
+      explicit Skybox(QOpenGLTexture * cubeMap,
+                      const std::string & name = "Skybox");
 
       /**
        * Construct a Skybox.
@@ -62,11 +62,13 @@ namespace Qtk {
        * @param back Image to use for the back side of the Skybox.
        * @param name The objectName to use for this Skybox.
        */
-      Skybox(
-          const std::string & right, const std::string & top,
-          const std::string & front, const std::string & left,
-          const std::string & bottom, const std::string & back,
-          const std::string & name = "Skybox");
+      Skybox(const std::string & right,
+             const std::string & top,
+             const std::string & front,
+             const std::string & left,
+             const std::string & bottom,
+             const std::string & back,
+             const std::string & name = "Skybox");
 
       ~Skybox() = default;
 

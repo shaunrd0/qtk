@@ -1,68 +1,134 @@
 # Qtk
 
-[![All Builds](https://github.com/shaunrd0/qtk/actions/workflows/all-builds.yml/badge.svg)](https://github.com/shaunrd0/qtk/actions/workflows/all-builds.yml)
+[![All Builds](https://github.com/shaunrd0/qtk/actions/workflows/build.yml/badge.svg)](https://github.com/shaunrd0/qtk/actions/workflows/build.yml)
 [![Linting](https://github.com/shaunrd0/qtk/actions/workflows/linting.yml/badge.svg)](https://github.com/shaunrd0/qtk/actions/workflows/linting.yml)
 
-Qtk is a Qt OpenGL graphics library created primarily for my own learning
-purposes. The library wraps some QOpenGL functionality in convenience classes
-that allow rendering geometry in 2D and 3D using custom GLSL shader programs.
+The Qtk desktop application provides a model loader using [Assimp](https://assimp.org/) within a Qt widget application.
+You can fly around the scene using WASD while holding down the left or right mouse button.
+[QtkWidget](./src/designer-plugins/qtkwidget.h) is the primary QOpenGLWidget used to render the scene and handle input.
 
-The long-term goal for this project is to create a tool that I can use to
-practice shader coding or graphics programming techniques. In doing this I hope
-to also learn more about the Qt UI framework, and the CMake build system.
+The underlying shared library [libqtk](./src/qtk) wraps QOpenGL objects in convenience classes that leverage
+lower-level OpenGL APIs to handle the rendering process manually. Many of these classes offer
+ways to expand the low-level OpenGL logic within a Qt application without having to set up much scaffolding.
+
+The Qtk GUI is built using custom [Qt Designer plugins](https://doc.qt.io/qt-6/designer-creating-custom-widgets.html). These can be installed to Qt Designer for
+use in other Qt applications, or built exclusively for Qtk. See [Build Options](#build-options) for more details.
+
+Object names can be double-clicked in the tree view panel for quick camera navigation.
+Properties of the object, like shader code and translation / scale, can be viewed and modified in the side panel.
+
+![](resources/screenshots/screen.png)
+
+All side panels and toolbars are dockable widgets that can be popped out
+and reorganized as needed. Panels can also be stacked to create a docked widget with
+tabs. The central widget that provides the camera view into the scene cannot be
+detached from the main window in this way.
+
+![](resources/screenshots/screen-1.png)
+
+The small triangles floating near 3D models represent the light source being used for the shader.
+These appear on models using phong, specular, and diffuse lighting techniques.
+
+The example scene contains basic examples like texture mapping to make a crate from simple cube geometry.
+This scene is used in the following screenshots, and can be built locally by enabling
+the `QTK_GUI_SCENE` [Build Option](#build-options) described below. Because this scene
+uses large 3D model resources, this option is disabled by default.
+
+The default scene with this option disabled is empty, but comes with a default skybox.
+Models can be added to the scene by clicking and dragging an `.obj` into the scene view.
+
+![](resources/screenshots/screen-texture.png)
+
+Examples of Ambient, Diffuse, and Specular GLSL shaders.
+
+| Ambient                                               | Diffuse                                               | Specular                                               |
+|-------------------------------------------------------|-------------------------------------------------------|--------------------------------------------------------|
+| <img src="resources/screenshots/screen-ambient.png"/> | <img src="resources/screenshots/screen-diffuse.png"/> | <img src="resources/screenshots/screen-specular.png"/> |
+
+And more advanced techniques like Phong lighting (ambient + diffuse + specular) and normal mapping.
+
+![](resources/screenshots/screen-phong.png)
+
+| Normal Mapping Disabled                              | Normal Mapping Enabled                                 |
+|------------------------------------------------------|--------------------------------------------------------|
+| <img src="resources/screenshots/spartan-phong.png"/> | <img src="resources/screenshots/spartan-normals.png"/> |
+
+See the `View` toolbar menu to enable debug console widgets for open scenes or reopen previously closed panels.
 
 Key features that are planned:
 
-* Runtime loading of `.obj` or similar 3D models.
-* Drag-and-drop interaction for adding objects to the scene.
-* Runtime reloading of modified GLSL shaders attached to objects within scenes.
-* Multiple views of a scene at one time.
-* Camera control modes such as panning, orbiting, or following objects.
-* Save / load for scene data. The current inheritance model is temporary.
-* Basic text editor for quickly modifying shaders attached to objects.
-* Shader / object properties panel to modify related settings.
-* Reduce size of application resources and git references.
+- [x] Runtime loading of `.obj` or similar 3D models.
+- [x] Drag-and-drop interaction for adding objects to the scene.
+- [x] Shader / object properties panel to modify related settings.
+- [x] Reduce size of application resources and git references.
+- [ ] Runtime reloading of modified GLSL shaders attached to objects within scenes.
+- [ ] Multiple views of a scene at one time.
+- [ ] Camera control modes such as panning, orbiting, or following objects.
+- [ ] Save / load scene data. The current model requires writing C++ code.
+- [ ] Basic text editor for quickly modifying shaders attached to objects.
 
-The Qtk desktop application provides a model loader
-using [Assimp](https://assimp.org/) within a Qt widget application.
-
-For examples of using the Qtk API, see the `example-app` project in the root of
-this repository.
+For examples of using libqtk, see the [example-app](./example-app)
+project in the root of this repository.
 
 To get textures loading on models look
 into [material files](http://www.paulbourke.net/dataformats/mtl/)
-and see some examples in the `resources/models/` directory.
+and see some examples at [qtk-resources/resources/models](https://git.shaunreed.com/shaunrd0/qtk-resources/src/branch/master/models).
 
 ### Source Builds
 
 Qtk was developed and tested using CLion
 and [Qt Creator](https://github.com/qt-creator/qt-creator).
-Simply open the root `CMakeLists.txt` with either of these editors and
-configurations will be loaded.
+Simply open the root `CMakeLists.txt` with either of these editors and default
+configurations will be loaded. To simplify providing Qt to the build, Qt Creator
+is the recommended option.
 
-This project has been ported to **Qt 6.6.0**, which is not yet available in
-Ubuntu apt repositories.
-To run this project, you will *need* to
-install [Qt6 Open Source Binaries](https://www.qt.io/download-qt-installer) for
-your system, **version 6.6.0** or later.
-Be sure to take note of the Qt6 installation directory, as we will need it to
-correctly set our `CMAKE_PREFIX_PATH` in the next steps.
+If you have manually installed [Qt6 Open Source Binaries](https://www.qt.io/download-qt-installer)
+for your system, be sure to correctly set your `CMAKE_PREFIX_PATH` in the next steps.
+On Ubuntu 24.04 the default installation directory to use for this path using Qt 6.5.0 is `$HOME/Qt/6.5.0/gcc_64/lib/cmake`.
+
+The Ubuntu apt repositories contain all the packages we need to build all targets.
+To build Qtk desktop application with the scene in the screenshots below run the following commands.
+
+```bash
+sudo apt update && sudo apt install cmake build-essential git ccache libxkbcommon-dev libassimp-dev qt6-base-dev qt6-tools-dev
+cmake -DQTK_GUI_SCENE=ON -B build
+cmake --build build
+./build/bin/qtk_gui
+```
+
+#### Build Options
+
+Qtk is composed of three separate components.
+
+* The shared library [libqtk](./src/qtk) provides classes that leverage QOpenGL functionality
+while still using lower-level OpenGL APIs to customize the rendering process.
+Many of these classes can be further expanded, such as [Qtk::Scene](./src/qtk/scene.h).
+This taget, `qtk` in cmake, is always selected to build and install as
+it is required by all other components in this project.
+* The [Qtk desktop application](./src/app) is built using libqtk within a Qt application.
+This target, `qtk_gui` in cmake, is optional and can be controlled using the `QTK_GUI` option below.
+* The GUI for the Qtk desktop application is constructed using a [custom set of Qt Designer widget plugins](./src/designer-plugins) that are also built using libqtk.
+If `QTK_GUI` is disabled this target (`qtk_plugins`) is optional and can be controlled using the `QTK_PLUGINS` options below.
+
+
+| Name                     | Description                                                  | Default |
+|--------------------------|--------------------------------------------------------------|:--------|
+| QTK_DEBUG                | Enable debug mode.                                           | OFF     |
+| QTK_SUBMODULES           | Use git submodules to fetch assimp dependency.               | OFF     |
+| QTK_EXAMPLE              | Build the libqtk example desktop application.                | ON      |
+| QTK_CCACHE               | Enable CCACHE.                                               | ON      |
+| QTK_ASSIMP_NEW_INTERFACE | Use the assimp::assimp interface. Recommended for WIN / OSX. | OFF     |
+| QTK_PLUGINS*             | Install Qtk plugins to Qt Designer.                          | OFF     |
+| QTK_GUI                  | Build and install Qtk desktop application.                   | ON      |
+| QTK_GUI_SCENE            | Fetch external 3D model resources for example scene.         | OFF     |
+
+*The Qtk plugins are always built if `QTK_GUI` is enabled. Disabling this option
+with QTK_GUI set will not mark the plugins for installation if we do
+`cmake --install build/` without selecting a component. If both `QTK_GUI` and
+`QTK_PLUGINS` are unset, neither will be built.
 
 If you are building on **Windows / Mac**, consider setting
 the `-DQTK_ASSIMP_NEW_INTERFACE` cmake build option.
-
-If the build is configured with all options enabled, we can subsequently install
-individual components as needed with cmake.
-
-```bash
-sudo apt update -y && sudo apt install libassimp-dev cmake build-essential git ccache libgl1-mesa-dev libglvnd-dev zlib1g-dev -y
-git clone https://github.com/shaunrd0/qtk
-cd qtk
-# Configure the build with all components enabled
-cmake -B build-all -DQTK_GUI=ON -DQTK_PLUGINS=ON -DQTK_EXAMPLE=ON -DCMAKE_PREFIX_PATH=$HOME/Qt/6.6.0/gcc_64
-# Build all targets
-cmake --build build-all/
-````
 
 By default, the build will not initialize Assimp as a git submodule and build
 from source.
@@ -71,47 +137,57 @@ CMake.
 Building using this option will fetch and build Assimp for us, but builds will
 take longer as a result.
 Using `-DQTK_SUBMODULES=ON` supports providing assimp on cross-platform builds (
-Windows / Mac / Linux) and may be easier
-to configure.
+Windows / Mac / Linux) and may be easier to configure.
 
 ```bash
 cmake -B build-all -DQTK_GUI=ON -DQTK_PLUGINS=ON -DQTK_EXAMPLE=ON -DQTK_SUBMODULES=ON -DCMAKE_PREFIX_PATH=$HOME/Qt/6.6.0/gcc_64
 ```
 
-#### Qtk GUI
+#### Qtk Components
+
+As described in [Build Options](#build-options), Qtk is composed of three separate components.
+Each component can be individually selected for building or installation.
+
+For this example we will configure the build with all options enabled.
+In the separate sections below we can install individual components with cmake.
 
 ```bash
-cmake --build build-all/ --target qtk_gui -- -j $(nproc)
-# Install Qtk desktop application (output removed)
-# Installation prefix path must be absolute, since Qtk uses Qt deploy tools.
-cmake --install build-all/ --component qtk_gui --prefix=$(pwd)/install
-./install/bin/qtk_gui
-```
+sudo apt update -y && sudo apt install cmake build-essential git ccache libxkbcommon-dev libassimp-dev qt6-base-dev qt6-tools-dev -y
+git clone https://github.com/shaunrd0/qtk
+cd qtk
+# Configure the build with all components enabled
+cmake -B build-all -DQTK_GUI=ON -DQTK_PLUGINS=ON -DQTK_EXAMPLE=ON -DCMAKE_PREFIX_PATH=$HOME/Qt/6.6.0/gcc_64
+# Build all targets
+cmake --build build-all/
+````
 
-If any errors are encountered loading plugins, we can debug plugin loading by
-setting the following environment variable -
+Now that we have all the components fully built, the following sections will
+install each component individually.
+If you want to uninstall previously installed components, run the following command.
 
 ```bash
-QT_DEBUG_PLUGINS=1 ./install/bin/qtk_gui
+sudo xargs rm -v < install_manifest.txt
 ```
 
-#### Qtk Library
+##### Qtk Library
 
-Qtk provides a simple library for working with QOpenGL.
+Shared libqtk library for working with lower-level OpenGL to customize the rendering process.
 We can install this library on a system path or a custom path and then
 set `CMAKE_PREFIX_PATH` to point to this location when building an application
 using libqtk.
 
+Here we will install to the `/usr/local/` path.
+
 ```bash
 # Install libqtk only
-cmake --build build-all/ --target qtk_library -- -j $(nproc)
-cmake --install build-all/ --component qtk_library --prefix=/usr/local
+cmake --build build-all/ --target qtk -- -j $(nproc)
+cmake --install build-all/ --component qtk --prefix=/usr/local
 -- Install configuration: "Release"
 -- Installing: /usr/local/lib/cmake/Qtk/QtkConfig.cmake
 -- Installing: /usr/local/lib/cmake/Qtk/QtkConfigVersion.cmake
 -- Installing: /usr/local/lib/cmake/Qtk/QtkTargets.cmake
 -- Installing: /usr/local/lib/cmake/Qtk/QtkTargets-release.cmake
--- Installing: /usr/local/lib/static/libqtk_library.a
+-- Installing: /usr/local/lib/static/libqtk.a
 -- Installing: /usr/local/include/qtk/camera3d.h
 -- Installing: /usr/local/include/qtk/input.h
 -- Installing: /usr/local/include/qtk/meshrenderer.h
@@ -128,7 +204,26 @@ cmake --install build-all/ --component qtk_library --prefix=/usr/local
 -- Installing: /usr/local/include/qtk/transform3D.h
 ```
 
-#### Qtk Plugin Collection
+##### Qtk GUI
+
+The Qtk desktop application can be built and installed with the following commands.
+
+```bash
+cmake --build build-all/ --target qtk_gui -- -j $(nproc)
+# Install Qtk desktop application (output removed)
+# Installation prefix path must be absolute, since Qtk uses Qt deploy tools.
+cmake --install build-all/ --component qtk_gui --prefix=$(pwd)/install
+./install/bin/qtk_gui
+```
+
+If any errors are encountered loading plugins, we can debug plugin loading by
+setting the following environment variable
+
+```bash
+QT_DEBUG_PLUGINS=1 ./install/bin/qtk_gui
+```
+
+##### Qtk Plugin Collection
 
 This project defines a collection of widget plugins for use with Qt Designer.
 These plugins were used to build the interface for the Qtk desktop application.
@@ -149,19 +244,12 @@ cmake --build build-all/ --target qtk_plugins -- -j $(nproc)
 # The path here should be initialized during build configuration, so no need for --prefix
 cmake --install build-all/ --component qtk_plugins
 -- Install configuration: "Release"
--- Up-to-date: /home/shaun/Qt/6.6.0/gcc_64/../../Tools/QtCreator/lib/Qt/lib/libqtk_library.a
+-- Up-to-date: /home/shaun/Qt/6.6.0/gcc_64/../../Tools/QtCreator/lib/Qt/lib/libqtk.a
 -- Up-to-date: /home/shaun/Qt/6.6.0/gcc_64/../../Tools/QtCreator/lib/Qt/lib/libqtk_plugin_library.a
 -- Up-to-date: /home/shaun/Qt/6.6.0/gcc_64/../../Tools/QtCreator/lib/Qt/plugins/designer/libqtk_collection.so
 ```
 
-To uninstall after a previous installation, we can run the following command
-from the root of the repository.
-
-```bash
-xargs rm < build/install_manifest.txt
-```
-
-#### Qtk Example
+#### Example libqtk Application
 
 There is a simple example of using libqtk in the [example-app/](example-app)
 directory. The example can be built standalone using `find_package` or as a
@@ -177,55 +265,29 @@ cmake --install build-all/ --component qtk_example --prefix=install
 See the README in the [example-app/](example-app) subdirectory for instructions
 on standalone builds.
 
-### Controls
-
-You can fly around the scene if you hold the right mouse button and use WASD.
-If you see a small triangle floating by a model it represents the light source
-that is being used for the shader rendering the model. These appear on models
-using phong, specular, and diffuse lighting techniques.
-
-Object names can be double-clicked in the tree view panel for quick camera
-navigation. All panels and toolbars are dockable widgets that can be popped out
-and reorganized as needed. Panels can be stacked to create a docked widget with
-tabs. The central widget that provides the camera view into the scene cannot be
-detached from the main window in this way. See the `View` menu to enable debug
-console widgets for open scenes or reopen previously closed panels.
-
-![](resources/screenshot.png)
-
-Spartan with no normals -
-
-![](resources/spartan-specular.png)
-
-Spartan with normals -
-
-![](resources/spartan-normals.png)
-
 #### Development
 
-This project uses version `15.0.5` of `clang-format`.
-Before merging any branch we should run `clang-tidy` followed by `clang-format`.
+This project is using `clang-format` version `>=15.0.5`.
+On Ubuntu 24.04, clang-format 18 is available to install in apt repositories.
 
 ```bash
-git clone git@github.com:llvm/llvm-project.git -b llvmorg-15.0.5
-cd llvm-project
-cmake -B build -DLLVM_ENABLE_PROJECTS=clang -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" llvm
-cmake --build build -j $(nproc --ignore=2)
-sudo cmake --build build -j $(nproc --ignore=2) --target install
+sudo apt install clang-format clang-tidy
 ```
 
-If the `clang-format` version is any earlier than `15.0.0`,
-running `clang-format` will fail because this project uses configuration options
-made available since `15.0.0`.
+If `clang-format --version` is any earlier than `15.0.0`, running `clang-format` will fail because this project uses configuration options made available since `15.0.0`.
 
 ```bash
 clang-format --version
-clang-format version 15.0.5 (git@github.com:llvm/llvm-project.git 154e88af7ec97d9b9f389e55d45bf07108a9a097)
+Ubuntu clang-format version 18.1.3 (1ubuntu1)
 ```
 
 CLion has integration for IDE code reformatting actions with `clang-format`.
-If you're using CLion, the `.clang-format` configuration will be picked up by
-CLion automatically.
+If you're using CLion, the `.clang-format` configuration will be picked up by CLion automatically.
+
+This repository provides the [`tools/format.sh`](./tools/format.sh) helper script to run `clang-tidy` and `clang-format` on Ubuntu 24.04.
+Running the script will build Qtk, so it's important to ensure you can manually build from source first.
+
+If you'd still like to run these tools manually, see the instructions below.
 
 `clang-tidy` can be run with the following commands.
 
@@ -234,14 +296,18 @@ CLion automatically.
 cd qtk
 # Build
 cmake -B build && cmake --build build -- -j $(nproc)
-clang-tidy -p build/ --fix --config-file=.clang-tidy src/*.cpp src/*.h app/*.cpp app/*.h
+```
+
+```bash
+export SOURCES=src/**/*.cpp src/**/*.h example-app/*.cpp example-app/*.h
+run-clang-tidy -p build/ -j $(nproc --ignore=1) -fix -config-file=.clang-tidy $SOURCES
 ```
 
 Last we need to run `clang-format`, this can be done with the command directly.
 This will reformat all the code in the repository.
 
 ```bash
-clang-format -i --style=file:.clang-format src/app/*.cpp src/app/*.h src/qtk/*.cpp src/qtk/*.h example-app/*.cpp example-app/*.h
+clang-format -i --style=file:.clang-format $SOURCES
 ```
 
 `clang-format` can be run with git integration (or CLion if you prefer).
@@ -304,7 +370,7 @@ To generate packages for Qtk desktop application, we should
 set `-DQTK_GUI=ON`. If this option is not set we will only package libqtk.
 
 The NSIS installer will allow component-specific path modification for all of
-these installation components through a GUI install application.
+these installation components through a Windows GUI install application.
 
 ##### Resources
 

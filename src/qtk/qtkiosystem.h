@@ -15,11 +15,13 @@
 #ifndef QTK_QTKIOSYSTEM_H
 #define QTK_QTKIOSYSTEM_H
 
-namespace Qtk {
+namespace Qtk
+{
   /**
    * Assimp IO system for loading models with assimp, using Qt Resource paths.
    */
-  class QtkIOSystem : public Assimp::IOSystem {
+  class QtkIOSystem : public Assimp::IOSystem
+  {
     public:
       QtkIOSystem() = default;
       ~QtkIOSystem() = default;
@@ -40,8 +42,8 @@ namespace Qtk {
        * @param pMode Mode to open file. See `man fopen`.
        * @return QtkIOStream for the opened file.
        */
-      Assimp::IOStream * Open(
-          const char * pFile, const char * pMode = "rb") override;
+      Assimp::IOStream * Open(const char * pFile,
+                              const char * pMode = "rb") override;
 
       /**
        * @param pFile File to close.

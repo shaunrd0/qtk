@@ -1,0 +1,388 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - '*'
+    # Runs on tag so the release workflow can use its artifact.
+    tags:
+      - "v*"
+  pull_request:
+  workflow_dispatch:
+
+
+env:
+  QT_VERSION: 6.6.0
+
+jobs:
+  Qtk:
+    name: Qtk Applications
+    env:
+      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=ON -DQTK_PLUGINS=OFF -DQTK_EXAMPLE=ON
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/ $CONFIG
+            flags: -j $(nproc)
+          - os: windows-latest
+            cmake: -DCMAKE_PREFIX_PATH=D:/a/qtk/qtk/Qt/$QT_VERSION/mingw81_64/ $CONFIG
+            flags: ''
+          - os: macos-latest
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/ $CONFIG
+            flags: -j $(nproc)
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+
+      # Windows
+
+      - name: Chocolatey Action
+        if: matrix.os == 'windows-latest'
+        uses: crazy-max/ghaction-chocolatey@v2
+        with:
+          args: install pkgconfiglite --checksum e87b5ea3c9142256af60f2d5b917aa63b571e6a0 --checksum-type sha1
+
+      - name: Install Debian packaging dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt update -y
+          sudo apt install libxcb-cursor0 -y
+
+      - name: Configure Qtk Application
+        shell: bash
+        run: cmake -B build/ ${{ matrix.cmake }}
+
+      - name: Build Qtk Application
+        shell: bash
+        run: cmake --build build/ --config Release --target qtk_gui ${{ matrix.flags }}
+
+      - name: Build Qtk Example
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: cmake --build build/ --config Release --target qtk_example ${{ matrix.flags }}
+
+      # Packaging
+
+      - name: Install Qtk Application
+        shell: bash
+        run: cmake --install build/ --config Release --component qtk_gui
+
+      - name: Package Qtk Application
+        shell: bash
+        run: cmake --build build/ --target package --config Release
+
+      - name: Package Qtk (DEB)
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          cd build
+          cpack -C Release -G DEB
+
+      - name: Upload package artifacts (DEB)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: qtk-gui-${{ matrix.os }}
+          path: |
+            build/packages/*.deb
+
+      - name: Package Qtk (WIN)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          cd build
+          cpack -C Release -G NSIS
+
+      - name: Upload logs on failure (WIN)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-Logs
+          path: |
+            D:\a\qtk\qtk\build\packages\_CPack_Packages\win64\NSIS\NSISOutput.log
+            D:\a\qtk\qtk\build\CMakeFiles\CMakeOutput.log
+            D:\a\qtk\qtk\build\CMakeFiles\CMakeError.log
+
+      - name: Upload package artifacts (WIN)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: qtk-gui-${{ matrix.os }}
+          path: |
+            build/packages/*.exe
+
+      - name: Package Qtk (OSX)
+        if: matrix.os == 'macos-latest'
+        shell: bash
+        run: |
+          cd build
+          cpack -C Release -G TGZ
+
+      - name: Upload package artifacts (OSX)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: qtk-gui-${{ matrix.os }}
+          path: |
+            build/packages/*.tar.gz
+
+      - name: Upload Qtk install directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: qtk-gui-${{ matrix.os }}-archive
+          path: install/*
+
+# TODO: Enable after trimming resources.
+#      - name: Package Qtk Application Sources
+#        if: matrix.os != 'macos-latest'
+#        shell: bash
+#        run: |
+#          cmake --build build/ --target package_source
+#
+#      - name: Upload package artifacts
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: qtk-${{ matrix.os }}-packages
+#          path: |
+#            build/packages/*
+#            !build/packages/_CPack_Packages/*
+
+  Qtk-Library:
+    name: Qtk library
+    env:
+      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=OFF -DQTK_PLUGINS=OFF -DQTK_EXAMPLE=OFF
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/ $CONFIG
+            flags: -j $(nproc)
+          - os: windows-latest
+            cmake: -DCMAKE_PREFIX_PATH=D:/a/qtk/qtk/Qt/$QT_VERSION/mingw81_64/ $CONFIG
+            flags: ''
+          - os: macos-latest
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/ $CONFIG
+            flags: -j $(nproc)
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+
+      # Windows
+
+      - name: Chocolatey Action
+        if: matrix.os == 'windows-latest'
+        uses: crazy-max/ghaction-chocolatey@v2
+        with:
+          args: install pkgconfiglite --checksum e87b5ea3c9142256af60f2d5b917aa63b571e6a0 --checksum-type sha1
+
+      - name: Configure Qtk Library
+        shell: bash
+        run: cmake -B build/ ${{ matrix.cmake }}
+
+      - name: Build Qtk Library
+        shell: bash
+        run: cmake --build build/ --config Release --target qtk -- ${{ matrix.flags }}
+
+      # Packaging
+
+      - name: Install Qtk Library
+        shell: bash
+        run: cmake --install build/ --config Release --prefix=$(pwd)/install --component qtk
+
+      - name: Package Qtk Library
+        shell: bash
+        run: cmake --build build/ --target package --config Release
+
+      - name: Package Qtk Library (DEB)
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          cd build
+          cpack -C Release -G DEB
+
+      - name: Upload package artifacts (DEB)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: libqtk-${{ matrix.os }}
+          path: |
+            build/packages/*.deb
+
+      - name: Package Qtk Library (WIN)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          cd build
+          cpack -C Release -G NSIS
+
+      - name: Upload logs on failure (WIN)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-Logs
+          path: |
+            D:\a\qtk\qtk\build\packages\_CPack_Packages\win64\NSIS\NSISOutput.log
+            D:\a\qtk\qtk\build\CMakeFiles\CMakeOutput.log
+            D:\a\qtk\qtk\build\CMakeFiles\CMakeError.log
+
+      - name: Upload package artifacts (WIN)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: libqtk-${{ matrix.os }}
+          path: |
+            build/packages/*.exe
+
+      - name: Package Qtk Library (OSX)
+        if: matrix.os == 'macos-latest'
+        shell: bash
+        run: |
+          cd build
+          cpack -C Release -G TGZ
+
+      - name: Upload package artifacts (OSX)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: libqtk-${{ matrix.os }}
+          path: |
+            build/packages/*.tar.gz
+
+      - name: Upload libqtk install
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: libqtk-${{ matrix.os }}-archive
+          path: install/*
+
+  Qtk-Plugins:
+    name: Qtk Qt Designer Plugins
+    env:
+      CONFIG: -DQTK_SUBMODULES=ON -DQTK_DEBUG=OFF -DQTK_CCACHE=OFF -DQTK_GUI=OFF -DQTK_PLUGINS=ON -DQTK_EXAMPLE=OFF
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/ $CONFIG
+            flags: -j $(nproc)
+          - os: windows-latest
+            cmake: -DCMAKE_PREFIX_PATH=D:/a/qtk/qtk/Qt/$QT_VERSION/mingw81_64/ $CONFIG
+            flags: ''
+          - os: macos-latest
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/ $CONFIG
+            flags: -j $(nproc)
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+
+      - name: Chocolatey Action
+        if: matrix.os == 'windows-latest'
+        uses: crazy-max/ghaction-chocolatey@v2
+        with:
+          args: install pkgconfiglite --checksum e87b5ea3c9142256af60f2d5b917aa63b571e6a0 --checksum-type sha1
+
+      - name: Configure Qtk Plugins
+        shell: bash
+        run: cmake -B build/ ${{ matrix.cmake }}
+
+      - name: Build Qtk Plugins
+        shell: bash
+        run: cmake --build build/ --config Release --target qtk_plugins -- ${{ matrix.flags }}
+
+      # Packaging
+
+      - name: Install Qtk Plugins
+        shell: bash
+        run: cmake --install build/ --config Release --component qtk_plugins
+
+  Qtk-Assimp-Targets:
+    name: Qtk Assimp Platform Targets
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/
+          - os: macos-latest
+            cmake: -DCMAKE_PREFIX_PATH=/home/runner/work/qtk/Qt/$QT_VERSION/gcc_64/
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+
+      - name: Install Assimp MacOS
+        if: matrix.os == 'macos-latest'
+        shell: bash
+        run: |
+          brew install assimp
+
+      - name: Install Assimp Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          sudo apt install libassimp-dev
+
+      - name: Configure Qtk
+        shell: bash
+        run: cmake -B build/ ${{ matrix.cmake }} -DQTK_CCACHE=OFF -DQTK_ASSIMP_NEW_INTERFACE=ON
+
+      - name: Build Qtk
+        shell: bash
+        run: cmake --build build/ --config Release
+
+  release:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [Qtk, Qtk-Library, Qtk-Plugins]
+    steps:
+      - name: Download Installer Artifact
+        uses: actions/download-artifact@v4
+        with:
+          path: |
+            build/packages/*
+            install/*
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Qtk ${{ github.ref_name }}
+          draft: true
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            build/packages/*
+            install/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

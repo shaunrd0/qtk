@@ -14,8 +14,10 @@
 
 #include "qtkapi.h"
 
-namespace Qtk {
-  class QTKAPI Input {
+namespace Qtk
+{
+  class QTKAPI Input
+  {
     public:
       /*************************************************************************
        * Typedefs
@@ -84,7 +86,8 @@ namespace Qtk {
        * @param key Key to check state.
        * @return True if the key is in InputTriggered state.
        */
-      inline static bool keyTriggered(Qt::Key key) {
+      inline static bool keyTriggered(Qt::Key key)
+      {
         return keyState(key) == InputTriggered;
       }
 
@@ -92,7 +95,8 @@ namespace Qtk {
        * @param key Key to check state.
        * @return True if the key is in InputPressed state.
        */
-      inline static bool keyPressed(Qt::Key key) {
+      inline static bool keyPressed(Qt::Key key)
+      {
         return keyState(key) == InputPressed;
       }
 
@@ -100,7 +104,8 @@ namespace Qtk {
        * @param key Key to check state.
        * @return True if the key is in InputReleased state.
        */
-      inline static bool keyReleased(Qt::Key key) {
+      inline static bool keyReleased(Qt::Key key)
+      {
         return keyState(key) == InputReleased;
       }
 
@@ -108,7 +113,8 @@ namespace Qtk {
        * @param button Mouse button to check state.
        * @return True if the key is in InputTriggered state.
        */
-      inline static bool buttonTriggered(Qt::MouseButton button) {
+      inline static bool buttonTriggered(Qt::MouseButton button)
+      {
         return buttonState(button) == InputTriggered;
       }
 
@@ -116,7 +122,8 @@ namespace Qtk {
        * @param button Mouse button to check state.
        * @return True if the key is in InputPressed state.
        */
-      inline static bool buttonPressed(Qt::MouseButton button) {
+      inline static bool buttonPressed(Qt::MouseButton button)
+      {
         return buttonState(button) == InputPressed;
       }
 
@@ -124,7 +131,8 @@ namespace Qtk {
        * @param button Mouse button to check state.
        * @return True if the key is in InputReleased state.
        */
-      inline static bool buttonReleased(Qt::MouseButton button) {
+      inline static bool buttonReleased(Qt::MouseButton button)
+      {
         return buttonState(button) == InputReleased;
       }
 

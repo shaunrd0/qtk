@@ -9,3 +9,15 @@
 #include "object.h"
 
 using namespace Qtk;
+
+std::string Object::getShaderSourceCode(
+    QOpenGLShader::ShaderType shader_type) const
+{
+  for (const auto & shader : mProgram.shaders()) {
+    if (shader->shaderType() == shader_type) {
+      return shader->sourceCode().toStdString();
+    }
+  }
+  qDebug() << "Failed to find shader of type " << shader_type;
+  return "";
+}

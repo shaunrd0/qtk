@@ -11,7 +11,8 @@
 #include "examplewidget.h"
 
 ExampleWidget::ExampleWidget(QWidget * parent) :
-    QOpenGLWidget(parent), mScene(new ExampleScene(new Qtk::SceneEmpty)) {
+    QOpenGLWidget(parent), mScene(new ExampleScene)
+{
   // NOTE: The decorator pattern is used to save / load scenes in Qtk currently.
   // The initializer above sets mScene to the concrete decorator ExampleScene.
   // Qtk::SceneEmpty provides an empty scene as the concrete component.
@@ -27,7 +28,8 @@ ExampleWidget::ExampleWidget(QWidget * parent) :
   setFocusPolicy(Qt::ClickFocus);
 }
 
-void ExampleWidget::initializeGL() {
+void ExampleWidget::initializeGL()
+{
   initializeOpenGLFunctions();
   connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
   glEnable(GL_MULTISAMPLE);
@@ -40,18 +42,21 @@ void ExampleWidget::initializeGL() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void ExampleWidget::resizeGL(int width, int height) {
+void ExampleWidget::resizeGL(int width, int height)
+{
   Qtk::Scene::getProjectionMatrix().setToIdentity();
   Qtk::Scene::getProjectionMatrix().perspective(
       45.0f, float(width) / float(height), 0.1f, 1000.0f);
 }
 
-void ExampleWidget::paintGL() {
+void ExampleWidget::paintGL()
+{
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   mScene->draw();
 }
 
-void ExampleWidget::update() {
+void ExampleWidget::update()
+{
   mScene->update();
   QWidget::update();
 }

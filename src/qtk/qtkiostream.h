@@ -15,12 +15,14 @@
 #ifndef QTK_QTKIOSTREAM_H
 #define QTK_QTKIOSTREAM_H
 
-namespace Qtk {
+namespace Qtk
+{
   /**
    * Custom Assimp IO stream to support QtkIOSystem file handling.
    * Allows direct use of Qt Resource paths for loading models in Assimp.
    */
-  class QtkIOStream : public Assimp::IOStream {
+  class QtkIOStream : public Assimp::IOStream
+  {
       friend class QtkIOSystem;
 
     protected:

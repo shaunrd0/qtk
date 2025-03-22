@@ -21,7 +21,8 @@
 #include "model.h"
 #include "skybox.h"
 
-namespace Qtk {
+namespace Qtk
+{
   /**
    * An abstract Scene class to inherit from when building new scenes.
    *
@@ -43,7 +44,8 @@ namespace Qtk {
    * If the child scene adds any objects which are not managed (drawn) by this
    * base class, the child scene class must also override the `draw()` method.
    */
-  class Scene : public QObject, protected QOpenGLFunctions {
+  class Scene : public QObject, protected QOpenGLFunctions
+  {
       Q_OBJECT
 
     public:
@@ -53,7 +55,7 @@ namespace Qtk {
 
       Scene();
 
-      virtual ~Scene();
+      ~Scene() override;
 
       /*************************************************************************
        * Public Methods
@@ -73,18 +75,23 @@ namespace Qtk {
 
       /**
        * Function called to update the QOpenGLWidget. Does not trigger a redraw.
-       *
+       * This method can translate or rotate objects to simulate movement.
        * Calling this several times will still result in only one repaint.
+       *
+       * It's very possible a client will not want to move objects in the scene
+       * using this method. This is intentially not pure virtual.
        */
       virtual void update() {}
 
-      void loadModel(const QUrl & url) {
+      void loadModel(const QUrl & url)
+      {
         auto fileName = url.fileName().replace(".obj", "").toStdString();
         auto filePath = url.toLocalFile().toStdString();
         loadModel(fileName, filePath);
       }
 
-      void loadModel(const std::string & name, const std::string & path) {
+      void loadModel(const std::string & name, const std::string & path)
+      {
         // Add the dropped model to the load queue.
         // This is consumed during rendering of the scene if not empty.
         mModelLoadQueue.emplace(name, path);
@@ -111,7 +118,8 @@ namespace Qtk {
       /**
        * @return The number of objects within the scene with the given name.
        */
-      [[nodiscard]] uint64_t getObjectCount(const QString & name) {
+      [[nodiscard]] uint64_t getObjectCount(const QString & name)
+      {
         return mObjectCount.count(name.toStdString())
                    ? mObjectCount[name.toStdString()]
                    : 0;
@@ -125,14 +133,16 @@ namespace Qtk {
       /**
        * @return View matrix for the camera attached to this scene.
        */
-      [[nodiscard]] inline static QMatrix4x4 getViewMatrix() {
+      [[nodiscard]] inline static QMatrix4x4 getViewMatrix()
+      {
         return mCamera.toMatrix();
       }
 
       /**
        * @return Projection matrix for the current view into the scene.
        */
-      [[nodiscard]] inline static QMatrix4x4 & getProjectionMatrix() {
+      [[nodiscard]] inline static QMatrix4x4 & getProjectionMatrix()
+      {
         return mProjection;
       }
 
@@ -150,15 +160,16 @@ namespace Qtk {
       /**
        * @return All MeshRenderers within the scene.
        */
-      [[nodiscard]] inline const std::vector<MeshRenderer *> & getMeshes()
-          const {
+      [[nodiscard]] inline const std::vector<MeshRenderer *> & getMeshes() const
+      {
         return mMeshes;
       }
 
       /**
        * @return All Models within the scene.
        */
-      [[nodiscard]] inline const std::vector<Model *> & getModels() const {
+      [[nodiscard]] inline const std::vector<Model *> & getModels() const
+      {
         return mModels;
       }
 
@@ -239,30 +250,6 @@ namespace Qtk {
       /* Track count of objects with same initial name. */
       std::unordered_map<std::string, uint64_t> mObjectCount;
   };
-
-  class SceneEmpty : public Scene {
-    public:
-      void init() override { setSceneName("Empty Scene"); }
-
-      void draw() override { Scene::draw(); }
-
-      void update() override { Scene::update(); }
-  };
-
-  class SceneInterface : public Scene {
-    public:
-      explicit SceneInterface(Scene * scene) : mScene(scene) {}
-
-      void init() override { mScene->init(); }
-
-      void draw() override { mScene->draw(); }
-
-      void update() override { mScene->update(); }
-
-    protected:
-      Scene * mScene;
-  };
-
 }  // namespace Qtk
 
 #endif  // QTK_SCENE_H

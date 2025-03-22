@@ -14,8 +14,10 @@
 #include "qtkapi.h"
 #include "transform3D.h"
 
-namespace Qtk {
-  class QTKAPI Camera3D {
+namespace Qtk
+{
+  class QTKAPI Camera3D
+  {
     public:
       /*************************************************************************
        * Static Public Constants
@@ -37,35 +39,40 @@ namespace Qtk {
       /**
        * @return Current translation of the camera as a QVector3D.
        */
-      [[nodiscard]] inline const QVector3D & getTranslation() const {
+      [[nodiscard]] inline const QVector3D & getTranslation() const
+      {
         return mTransform.getTranslation();
       }
 
       /**
        * @return Current rotation of this camera as a QQuaternion.
        */
-      [[nodiscard]] inline const QQuaternion & getRotation() const {
+      [[nodiscard]] inline const QQuaternion & getRotation() const
+      {
         return mTransform.getRotation();
       }
 
       /**
        * @return QVector3D for the forward vector of the camera.
        */
-      [[nodiscard]] inline QVector3D getForward() const {
+      [[nodiscard]] inline QVector3D getForward() const
+      {
         return mTransform.getRotation().rotatedVector(LocalForward);
       }
 
       /**
        * @return QVector3D for the right vector of the camera.
        */
-      [[nodiscard]] inline QVector3D getRight() const {
+      [[nodiscard]] inline QVector3D getRight() const
+      {
         return mTransform.getRotation().rotatedVector(LocalRight);
       }
 
       /**
        * @return QVector3D for the up vector of the camera.
        */
-      [[nodiscard]] inline QVector3D getUp() const {
+      [[nodiscard]] inline QVector3D getUp() const
+      {
         return mTransform.getRotation().rotatedVector(LocalUp);
       }
 

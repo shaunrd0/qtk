@@ -24,12 +24,14 @@
 #include "modelmesh.h"
 #include "qtkapi.h"
 
-namespace Qtk {
+namespace Qtk
+{
   /**
    * Model object that has a ModelMesh.
    * Top-level object that represents 3D models stored within a scene.
    */
-  class QTKAPI Model : public Object {
+  class QTKAPI Model : public Object
+  {
     public:
       /*************************************************************************
        * Typedefs
@@ -51,13 +53,13 @@ namespace Qtk {
        * @param vertexShader Optional path to custom vertex shader.
        * @param fragmentShader Optional path to custom fragment shader.
        */
-      inline Model(
-          const char * name, const char * path,
-          const char * vertexShader = ":/shaders/model-basic.vert",
-          const char * fragmentShader = ":/shaders/model-basic.frag") :
-          Object(name, QTK_MODEL),
-          mModelPath(path), mVertexShader(vertexShader),
-          mFragmentShader(fragmentShader) {
+      inline Model(const char * name,
+                   const char * path,
+                   const char * vertexShader = "",
+                   const char * fragmentShader = "") :
+          Object(name, QTK_MODEL), mModelPath(path),
+          mVertexShader(vertexShader), mFragmentShader(fragmentShader)
+      {
         loadModel(mModelPath);
       }
 
@@ -86,8 +88,9 @@ namespace Qtk {
        * @param flipX Flip the texture along the X axis
        * @param flipY Flip the texture along the Y axis
        */
-      void flipTexture(
-          const std::string & fileName, bool flipX = false, bool flipY = true);
+      void flipTexture(const std::string & fileName,
+                       bool flipX = false,
+                       bool flipY = true);
 
       /*************************************************************************
        * Setters
@@ -101,8 +104,9 @@ namespace Qtk {
        * @param value The value to assign to the uniform
        */
       template <typename T>
-      inline void setUniform(const char * location, T value) {
-        for(auto & mesh : mMeshes) {
+      inline void setUniform(const char * location, T value)
+      {
+        for (auto & mesh : mMeshes) {
           mesh.mProgram->bind();
           mesh.mProgram->setUniformValue(location, value);
           mesh.mProgram->release();
@@ -125,13 +129,15 @@ namespace Qtk {
       /**
        * @return Transform3D attached to this Model.
        */
-      inline Transform3D & getTransform() { return mTransform; }
+      inline Transform3D & getTransform() override { return mTransform; }
 
-      inline std::string getVertexShader() const override {
+      [[nodiscard]] inline std::string getVertexShader() const override
+      {
         return mVertexShader;
       }
 
-      inline std::string getFragmentShader() const override {
+      [[nodiscard]] inline std::string getFragmentShader() const override
+      {
         return mFragmentShader;
       }
 
@@ -183,8 +189,9 @@ namespace Qtk {
        * @param typeName Texture type name in string format.
        * @return Collection of all textures for a single ModelMesh.
        */
-      ModelMesh::Textures loadMaterialTextures(
-          aiMaterial * mat, aiTextureType type, const std::string & typeName);
+      ModelMesh::Textures loadMaterialTextures(aiMaterial * mat,
+                                               aiTextureType type,
+                                               const std::string & typeName);
 
       /**
        * Sorts each mesh in the Model based on distance from the camera.

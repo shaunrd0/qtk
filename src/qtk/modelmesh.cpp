@@ -8,6 +8,7 @@
 
 #include "modelmesh.h"
 #include "scene.h"
+#include "shaders.h"
 
 using namespace Qtk;
 
@@ -15,7 +16,8 @@ using namespace Qtk;
  * Public Member Functions
  ******************************************************************************/
 
-void ModelMesh::draw(QOpenGLShaderProgram & shader) {
+void ModelMesh::draw(QOpenGLShaderProgram & shader)
+{
   mVAO->bind();
   // Bind shader
   shader.bind();
@@ -28,7 +30,7 @@ void ModelMesh::draw(QOpenGLShaderProgram & shader) {
   GLuint diffuseCount = 1;
   GLuint specularCount = 1;
   GLuint normalCount = 1;
-  for(GLuint i = 0; i < mTextures.size(); i++) {
+  for (GLuint i = 0; i < mTextures.size(); i++) {
     // Activate the current texture index by adding offset to GL_TEXTURE0
     glActiveTexture(GL_TEXTURE0 + i);
     mTextures[i].mTexture->bind();
@@ -38,13 +40,13 @@ void ModelMesh::draw(QOpenGLShaderProgram & shader) {
     // Specular:   material.texture_specular1, material.texture_specular2, ...
     std::string number;
     std::string name = mTextures[i].mType;
-    if(name == "texture_diffuse") {
+    if (name == "texture_diffuse") {
       number = std::to_string(diffuseCount++);
     }
-    if(name == "texture_specular") {
+    if (name == "texture_specular") {
       number = std::to_string(specularCount++);
     }
-    if(name == "texture_normal") {
+    if (name == "texture_normal") {
       number = std::to_string(normalCount++);
     }
 
@@ -61,7 +63,7 @@ void ModelMesh::draw(QOpenGLShaderProgram & shader) {
       GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, mIndices.data());
 
   // Release shader, textures
-  for(const auto & texture : mTextures) {
+  for (const auto & texture : mTextures) {
     texture.mTexture->release();
   }
   shader.release();
@@ -72,11 +74,12 @@ void ModelMesh::draw(QOpenGLShaderProgram & shader) {
  * Private Member Functions
  ******************************************************************************/
 
-void ModelMesh::initMesh(const char * vert, const char * frag) {
+void ModelMesh::initMesh(const std::string & vert, const std::string & frag)
+{
   initializeOpenGLFunctions();
 
   // Create VAO, VBO, EBO
-  bool status = mVAO->create();
+  mVAO->create();
   mVBO->create();
   mEBO->create();
 
@@ -95,10 +98,26 @@ void ModelMesh::initMesh(const char * vert, const char * frag) {
   mEBO->release();
 
   // Load and link shaders
-  mProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, vert);
-  mProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, frag);
-  mProgram->link();
-  mProgram->bind();
+  if (!vert.empty()) {
+    mProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, vert.c_str());
+  } else {
+    mProgram->addShaderFromSourceCode(QOpenGLShader::Vertex,
+                                      QTK_SHADER_VERTEX_MODEL);
+  }
+
+  if (!frag.empty()) {
+    mProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, frag.c_str());
+  } else {
+    mProgram->addShaderFromSourceCode(QOpenGLShader::Fragment,
+                                      QTK_SHADER_FRAGMENT_MODEL);
+  }
+
+  if (!mProgram->link()) {
+    qDebug() << "Failed to link shader: " << mProgram->log();
+  }
+  if (!mProgram->bind()) {
+    qDebug() << "Failed to bind shader: " << mProgram->log();
+  }
 
   // Positions
   mProgram->enableAttributeArray(0);
@@ -112,9 +131,11 @@ void ModelMesh::initMesh(const char * vert, const char * frag) {
 
   // Texture Coordinates
   mProgram->enableAttributeArray(2);
-  mProgram->setAttributeBuffer(
-      2, GL_FLOAT, offsetof(ModelVertex, mTextureCoord), 2,
-      sizeof(ModelVertex));
+  mProgram->setAttributeBuffer(2,
+                               GL_FLOAT,
+                               offsetof(ModelVertex, mTextureCoord),
+                               2,
+                               sizeof(ModelVertex));
 
   // Vertex tangents
   mProgram->enableAttributeArray(3);

@@ -16,30 +16,33 @@
 
 #include "qtkapi.h"
 
-namespace Qtk {
+namespace Qtk
+{
   /**
    * Binds shader programs until the end of scope.
    * Does nothing if the shader program was already bound.
    *
    * See MeshRenderer::setUniform() for example.
    */
-  class QTKAPI ShaderBindScope {
+  class QTKAPI ShaderBindScope
+  {
     public:
       /*************************************************************************
        * Constructors / Destructors
        ************************************************************************/
 
-      explicit ShaderBindScope(
-          QOpenGLShaderProgram * program, bool was_locked) :
-          mWasBound(was_locked) {
+      explicit ShaderBindScope(QOpenGLShaderProgram * program,
+                               bool was_locked) : mWasBound(was_locked)
+      {
         mProgram = program;
-        if(!mWasBound) {
+        if (!mWasBound) {
           mProgram->bind();
         }
       }
 
-      ~ShaderBindScope() {
-        if(!mWasBound) {
+      ~ShaderBindScope()
+      {
+        if (!mWasBound) {
           mProgram->release();
         }
       }
@@ -56,7 +59,8 @@ namespace Qtk {
   /**
    * Factories for initializing various OpenGL textures
    */
-  class QTKAPI OpenGLTextureFactory {
+  class QTKAPI OpenGLTextureFactory
+  {
     public:
       /*************************************************************************
        * Constructors / Destructors
@@ -76,8 +80,9 @@ namespace Qtk {
        * @param flipY If true the image will be flipped on Y axis.
        * @return QImage object.
        */
-      static QImage initImage(
-          const char * image, bool flipX = false, bool flipY = false);
+      static QImage initImage(const char * image,
+                              bool flipX = false,
+                              bool flipY = false);
 
       /**
        * QOpenGLTexture factory
@@ -88,8 +93,9 @@ namespace Qtk {
        * @param flipY If true the image will be flipped on Y axis.
        * @return Pointer to an initialized QOpenGLTexture object.
        */
-      static QOpenGLTexture * initTexture(
-          const char * texture, bool flipX = false, bool flipY = false);
+      static QOpenGLTexture * initTexture(const char * texture,
+                                          bool flipX = false,
+                                          bool flipY = false);
 
       /**
        * Cube map factory for initializing all sides of a CubeMap.
@@ -103,9 +109,12 @@ namespace Qtk {
        * @param back Path to image for the back side of the CubeMap.
        * @return Pointer to an initialized QOpenGLTexture object.
        */
-      static QOpenGLTexture * initCubeMap(
-          const QImage & right, const QImage & top, const QImage & front,
-          const QImage & left, const QImage & bottom, const QImage & back);
+      static QOpenGLTexture * initCubeMap(const QImage & right,
+                                          const QImage & top,
+                                          const QImage & front,
+                                          const QImage & left,
+                                          const QImage & bottom,
+                                          const QImage & back);
 
       /**
        * CubeMap factory for tiling the same image on all sides.
@@ -128,17 +137,15 @@ namespace Qtk {
        * @param back Path to image for the back side of the CubeMap.
        * @return Pointer to an initialized QOpenGLTexture object.
        */
-      static QOpenGLTexture * initCubeMap(
-          const char * right, const char * top, const char * front,
-          const char * left, const char * bottom, const char * back);
+      static QOpenGLTexture * initCubeMap(const char * right,
+                                          const char * top,
+                                          const char * front,
+                                          const char * left,
+                                          const char * bottom,
+                                          const char * back);
 
       /// The texture used in place of a missing texture.
-      static QImage defaultTexture() {
-        // Use plaster for default texture if image fails to load.
-        // This prevents segfaults when loading a texture that doesn't exist.
-        // TODO: Replace with a '?' texture to indicate missing texture.
-        return QImage(":/textures/plaster.png");
-      }
+      static QImage defaultTexture();
 
     private:
       // Private ctor to prevent creating instances of this class
@@ -151,7 +158,8 @@ namespace Qtk {
    * TODO: Struct for (re)storing texture state
    * A struct to store flipX, flipY and other initial state needed to copy
    */
-  class Texture {
+  class Texture
+  {
     public:
       /*************************************************************************
        * Typedefs
@@ -169,7 +177,8 @@ namespace Qtk {
        *
        * @param value Texture to copy.
        */
-      Texture(const Texture & value) {
+      Texture(const Texture & value)
+      {
         mOpenGLTexture = OpenGLTextureFactory::initTexture(value.mPath);
         mPath = value.mPath;
       }
@@ -179,10 +188,13 @@ namespace Qtk {
        * @param flipX True if texture is to be flipped on the X axis.
        * @param flipY True if texture is to be flipped on the Y axis.
        */
-      explicit Texture(
-          const char * path, bool flipX = false, bool flipY = false) :
+      explicit Texture(const char * path,
+                       bool flipX = false,
+                       bool flipY = false) :
           mOpenGLTexture(OpenGLTextureFactory::initTexture(path, flipX, flipY)),
-          mPath(path) {}
+          mPath(path)
+      {
+      }
 
       /**
        * Construct a Texture using an existing QOpenGLTexture.
@@ -200,8 +212,23 @@ namespace Qtk {
       /**
        * @return True if the OpenGL texture has been initialized.
        */
-      [[nodiscard]] inline bool hasTexture() const {
+      [[nodiscard]] inline bool hasTexture() const
+      {
         return mOpenGLTexture != Q_NULLPTR;
+      }
+
+      /**
+       * Bind the OpenGL texture if it exists, avoiding segmentation faults.
+       */
+      bool bind() const
+      {
+        if (hasTexture()) {
+          // TODO: It would be nice to warn here but some objects may not have
+          // a texture. Factor Texture out of those objects so we don't bind.
+          mOpenGLTexture->bind();
+          return true;
+        }
+        return false;
       }
 
       /*************************************************************************
@@ -211,7 +238,8 @@ namespace Qtk {
       /**
        * @return QOpenGLTexture associated with this Texture.
        */
-      [[nodiscard]] inline QOpenGLTexture & getOpenGLTexture() const {
+      [[nodiscard]] inline QOpenGLTexture & getOpenGLTexture() const
+      {
         return *mOpenGLTexture;
       }
 
@@ -231,8 +259,10 @@ namespace Qtk {
        * @param flipX True if texture is to be flipped on the X axis.
        * @param flipY True if texture is to be flipped on the Y axis.
        */
-      inline void setTexture(
-          const std::string & path, bool flipX = false, bool flipY = false) {
+      inline void setTexture(const std::string & path,
+                             bool flipX = false,
+                             bool flipY = false)
+      {
         setTexture(path.c_str(), flipX, flipY);
       }
 
@@ -241,8 +271,10 @@ namespace Qtk {
        * @param flipX True if texture is to be flipped on the X axis.
        * @param flipY True if texture is to be flipped on the Y axis.
        */
-      inline void setTexture(
-          const char * path, bool flipX = false, bool flipY = false) {
+      inline void setTexture(const char * path,
+                             bool flipX = false,
+                             bool flipY = false)
+      {
         mOpenGLTexture = OpenGLTextureFactory::initTexture(path, flipX, flipY);
         mPath = path;
       }
@@ -252,7 +284,8 @@ namespace Qtk {
        *
        * @param path Path to texture to use for all sides of the cube map.
        */
-      virtual inline void setCubeMap(const char * path) {
+      virtual inline void setCubeMap(const char * path)
+      {
         mOpenGLTexture = OpenGLTextureFactory::initCubeMap(path);
         mPath = path;
       }
@@ -267,9 +300,13 @@ namespace Qtk {
        * @param bottom Path to texture to use for bottom cube map side.
        * @param back Path to texture to use for back cube map side.
        */
-      virtual inline void setCubeMap(
-          const char * right, const char * top, const char * front,
-          const char * left, const char * bottom, const char * back) {
+      virtual inline void setCubeMap(const char * right,
+                                     const char * top,
+                                     const char * front,
+                                     const char * left,
+                                     const char * bottom,
+                                     const char * back)
+      {
         mOpenGLTexture = OpenGLTextureFactory::initCubeMap(
             right, top, front, left, bottom, back);
       }
@@ -277,16 +314,20 @@ namespace Qtk {
       /**
        * Sets this Texture to be a cube map with provided sides.
        *
-       * @param right Path to texture to use for right cube map side.
-       * @param top Path to texture to use for top cube map side.
-       * @param front Path to texture to use for front cube map side.
-       * @param left Path to texture to use for left cube map side.
-       * @param bottom Path to texture to use for bottom cube map side.
-       * @param back Path to texture to use for back cube map side.
+       * @param right QImage texture to use for right cube map side.
+       * @param top QImage texture to use for top cube map side.
+       * @param front QImage texture to use for front cube map side.
+       * @param left QImage texture to use for left cube map side.
+       * @param bottom QImage texture to use for bottom cube map side.
+       * @param back QImage texture to use for back cube map side.
        */
-      virtual inline void setCubeMap(
-          const QImage & right, const QImage & top, const QImage & front,
-          const QImage & left, const QImage & bottom, const QImage & back) {
+      virtual inline void setCubeMap(const QImage & right,
+                                     const QImage & top,
+                                     const QImage & front,
+                                     const QImage & left,
+                                     const QImage & bottom,
+                                     const QImage & back)
+      {
         mOpenGLTexture = OpenGLTextureFactory::initCubeMap(
             right, top, front, left, bottom, back);
       }
@@ -299,7 +340,8 @@ namespace Qtk {
       /**
        * @param texture QOpenGLTexture to use for this Texture.
        */
-      inline void setTexture(QOpenGLTexture * texture) {
+      inline void setTexture(QOpenGLTexture * texture)
+      {
         mOpenGLTexture = texture;
       }
 

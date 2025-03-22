@@ -2,9 +2,9 @@
 ## Project for working with OpenGL and Qt6 widgets                            ##
 ##                                                                            ##
 ## Author: Shaun Reed | Contact: shaunrd0@gmail.com | URL: www.shaunreed.com  ##
-## All Content (c) 2023 Shaun Reed, all rights reserved                       ##
+## All Content (c) 2025 Shaun Reed, all rights reserved                       ##
 ################################################################################
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.28)
 
 ################################################################################
 # Constants
@@ -18,6 +18,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_MACOSX_BUNDLE ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_AUTORCC_OPTIONS --binary)
 
 if(WIN32)
   set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
@@ -30,7 +31,7 @@ add_compile_options(-fPIC)
 ################################################################################
 project(
     #[[NAME]]   Qtk
-    VERSION     0.2
+    VERSION     0.3
     DESCRIPTION "Qt OpenGL library and desktop application."
     LANGUAGES   CXX C
 )
@@ -47,18 +48,10 @@ include(GNUInstallDirs)
 ################################################################################
 option(QTK_DEBUG "Enable debugger" OFF)
 option(QTK_SUBMODULES "Update external project (assimp) submodule" OFF)
-option(QTK_GUI "Build the Qtk desktop application" ON)
-option(QTK_PLUGINS "Install Qtk plugins to Qt Creator path." OFF)
 option(QTK_EXAMPLE "Build the Qtk example desktop application" ON)
 option(QTK_CCACHE "Enable ccache" ON)
-
-if (QTK_CCACHE)
-  set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
-endif()
-
 # Install Qtk for use within Qt Creator projects only, instead of system-wide.
 option(QTK_PREFIX_QTCREATOR "Install Qtk to Qt Creator. Untested." OFF)
-
 # Option for bringing your own assimp installation; Otherwise not needed
 # + If assimp is available system-wide we can just set QTK_SUBMODULES OFF
 option(
@@ -66,6 +59,18 @@ option(
     "Use the assimp::assimp interface (WIN / OSX)"
     OFF
 )
+
+# Qtk Component Options
+option(QTK_PLUGINS "Install Qtk plugins to Qt Designer path." OFF)
+# Options for qtk_gui
+option(QTK_GUI "Build the Qtk desktop application" ON)
+option(QTK_GUI_SCENE
+    "Fetch model resources and build the GUI with an example scene." OFF
+)
+
+if (QTK_CCACHE)
+  set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
+endif()
 
 if(QTK_DEBUG OR CMAKE_BUILD_TYPE MATCHES "^[Dd][Ee][Bb][Uu][Gg]$")
   set(QTK_DEBUG ON)
@@ -79,10 +84,12 @@ endif()
 set(QT_INSTALL_DIR "$ENV{HOME}/Qt/6.5.0/gcc_64/lib/cmake" CACHE PATH "Path to Qt6 install.")
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX  "${CMAKE_BINARY_DIR}/install")
-endif ()
+endif()
 
 set(QTK_RESOURCES "${CMAKE_SOURCE_DIR}/resources")
 set(QTK_OSX_ICONS ${CMAKE_SOURCE_DIR}/resources/icons/osx/kilroy.icns)
+string(TIMESTAMP YEAR "%Y")
+set(QTK_COPYRIGHT "All Content © 2021-${YEAR} Shaun Reed, all rights reserved.")
 
 # Point CMAKE_PREFIX_PATH to Qt6 install directory
 # If Qtk is built within Qt Creator this is not required.
@@ -182,8 +189,8 @@ endif()
 add_subdirectory(src)
 
 if(QTK_EXAMPLE)
-  # Create a namespaced alias for linking with qtk_library in the example.
-  add_library(${PROJECT_NAME}::qtk_library ALIAS qtk_library)
+  # Create a namespaced alias for linking with libqtk in the example.
+  add_library(${PROJECT_NAME}::qtk ALIAS qtk)
   add_subdirectory(example-app EXCLUDE_FROM_ALL)
 endif()
 
@@ -198,3 +205,25 @@ foreach(VAR_NAME IN LISTS VAR_NAMES VAR_PATHS)
     message(STATUS "[Qtk] ${VAR_NAME}=${${VAR_NAME}}")
   endif()
 endforeach()
+message(STATUS "[Qtk] Installation prefix: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "[Qtk] Found Qt6: ${Qt6Core_VERSION}")
+
+# qt_generate_deploy_app_script is supported on Linux in QtCore >= 6.5.0.
+# qt_generate_deploy_app_script supports Windows and OSX in QtCore >= 6.3.
+# https://doc.qt.io/qt-6.5/qt-generate-deploy-app-script.html
+# https://doc.qt.io/archives/qt-6.4/qt-generate-deploy-app-script.html
+# The application can still build and run, we just can't install.
+if(QTK_GUI OR QTK_EXAMPLE)
+  if(UNIX AND NOT APPLE)
+    # Ubuntu 24.04 provides QtCore 6.4.2 in qt-base-dev.
+    # This version of qt_generate_deploy_app_script does not support Linux.
+    if (Qt6_VERSION VERSION_LESS "6.5.0")
+      message(WARNING "[Qtk] Installation is only supported on Qt >=6.5.\n")
+    endif()
+  elseif(APPLE OR WIN32)
+    # Predates qt_generate_deploy_app_script.
+    if (Qt6_VERSION VERSION_LESS "6.3.0")
+      message(WARNING "[Qtk] Installation is only supported on Qt >=6.5.\n")
+    endif()
+  endif()
+endif()

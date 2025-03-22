@@ -2,7 +2,7 @@
 ## Example client project using qtk                                           ##
 ##                                                                            ##
 ## Author: Shaun Reed | Contact: shaunrd0@gmail.com | URL: www.shaunreed.com  ##
-## All Content (c) 2023 Shaun Reed, all rights reserved                       ##
+## All Content (c) 2025 Shaun Reed, all rights reserved                       ##
 ################################################################################
 cmake_minimum_required(VERSION 3.23)
 
@@ -56,7 +56,7 @@ endif()
 
 # Allow add_subdirectory on this project to use target ALIAS if available.
 # If this example project is opened standalone we will use find_package.
-if(NOT TARGET Qtk::qtk_library)
+if(NOT TARGET Qtk::qtk)
   find_package(Qtk 0.2 REQUIRED)
 endif()
 
@@ -77,20 +77,27 @@ configure_file(
 
 qt_add_executable(qtk_example ${EXAMPLE_SOURCES})
 target_link_libraries(qtk_example PUBLIC Qt6::Widgets Qt6::OpenGLWidgets Qt6::Core)
-target_link_libraries(qtk_example PUBLIC Qtk::qtk_library)
+target_link_libraries(qtk_example PUBLIC Qtk::qtk)
 target_include_directories(qtk_example PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
-install(
-    TARGETS qtk_example
-    COMPONENT qtk_example
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib/static
-    RUNTIME DESTINATION bin
-)
-qt_generate_deploy_app_script(
-    TARGET qtk_example
-    OUTPUT_SCRIPT QTK_EXAMPLE_DEPLOY_SCRIPT
-    NO_UNSUPPORTED_PLATFORM_ERROR
-)
-install(SCRIPT ${QTK_EXAMPLE_DEPLOY_SCRIPT} COMPONENT qtk_example)
+# qt_generate_deploy_app_script supports Windows and OSX in QtCore >= 6.3.
+# qt_generate_deploy_app_script is supported on Linux in QtCore >= 6.5.0.
+if((Qt6_VERSION VERSION_GREATER_EQUAL "6.3.0" AND (WIN32 OR APPLE))
+    OR Qt6_VERSION VERSION_GREATER_EQUAL "6.5.0")
+  install(
+      TARGETS qtk_example
+      COMPONENT qtk_example
+      BUNDLE DESTINATION .
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib/static
+      RUNTIME DESTINATION bin
+  )
+  qt_generate_deploy_app_script(
+      TARGET qtk_example
+      OUTPUT_SCRIPT QTK_EXAMPLE_DEPLOY_SCRIPT
+      NO_UNSUPPORTED_PLATFORM_ERROR
+  )
+  install(SCRIPT ${QTK_EXAMPLE_DEPLOY_SCRIPT} COMPONENT qtk_example)
+elseif(NOT Qtk_IS_TOP_LEVEL)
+  message(WARNING "[Qtk] Installation is only supported on Qt >=6.5.\n")
+endif()

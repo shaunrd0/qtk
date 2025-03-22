@@ -14,7 +14,8 @@
 
 #include "examplescene.h"
 
-class ExampleWidget : public QOpenGLWidget, protected QOpenGLFunctions {
+class ExampleWidget : public QOpenGLWidget, protected QOpenGLFunctions
+{
     Q_OBJECT;
 
   public:

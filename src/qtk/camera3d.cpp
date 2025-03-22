@@ -22,7 +22,8 @@ const QVector3D Camera3D::LocalRight(1.0f, 0.0f, 0.0f);
  * Public Methods
  ******************************************************************************/
 
-const QMatrix4x4 & Camera3D::toMatrix() {
+const QMatrix4x4 & Camera3D::toMatrix()
+{
   mWorld.setToIdentity();
   // Qt6 renamed QMatrix4x4::conjugate() to conjugated()
   mWorld.rotate(mTransform.getRotation().conjugated());
@@ -34,17 +35,20 @@ const QMatrix4x4 & Camera3D::toMatrix() {
  * Qt Streams
  ******************************************************************************/
 
-QDataStream & operator<<(QDataStream & out, Camera3D & transform) {
+QDataStream & operator<<(QDataStream & out, Camera3D & transform)
+{
   out << transform.getTransform();
   return out;
 }
 
-QDataStream & operator>>(QDataStream & in, Camera3D & transform) {
+QDataStream & operator>>(QDataStream & in, Camera3D & transform)
+{
   in >> transform.getTransform();
   return in;
 }
 
-QDebug operator<<(QDebug dbg, const Camera3D & transform) {
+QDebug operator<<(QDebug dbg, const Camera3D & transform)
+{
   dbg << "Camera3D\n{\n";
   dbg << "Position: <" << transform.getTranslation().x() << ", "
       << transform.getTranslation().y() << ", "

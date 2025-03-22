@@ -21,25 +21,28 @@ Model::ModelManager Model::mManager;
  * Public Member Functions
  ******************************************************************************/
 
-void Model::draw() {
-  for(auto & mesh : mMeshes) {
+void Model::draw()
+{
+  for (auto & mesh : mMeshes) {
     mesh.mTransform = mTransform;
     mesh.draw();
   }
 }
 
-void Model::draw(QOpenGLShaderProgram & shader) {
-  for(auto & mesh : mMeshes) {
+void Model::draw(QOpenGLShaderProgram & shader)
+{
+  for (auto & mesh : mMeshes) {
     mesh.mTransform = mTransform;
     mesh.draw(shader);
   }
 }
 
-void Model::flipTexture(const std::string & fileName, bool flipX, bool flipY) {
+void Model::flipTexture(const std::string & fileName, bool flipX, bool flipY)
+{
   bool modified = false;
   std::string fullPath = mDirectory + '/' + fileName;
-  for(auto & texture : mTexturesLoaded) {
-    if(texture.mPath == fileName) {
+  for (auto & texture : mTexturesLoaded) {
+    if (texture.mPath == fileName) {
       texture.mTexture->destroy();
       texture.mTexture->create();
       texture.mTexture->setData(
@@ -47,14 +50,15 @@ void Model::flipTexture(const std::string & fileName, bool flipX, bool flipY) {
       modified = true;
     }
   }
-  if(!modified) {
+  if (!modified) {
     qDebug() << "Attempt to flip texture that doesn't exist: "
              << fullPath.c_str() << "\n";
   }
 }
 
 // Static function to access ModelManager for getting Models by name
-Model * Qtk::Model::getInstance(const char * name) {
+Model * Qtk::Model::getInstance(const char * name)
+{
   return mManager[name];
 }
 
@@ -62,10 +66,11 @@ Model * Qtk::Model::getInstance(const char * name) {
  * Private Member Functions
  ******************************************************************************/
 
-void Model::loadModel(const std::string & path) {
+void Model::loadModel(const std::string & path)
+{
   Assimp::Importer import;
   // If using a Qt Resource path, use QtkIOSystem for file handling.
-  if(path.front() == ':') {
+  if (path.front() == ':') {
     import.SetIOHandler(new QtkIOSystem());
   }
   // Used as base path for loading model textures.
@@ -75,13 +80,14 @@ void Model::loadModel(const std::string & path) {
   // + And flipping texture UVs, etc..
   // Assimp options: http://assimp.sourceforge.net/lib_html/postprocess_8h.html
   const aiScene * scene = import.ReadFile(
-      path.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs
-                        | aiProcess_GenSmoothNormals
-                        | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes
-                        | aiProcess_SplitLargeMeshes);
+      path.c_str(),
+      aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals
+          | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes
+          | aiProcess_SplitLargeMeshes);
 
   // If there were errors, print and return
-  if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+  if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE
+      || !scene->mRootNode) {
     qDebug() << "Error::ASSIMP::" << import.GetErrorString() << "\n";
     return;
   }
@@ -99,26 +105,28 @@ void Model::loadModel(const std::string & path) {
   mManager.insert(getName().c_str(), this);
 }
 
-void Model::processNode(aiNode * node, const aiScene * scene) {
+void Model::processNode(aiNode * node, const aiScene * scene)
+{
   // Process each mesh that is available for this node
-  for(GLuint i = 0; i < node->mNumMeshes; i++) {
+  for (GLuint i = 0; i < node->mNumMeshes; i++) {
     aiMesh * mesh = scene->mMeshes[node->mMeshes[i]];
     mMeshes.push_back(processMesh(mesh, scene));
   }
 
   // Process each child node for this mesh using recursion
-  for(GLuint i = 0; i < node->mNumChildren; i++) {
+  for (GLuint i = 0; i < node->mNumChildren; i++) {
     processNode(node->mChildren[i], scene);
   }
 }
 
-ModelMesh Model::processMesh(aiMesh * mesh, const aiScene * scene) {
+ModelMesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
+{
   ModelMesh::Vertices vertices;
   ModelMesh::Indices indices;
   ModelMesh::Textures textures;
 
   // For each vertex in the aiMesh
-  for(GLuint i = 0; i < mesh->mNumVertices; i++) {
+  for (GLuint i = 0; i < mesh->mNumVertices; i++) {
     // Create a local vertex object for positions, normals, and texture coords
     ModelVertex vertex;
 
@@ -132,7 +140,7 @@ ModelMesh Model::processMesh(aiMesh * mesh, const aiScene * scene) {
     // Set the position of our local vertex to the local vector object
     vertex.mPosition = vector3D;
 
-    if(mesh->HasNormals()) {
+    if (mesh->HasNormals()) {
       // Initialize vertex normal
       vector3D.setX(mesh->mNormals[i].x);
       vector3D.setY(mesh->mNormals[i].y);
@@ -142,7 +150,7 @@ ModelMesh Model::processMesh(aiMesh * mesh, const aiScene * scene) {
     }
 
     // Initialize texture coordinates, if any are available
-    if(mesh->mTextureCoords[0]) {
+    if (mesh->mTextureCoords[0]) {
       QVector2D vector2D;
       // Texture coordinates
       vector2D.setX(mesh->mTextureCoords[0][i].x);
@@ -169,16 +177,16 @@ ModelMesh Model::processMesh(aiMesh * mesh, const aiScene * scene) {
   }
 
   // For each face on the mesh, process its indices
-  for(GLuint i = 0; i < mesh->mNumFaces; i++) {
+  for (GLuint i = 0; i < mesh->mNumFaces; i++) {
     aiFace face = mesh->mFaces[i];
-    for(GLuint j = 0; j < face.mNumIndices; j++) {
+    for (GLuint j = 0; j < face.mNumIndices; j++) {
       // Add the index to out container of indices
       indices.push_back(face.mIndices[j]);
     }
   }
 
   // Process material
-  if(mesh->mMaterialIndex >= 0) {
+  if (mesh->mMaterialIndex >= 0) {
     // Get the material attached to the model using Assimp
     aiMaterial * material = scene->mMaterials[mesh->mMaterialIndex];
     // Get all diffuse textures from the material
@@ -200,25 +208,29 @@ ModelMesh Model::processMesh(aiMesh * mesh, const aiScene * scene) {
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
   }
 
-  return {
-      vertices, indices, textures, mVertexShader.c_str(),
-      mFragmentShader.c_str()};
+  return {vertices,
+          indices,
+          textures,
+          mVertexShader.c_str(),
+          mFragmentShader.c_str()};
 }
 
-ModelMesh::Textures Model::loadMaterialTextures(
-    aiMaterial * mat, aiTextureType type, const std::string & typeName) {
+ModelMesh::Textures Model::loadMaterialTextures(aiMaterial * mat,
+                                                aiTextureType type,
+                                                const std::string & typeName)
+{
   ModelMesh::Textures textures;
 
-  for(GLuint i = 0; i < mat->GetTextureCount(type); i++) {
+  for (GLuint i = 0; i < mat->GetTextureCount(type); i++) {
     // Call GetTexture to get the name of the texture file to load
     aiString fileName;
     mat->GetTexture(type, i, &fileName);
 
     // Check if we have already loaded this texture
     bool skip = false;
-    for(auto & j : mTexturesLoaded) {
+    for (auto & j : mTexturesLoaded) {
       // If the path to the texture already exists in m_texturesLoaded, skip it
-      if(std::strcmp(j.mPath.data(), fileName.C_Str()) == 0) {
+      if (std::strcmp(j.mPath.data(), fileName.C_Str()) == 0) {
         textures.push_back(j);
         // If we have loaded the texture, do not load it again
         skip = true;
@@ -227,10 +239,11 @@ ModelMesh::Textures Model::loadMaterialTextures(
     }
 
     // If the texture has not yet been loaded
-    if(!skip) {
+    if (!skip) {
       ModelTexture texture;
       texture.mTexture = OpenGLTextureFactory::initTexture(
-          std::string(mDirectory + '/' + fileName.C_Str()).c_str(), false,
+          std::string(mDirectory + '/' + fileName.C_Str()).c_str(),
+          false,
           false);
       texture.mID = texture.mTexture->textureId();
       texture.mType = typeName;
@@ -246,7 +259,8 @@ ModelMesh::Textures Model::loadMaterialTextures(
   return textures;
 }
 
-void Model::sortModelMeshes() {
+void Model::sortModelMeshes()
+{
   auto cameraPos = Scene::getCamera().getTransform();
   auto cameraDistance = [&cameraPos](const ModelMesh & a, const ModelMesh & b) {
     // Sort by the first vertex position in the model
