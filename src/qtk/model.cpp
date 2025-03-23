@@ -56,8 +56,19 @@ void Model::flipTexture(const std::string & fileName, bool flipX, bool flipY)
   }
 }
 
+void Model::setLightPosition(const QString & lightName, const char * uniform)
+{
+  if (auto light = MeshRenderer::getInstance(lightName); light) {
+    QVector3D position = light->getTransform().getTranslation();
+    setUniform(uniform, position);
+  } else {
+    qDebug() << "[QtkScene] Failed to set " << mName
+             << "light position: " << lightName;
+  }
+}
+
 // Static function to access ModelManager for getting Models by name
-Model * Qtk::Model::getInstance(const char * name)
+Model * Model::getInstance(const char * name)
 {
   return mManager[name];
 }
@@ -102,7 +113,7 @@ void Model::loadModel(const std::string & path)
   sortModelMeshes();
 
   // Object finished loading, insert it into ModelManager
-  mManager.insert(getName().c_str(), this);
+  mManager.insert(getName(), this);
 }
 
 void Model::processNode(aiNode * node, const aiScene * scene)
@@ -261,13 +272,11 @@ ModelMesh::Textures Model::loadMaterialTextures(aiMaterial * mat,
 
 void Model::sortModelMeshes()
 {
-  auto cameraPos = Scene::getCamera().getTransform();
+  auto cameraPos = Scene::getCamera().getTransform().getTranslation();
   auto cameraDistance = [&cameraPos](const ModelMesh & a, const ModelMesh & b) {
     // Sort by the first vertex position in the model
-    return (cameraPos.getTranslation().distanceToPoint(
-               a.mVertices[0].mPosition))
-           < (cameraPos.getTranslation().distanceToPoint(
-               b.mVertices[0].mPosition));
+    return cameraPos.distanceToPoint(a.mVertices[0].mPosition)
+           < cameraPos.distanceToPoint(b.mVertices[0].mPosition);
   };
   std::sort(mMeshes.begin(), mMeshes.end(), cameraDistance);
 }

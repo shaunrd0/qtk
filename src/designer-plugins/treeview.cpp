@@ -43,7 +43,7 @@ void Qtk::TreeView::updateView(const Qtk::Scene * scene)
   mSceneName = scene->getSceneName();
   auto objects = scene->getObjects();
   for (const auto & object : objects) {
-    QStringList list(QStringList(QString(object->getName().c_str())));
+    QStringList list(QStringList(QString(object->getName())));
     ui->treeWidget->insertTopLevelItem(0, new QTreeWidgetItem(list));
   }
 }

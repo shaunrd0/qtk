@@ -120,9 +120,7 @@ namespace Qtk
        */
       [[nodiscard]] uint64_t getObjectCount(const QString & name)
       {
-        return mObjectCount.count(name.toStdString())
-                   ? mObjectCount[name.toStdString()]
-                   : 0;
+        return mObjectCount.count(name) ? mObjectCount[name] : 0;
       }
 
       /**
@@ -248,7 +246,7 @@ namespace Qtk
       /* MeshRenderers used simple geometry. */
       std::vector<MeshRenderer *> mMeshes {};
       /* Track count of objects with same initial name. */
-      std::unordered_map<std::string, uint64_t> mObjectCount;
+      std::unordered_map<QString, uint64_t> mObjectCount;
   };
 }  // namespace Qtk
 

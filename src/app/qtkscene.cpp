@@ -482,21 +482,9 @@ void QtkScene::update()
     myCube->getTransform().rotate(-0.75f, 0.0f, 1.0f, 0.0f);
   }
 
-  // Helper lambda to set the light position used by GLSL shaders on the model.
-  // TODO: This could be a helper function on the Model class.
-  auto setLightPosition = [](const std::string & lightName, Model * model) {
-    if (auto light = Model::getInstance(lightName.c_str()); light) {
-      QVector3D position = light->getTransform().getTranslation();
-      model->setUniform("uLight.position", position);
-    } else {
-      qDebug() << "[QtkScene] Failed to set light position: "
-               << lightName.c_str();
-    }
-  };
-
   QMatrix4x4 posMatrix;
   if (auto alien = getModel("alienTest"); alien) {
-    setLightPosition("alienTestLight", alien);
+    alien->setLightPosition("alienTestLight");
 
     alien->setUniform("uCameraPosition", cameraPosition);
     posMatrix = alien->getTransform().toMatrix();
@@ -508,7 +496,7 @@ void QtkScene::update()
   }
 
   if (auto spartan = getModel("spartanTest"); spartan) {
-    setLightPosition("spartanTestLight", spartan);
+    spartan->setLightPosition("spartanTestLight");
 
     spartan->setUniform("uCameraPosition", cameraPosition);
     posMatrix = spartan->getTransform().toMatrix();
@@ -520,7 +508,7 @@ void QtkScene::update()
   }
 
   if (auto phong = getModel("testPhong"); phong) {
-    setLightPosition("testLight", phong);
+    phong->setLightPosition("testLight");
 
     phong->getTransform().rotate(0.75f, 1.0f, 0.5f, 0.0f);
     phong->bindShaders();

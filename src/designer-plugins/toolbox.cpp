@@ -16,20 +16,94 @@
 
 using namespace Qtk;
 
-ToolBox::ToolBox(QWidget * parent) : QDockWidget(parent), ui(new Ui::ToolBox)
+ToolBox::ToolBox(QWidget * parent) :
+    QDockWidget(parent), objectDetails_(this), transformPanel_(this),
+    scalePanel_(this), vertex_(this, "Vertex Shader:"),
+    fragment_(this, "Fragment Shader:"), properiesForm_(new QFormLayout),
+    shaderForm_(new QFormLayout), ui(new Ui::ToolBox)
 {
   ui->setupUi(this);
   setMinimumWidth(350);
+
+  // Object Properties.
+  ui->page_properties->setLayout(properiesForm_);
+  properiesForm_->addRow(objectDetails_.name.label, objectDetails_.name.value);
+  properiesForm_->addRow(objectDetails_.objectType.label,
+                         objectDetails_.objectType.value);
+  properiesForm_->addRow(reinterpret_cast<QWidget *>(&transformPanel_));
+  properiesForm_->addRow(reinterpret_cast<QWidget *>(&scalePanel_));
+  ui->toolBox->setCurrentWidget(ui->page_properties);
+
+  // Shader views.
+  ui->page_shaders->setLayout(shaderForm_);
+  shaderForm_->addRow(reinterpret_cast<QWidget *>(&vertex_));
+  shaderForm_->addRow(reinterpret_cast<QWidget *>(&fragment_));
 }
 
 void ToolBox::updateFocus(const QString & name)
 {
   auto object =
-      Qtk::QtkWidget::mWidgetManager.get_widget()->getScene()->getObject(name);
+      QtkWidget::mWidgetManager.get_widget()->getScene()->getObject(name);
   if (object != Q_NULLPTR) {
-    removePages();
-    createPageProperties(object);
-    createPageShader(object);
+    refreshProperties(object);
+    refreshShaders(object);
+  }
+}
+
+ToolBox::SpinBox3D::SpinBox3D(QWidget * parent, const char * l) :
+    QWidget(parent), layout(new QHBoxLayout(this)), label(new QLabel(tr(l)))
+{
+  // The layout owns the widget and will clean it up on destruction.
+  layout->addWidget(label);
+  for (const auto & f : fields) {
+    layout->addWidget(f->spinBox);
+    f->spinBox->setMinimum(std::numeric_limits<double>::lowest());
+    f->spinBox->setSingleStep(0.1);
+    f->spinBox->setFixedWidth(75);
+  }
+}
+
+void ToolBox::SpinBox::disconnect() const
+{
+  Object::disconnect(connection);
+}
+
+void ToolBox::TransformPanel::setObject(const Qtk::Object * object)
+{
+  // Reconnect translation panel controls to the new object.
+  const std::vector binds = {&Object::setTranslationX,
+                             &Object::setTranslationY,
+                             &Object::setTranslationZ};
+  for (size_t i = 0; i < spinBox3D.fields.size(); i++) {
+    auto * f = spinBox3D.fields[i];
+    // Disconnect before changing spin box value.
+    f->disconnect();
+
+    // Set the values in the spin box to the object's current X,Y,Z
+    f->spinBox->setValue(object->getTransform().getTranslation()[i]);
+
+    // Reconnect to bind spin box value to the new object's position.
+    f->connection =
+        connect(f->spinBox, &QDoubleSpinBox::valueChanged, object, binds[i]);
+  }
+}
+
+void ToolBox::ScalePanel::setObject(const Qtk::Object * object)
+{
+  // Reconnect scale panel controls to the new object.
+  const std::vector binds = {
+      &Object::setScaleX, &Object::setScaleY, &Object::setScaleZ};
+  for (size_t i = 0; i < spinBox3D.fields.size(); i++) {
+    auto * f = spinBox3D.fields[i];
+    // Disconnect before changing spin box value.
+    f->disconnect();
+
+    // Set the values in the spin box to the object's current X,Y,Z
+    f->spinBox->setValue(object->getTransform().getScale()[i]);
+
+    // Reconnect to bind spin box value to the new object's scale.
+    f->connection =
+        connect(f->spinBox, &QDoubleSpinBox::valueChanged, object, binds[i]);
   }
 }
 
@@ -38,110 +112,19 @@ ToolBox::~ToolBox()
   delete ui;
 }
 
-void ToolBox::removePages()
+void ToolBox::refreshProperties(const Object * object)
 {
-  // Remove all existing pages.
-  for (size_t i = 0; i < ui->toolBox->count(); i++) {
-    delete ui->toolBox->widget(i);
-    ui->toolBox->removeItem(i);
-  }
+  // Refresh to show the new object's details.
+  objectDetails_.setObject(object);
+  // Reconnect transform panel controls to the new object.
+  transformPanel_.setObject(object);
+  scalePanel_.setObject(object);
 }
 
-void ToolBox::createPageProperties(const Object * object)
+void ToolBox::refreshShaders(const Object * object)
 {
-  auto transform = object->getTransform();
-  auto type = object->getType();
-  auto * widget = new QWidget;
-  ui->toolBox->addItem(widget, "Properties");
-  ui->toolBox->setCurrentWidget(widget);
-
-  auto * layout = new QFormLayout;
-  layout->addRow(new QLabel(tr("Name:")),
-                 new QLabel(object->getName().c_str()));
-
-  layout->addRow(new QLabel(tr("Type:")),
-                 new QLabel(type == Object::Type::QTK_MESH ? "Mesh" : "Model"));
-
-  auto rowLayout = new QHBoxLayout;
-  rowLayout->addWidget(new QLabel(tr("Translation:")));
-  int minWidth = 75;
-  for (size_t i = 0; i < 3; i++) {
-    auto spinBox = new QDoubleSpinBox;
-    spinBox->setMinimum(std::numeric_limits<double>::lowest());
-    spinBox->setSingleStep(0.1);
-    spinBox->setValue(transform.getTranslation()[i]);
-    spinBox->setFixedWidth(minWidth);
-    rowLayout->addWidget(spinBox);
-
-    if (i == 0) {
-      connect(spinBox,
-              &QDoubleSpinBox::valueChanged,
-              object,
-              &Object::setTranslationX);
-    } else if (i == 1) {
-      connect(spinBox,
-              &QDoubleSpinBox::valueChanged,
-              object,
-              &Object::setTranslationY);
-    } else if (i == 2) {
-      connect(spinBox,
-              &QDoubleSpinBox::valueChanged,
-              object,
-              &Object::setTranslationZ);
-    }
-  }
-  layout->addRow(rowLayout);
-
-  rowLayout = new QHBoxLayout;
-  rowLayout->addWidget(new QLabel(tr("Scale:")));
-  for (size_t i = 0; i < 3; i++) {
-    auto spinBox = new QDoubleSpinBox;
-    spinBox->setMinimum(std::numeric_limits<double>::lowest());
-    spinBox->setSingleStep(0.1);
-    spinBox->setValue(transform.getScale()[i]);
-    spinBox->setFixedWidth(minWidth);
-    rowLayout->addWidget(spinBox);
-
-    if (i == 0) {
-      connect(
-          spinBox, &QDoubleSpinBox::valueChanged, object, &Object::setScaleX);
-    } else if (i == 1) {
-      connect(
-          spinBox, &QDoubleSpinBox::valueChanged, object, &Object::setScaleY);
-    } else if (i == 2) {
-      connect(
-          spinBox, &QDoubleSpinBox::valueChanged, object, &Object::setScaleZ);
-    }
-  }
-  layout->addRow(rowLayout);
-  widget->setLayout(layout);
-}
-
-void ToolBox::createPageShader(const Object * object)
-{
-  // Shaders page.
-  auto widget = new QWidget;
-  ui->toolBox->addItem(widget, "Shaders");
-  auto mainLayout = new QFormLayout;
-  auto rowLayout = new QHBoxLayout;
-  rowLayout->addWidget(new QLabel("Vertex Shader:"));
-  rowLayout->addWidget(new QLabel(object->getVertexShader().c_str()));
-  mainLayout->addRow(rowLayout);
-
-  auto shaderView = new QTextEdit;
-  shaderView->setReadOnly(true);
-  shaderView->setText(object->getVertexShaderSourceCode().c_str());
-  mainLayout->addRow(shaderView);
-
-  rowLayout = new QHBoxLayout;
-  rowLayout->addWidget(new QLabel("Fragment Shader:"));
-  rowLayout->addWidget(new QLabel(object->getFragmentShader().c_str()));
-  mainLayout->addRow(rowLayout);
-
-  shaderView = new QTextEdit;
-  shaderView->setReadOnly(true);
-  shaderView->setText(object->getFragmentShaderSourceCode().c_str());
-  mainLayout->addRow(shaderView);
-
-  widget->setLayout(mainLayout);
+  vertex_.path.setValue(object->getVertexShader().c_str());
+  vertex_.editor->setText(object->getVertexShaderSourceCode().c_str());
+  fragment_.path.setValue(object->getFragmentShader().c_str());
+  fragment_.editor->setText(object->getFragmentShaderSourceCode().c_str());
 }

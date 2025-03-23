@@ -57,7 +57,7 @@ endif()
 # Allow add_subdirectory on this project to use target ALIAS if available.
 # If this example project is opened standalone we will use find_package.
 if(NOT TARGET Qtk::qtk)
-  find_package(Qtk 0.2 REQUIRED)
+  find_package(Qtk 0.3 REQUIRED)
 endif()
 
 find_package(Qt6 COMPONENTS Core Widgets OpenGLWidgets REQUIRED)

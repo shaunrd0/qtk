@@ -222,6 +222,9 @@
    </property>
   </action>
   <action name="actionLoad_Model">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>:/icons/fontawesome-free-6.2.1-desktop/svgs/solid/cube.svg</normaloff>:/icons/fontawesome-free-6.2.1-desktop/svgs/solid/cube.svg</iconset>
@@ -234,6 +237,9 @@
    </property>
   </action>
   <action name="actionDelete_Object">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>:/icons/fontawesome-free-6.2.1-desktop/svgs/regular/trash-can.svg</normaloff>:/icons/fontawesome-free-6.2.1-desktop/svgs/regular/trash-can.svg</iconset>

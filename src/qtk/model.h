@@ -63,7 +63,7 @@ namespace Qtk
         loadModel(mModelPath);
       }
 
-      inline ~Model() override { mManager.remove(getName().c_str()); }
+      inline ~Model() override { mManager.remove(getName()); }
 
       /*************************************************************************
        * Public Methods
@@ -112,6 +112,14 @@ namespace Qtk
           mesh.mProgram->release();
         }
       }
+
+      /**
+       * Sets the position of a light used in GLSL unfiroms.
+       *
+       * @param lightName Object name of the light
+       */
+      void setLightPosition(const QString & lightName,
+                            const char * uniform = "uLight.position");
 
       /*************************************************************************
        * Accessors

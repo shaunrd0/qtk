@@ -100,7 +100,7 @@ namespace Qtk
         return mShape.mVertices;
       }
 
-      [[nodiscard]] inline std::string getName() const { return mName; }
+      [[nodiscard]] inline QString getName() const { return mName; }
 
       [[nodiscard]] inline const Type & getType() const { return mType; }
 
@@ -143,7 +143,7 @@ namespace Qtk
        * Setters
        ************************************************************************/
 
-      virtual inline void setName(const std::string & name) { mName = name; }
+      virtual inline void setName(const QString & name) { mName = name; }
 
       virtual inline void setColors(const Colors & value)
       {
@@ -244,6 +244,23 @@ namespace Qtk
         mProgram.release();
       }
 
+      /*************************************************************************
+       * Public Static Methods
+       ************************************************************************/
+
+      /**
+       * Helper to disconnect a QObject connection, only if it's valid.
+       * If the connection is valid and we fail to disconnect log a message.
+       *
+       * @param con QObject connection handle to disconnect.
+       */
+      static void disconnect(const QMetaObject::Connection & con)
+      {
+        if (con && !QObject::disconnect(con)) {
+          qDebug() << "[Qtk] Failed to disconnect valid connection: " << con;
+        }
+      }
+
     private:
       /*************************************************************************
        * Private Members
@@ -255,7 +272,7 @@ namespace Qtk
       Transform3D mTransform;
       Shape mShape;
       Texture mTexture;
-      std::string mName;
+      QString mName;
       bool mBound;
       Type mType = QTK_OBJECT;
   };

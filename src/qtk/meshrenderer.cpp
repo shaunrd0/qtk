@@ -45,7 +45,7 @@ MeshRenderer::MeshRenderer(const char * name, const ShapeBase & shape) :
 
 MeshRenderer::~MeshRenderer()
 {
-  sInstances.remove(mName.c_str());
+  sInstances.remove(mName);
 }
 
 /*******************************************************************************

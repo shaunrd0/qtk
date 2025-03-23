@@ -103,7 +103,7 @@ std::vector<Object *> Scene::getObjects() const
 Object * Scene::getObject(const QString & name) const
 {
   for (const auto & object : getObjects()) {
-    if (object->getName() == name.toStdString()) {
+    if (object->getName() == name) {
       return object;
     }
   }
@@ -121,6 +121,6 @@ void Scene::initSceneObjectName(Object * object)
   // If the object name exists make it unique.
   auto count = ++mObjectCount[object->getName()];
   if (count > 1) {
-    object->setName(object->getName() + " (" + std::to_string(count) + ")");
+    object->setName(object->getName() + " (" + QString::number(count) + ")");
   }
 }
