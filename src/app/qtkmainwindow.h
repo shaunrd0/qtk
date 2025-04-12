@@ -11,8 +11,8 @@
 
 #include <unordered_map>
 
+#include <QFileDialog>
 #include <QMainWindow>
-#include <QPlainTextEdit>
 
 #include "designer-plugins/debugconsole.h"
 
@@ -143,6 +143,23 @@ class MainWindow : public QMainWindow
      * @param sceneName The name of the scene that has been modified.
      */
     void refreshScene(const QString & sceneName);
+
+
+    /**
+     * Opens a QFileDialog for selecting an object file to load into the scene.
+     */
+    void loadObject()
+    {
+      const QUrl file = QFileDialog::getOpenFileName(
+          this, tr("Load Model"), QDir::homePath(), tr("Object Files (*.obj)"));
+      getQtkWidget()->getScene()->loadModel(file.fileName().replace(".obj", ""),
+                                            file.toString());
+    }
+
+    /**
+     * Deletes the currently selected object from the scene.
+     */
+    void deleteObject();
 
   private:
     /***************************************************************************

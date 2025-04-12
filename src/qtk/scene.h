@@ -85,16 +85,16 @@ namespace Qtk
 
       void loadModel(const QUrl & url)
       {
-        auto fileName = url.fileName().replace(".obj", "").toStdString();
-        auto filePath = url.toLocalFile().toStdString();
+        auto fileName = url.fileName().replace(".obj", "");
+        auto filePath = url.toLocalFile();
         loadModel(fileName, filePath);
       }
 
-      void loadModel(const std::string & name, const std::string & path)
+      void loadModel(const QString & name, const QString & path)
       {
         // Add the dropped model to the load queue.
         // This is consumed during rendering of the scene if not empty.
-        mModelLoadQueue.emplace(name, path);
+        mModelLoadQueue.emplace(name.toStdString(), path.toStdString());
       }
 
       /*************************************************************************
@@ -182,8 +182,9 @@ namespace Qtk
 
       /**
        * Adds objects to the scene.
-       * This template provides explicit specializations for valid types.
-       * Adding any object other than these types will cause errors.
+       * This template provides explicit specializations for the valid types:
+       * 		MeshRenderer, Model
+       * Any other object type will cause errors.
        * TODO: Refactor to use Object base class container for scene objects.
        *
        * If creating a new object type for a scene, it must inherit Qtk::Object
@@ -193,6 +194,17 @@ namespace Qtk
        * @return The object added to the scene.
        */
       template <typename T> T * addObject(T * object);
+
+      /**
+       * Removes an object from the scene.
+       * This template provides explicit specializations for the valid types:
+       * 		MeshRenderer, Model
+       * Any other object type will cause errors.
+       * TODO: Refactor to use Object base class container for scene objects.
+       *
+       * @param object Pointer to the object to remove from the scene.
+       */
+      template <typename T> void removeObject(T * object);
 
       /**
        * @param name The name to use for this scene.

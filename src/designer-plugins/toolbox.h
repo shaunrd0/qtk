@@ -18,8 +18,8 @@
 #include <QLabel>
 #include <QTextEdit>
 
+#include "qtk/object.h"
 
-#include "qtk/scene.h"
 
 namespace Ui
 {
@@ -45,8 +45,13 @@ namespace Qtk
 
       void refreshShaders(const Object * object);
 
+      void refresh(const Object * object);
+
       void updateFocus(const QString & name);
 
+      [[nodiscard]] Object * getObjectFocus() const { return objectFocus_; }
+
+      void clearFocus();
 
     private:
       /*************************************************************************
@@ -65,9 +70,9 @@ namespace Qtk
               {
               }
 
-              void setValue(const char * v) { value->setText(tr(v)); }
+              void setValue(const char * v) const { value->setText(tr(v)); }
 
-              void setItem(const char * l, const char * v)
+              void setItem(const char * l, const char * v) const
               {
                 label->setText(tr(l));
                 value->setText(tr(v));
@@ -84,8 +89,14 @@ namespace Qtk
           }
 
           /// Refresh to display the new object's details
-          void setObject(const Qtk::Object * object)
+          void setObject(const Qtk::Object * object) const
           {
+            // Zero contents if there is no object selected.
+            if (object == Q_NULLPTR) {
+              name.setValue("");
+              objectType.setValue("No object selected");
+              return;
+            }
             name.setItem("Name:", object->getName().toStdString().c_str());
             objectType.setItem(
                 "Type:",
@@ -118,6 +129,15 @@ namespace Qtk
           /// We pass a parent to ensure Qt will clean up resources.
           /// Assigning a QWidget to a QLayout also ensures Qt will clean up.
           explicit SpinBox3D(QWidget * parent, const char * l = "SpinBox3D:");
+
+          /// Zero the SpinBox3D display.
+          void clear()
+          {
+            for (auto & field : fields) {
+              field->disconnect();
+              field->spinBox->setValue(0.0);
+            }
+          }
 
           /// The main layout for the SpinBox3D widget.
           QHBoxLayout * layout;
@@ -176,6 +196,13 @@ namespace Qtk
             layout->addWidget(editor);
           }
 
+          /// Zero the ShaderView display.
+          void clear() const
+          {
+            path.setValue("");
+            editor->setText("");
+          }
+
           /// The main layout for the ShaderView widget.
           QVBoxLayout * layout;
 
@@ -189,6 +216,8 @@ namespace Qtk
 
       QFormLayout * properiesForm_;
       QFormLayout * shaderForm_;
+
+      Object * objectFocus_ {};
 
       Ui::ToolBox * ui;
   };

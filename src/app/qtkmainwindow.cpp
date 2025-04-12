@@ -48,6 +48,16 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent)
             &Qtk::ToolBox::updateFocus);
   }
 
+  connect(ui_->actionDelete_Object,
+          &QAction::triggered,
+          this,
+          &MainWindow::deleteObject);
+
+  connect(ui_->actionLoad_Model,
+          &QAction::triggered,
+          this,
+          &MainWindow::loadObject);
+
   // TODO: Fix / use MainWindow in Qt Designer to add these dock widgets.
   // For now we will add them manually, but we should be able to do this in the
   // designer. At the moment if you edit the UI in designer the dock widget
@@ -102,6 +112,26 @@ void MainWindow::refreshScene(const QString & sceneName)
 {
   // TODO: Select TreeView using sceneName
   ui_->qtk__TreeView->updateView(getQtkWidget()->getScene());
+}
+
+void MainWindow::deleteObject()
+{
+  if (auto object = ui_->qtk__ToolBox->getObjectFocus(); object != Q_NULLPTR) {
+    auto scene = getQtkWidget()->getScene();
+    switch (object->getType()) {
+      case Qtk::Object::Type::QTK_MESH:
+        scene->removeObject(dynamic_cast<Qtk::MeshRenderer *>(object));
+        ui_->qtk__ToolBox->clearFocus();
+        break;
+      case Qtk::Object::Type::QTK_MODEL:
+        scene->removeObject(dynamic_cast<Qtk::Model *>(object));
+        ui_->qtk__ToolBox->clearFocus();
+        break;
+      default:
+        qDebug() << "Failed to delete model with invalid type";
+        break;
+    }
+  }
 }
 
 void MainWindow::setScene(Qtk::Scene * scene)

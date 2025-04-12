@@ -55,6 +55,34 @@ template <> Model * Scene::addObject(Model * object)
   return object;
 }
 
+template <> void Scene::removeObject(MeshRenderer * object)
+{
+  auto it = std::find(mMeshes.begin(), mMeshes.end(), object);
+  if (it == mMeshes.end()) {
+    qDebug() << "[Scene::removeObject]: Failed to remove object: "
+             << object->getName() << " (" << object << ")";
+    return;
+  }
+
+  --mObjectCount[object->getName()];
+  mMeshes.erase(it);
+  emit sceneUpdated(mSceneName);
+}
+
+template <> void Scene::removeObject(Model * object)
+{
+  auto it = std::find(mModels.begin(), mModels.end(), object);
+  if (it == mModels.end()) {
+    qDebug() << "[Scene::removeObject]: Failed to remove object: "
+             << object->getName() << " (" << object << ")";
+    return;
+  }
+
+  --mObjectCount[object->getName()];
+  mModels.erase(it);
+  emit sceneUpdated(mSceneName);
+}
+
 void Scene::draw()
 {
   if (!mInit) {

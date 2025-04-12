@@ -20,7 +20,7 @@ ToolBox::ToolBox(QWidget * parent) :
     QDockWidget(parent), objectDetails_(this), transformPanel_(this),
     scalePanel_(this), vertex_(this, "Vertex Shader:"),
     fragment_(this, "Fragment Shader:"), properiesForm_(new QFormLayout),
-    shaderForm_(new QFormLayout), ui(new Ui::ToolBox)
+    shaderForm_(new QFormLayout), ui(new Ui::ToolBox), objectFocus_(Q_NULLPTR)
 {
   ui->setupUi(this);
   setMinimumWidth(350);
@@ -44,10 +44,24 @@ void ToolBox::updateFocus(const QString & name)
 {
   auto object =
       QtkWidget::mWidgetManager.get_widget()->getScene()->getObject(name);
-  if (object != Q_NULLPTR) {
-    refreshProperties(object);
-    refreshShaders(object);
+  // If we can't find the object show a warning.
+  if (object == Q_NULLPTR) {
+    qDebug() << "Failed to find selected object: " << name
+             << ";  Clearing object panels.";
   }
+
+  // We should still pass the nullptr here if we failed to find the object
+  // above.
+  objectFocus_ = object;
+  refreshProperties(object);
+  refreshShaders(object);
+}
+
+void ToolBox::clearFocus()
+{
+  objectFocus_ = Q_NULLPTR;
+  refreshProperties(objectFocus_);
+  refreshShaders(objectFocus_);
 }
 
 ToolBox::SpinBox3D::SpinBox3D(QWidget * parent, const char * l) :
@@ -70,6 +84,13 @@ void ToolBox::SpinBox::disconnect() const
 
 void ToolBox::TransformPanel::setObject(const Qtk::Object * object)
 {
+  // Zero the panel contents if there is no object selected.
+  if (object == Q_NULLPTR) {
+    spinBox3D.clear();
+    return;
+  }
+
+
   // Reconnect translation panel controls to the new object.
   const std::vector binds = {&Object::setTranslationX,
                              &Object::setTranslationY,
@@ -90,6 +111,12 @@ void ToolBox::TransformPanel::setObject(const Qtk::Object * object)
 
 void ToolBox::ScalePanel::setObject(const Qtk::Object * object)
 {
+  // Zero the panel contents if there is no object selected.
+  if (object == Q_NULLPTR) {
+    spinBox3D.clear();
+    return;
+  }
+
   // Reconnect scale panel controls to the new object.
   const std::vector binds = {
       &Object::setScaleX, &Object::setScaleY, &Object::setScaleZ};
@@ -123,8 +150,21 @@ void ToolBox::refreshProperties(const Object * object)
 
 void ToolBox::refreshShaders(const Object * object)
 {
+  // Zero the panel contents if there is no object selected.
+  if (object == Q_NULLPTR) {
+    vertex_.clear();
+    fragment_.clear();
+    return;
+  }
+
   vertex_.path.setValue(object->getVertexShader().c_str());
   vertex_.editor->setText(object->getVertexShaderSourceCode().c_str());
   fragment_.path.setValue(object->getFragmentShader().c_str());
   fragment_.editor->setText(object->getFragmentShaderSourceCode().c_str());
+}
+
+void ToolBox::refresh(const Object * object)
+{
+  refreshProperties(object);
+  refreshShaders(object);
 }
