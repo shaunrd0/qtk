@@ -157,8 +157,15 @@ list(APPEND VAR_NAMES QT6_INSTALL_PLUGINS)
 
 # Find Assimp.
 if(QTK_SUBMODULES)
-  # Required to statically link.
-  add_compile_options(-fPIC)
+  if(APPLE)
+    # Avoid zlib redefining fdopen, causing build failures in apple clang.
+    # https://github.com/assimp/assimp/issues/6118
+    add_compile_definitions(-Dfdopen=fdopen)
+  endif()
+  if(NOT WIN32)
+    # Required to statically link.
+    add_compile_options(-fPIC)
+  endif()
   set(BUILD_SHARED_LIBS OFF CACHE STRING "Build static assimp libs" FORCE)
   set(ASSIMP_BUILD_ZLIB ON CACHE STRING "Build Zlib with assimp." FORCE)
   set(
@@ -174,6 +181,14 @@ if(QTK_SUBMODULES)
   add_subdirectory(
       "${CMAKE_CURRENT_SOURCE_DIR}/extern/assimp/assimp/"
       EXCLUDE_FROM_ALL
+  )
+  install(
+      TARGETS assimp zlibstatic
+      EXPORT qtk_export
+      COMPONENT qtk
+      ARCHIVE DESTINATION lib
+      LIBRARY DESTINATION lib
+      RUNTIME DESTINATION bin
   )
 else()
   find_package(assimp REQUIRED)

@@ -90,7 +90,7 @@ The Ubuntu apt repositories contain all the packages we need to build all target
 To build Qtk desktop application with the scene in the screenshots below run the following commands.
 
 ```bash
-sudo apt update && sudo apt install cmake build-essential git ccache libxkbcommon-dev libassimp-dev qt6-base-dev qt6-tools-dev
+sudo apt update && sudo apt install cmake build-essential git ccache libxkbcommon-dev libassimp-dev qt6-base-dev qt6-tools-dev zlib1g-dev
 cmake -DQTK_GUI_SCENE=ON -B build
 cmake --build build
 ./build/bin/qtk_gui

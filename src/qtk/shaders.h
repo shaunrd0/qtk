@@ -109,11 +109,12 @@ void main()
 #version 330
 uniform samplerCube uTexture;
 
-varying vec3 vTexCoord;
+in vec3 vTexCoord;
+out vec4 FragColor;
 
 void main()
 {
-  gl_FragColor = texture(uTexture, vTexCoord);
+  FragColor = texture(uTexture, vTexCoord);
 }
 )"
 
